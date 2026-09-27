@@ -47,7 +47,7 @@ Analisa JavaScript/TypeScript.
 
 Os updates de versão cobrem npm na raiz, npm dos testes Playwright e GitHub Actions. Entradas NuGet legadas foram removidas porque o produto atual não contém projetos .NET.
 
-Os Dependabot Alerts/Security Updates dependem da configuração de segurança do repositório no GitHub e não são controlados pelo arquivo `.github/dependabot.yml`.
+**Dependabot Alerts** e **Dependabot Security Updates** estão habilitados nas configurações do repositório, confirmados em 27/09/2026. O arquivo `.github/dependabot.yml` continua responsável apenas pelos updates de versão e de GitHub Actions.
 
 ## Release
 
