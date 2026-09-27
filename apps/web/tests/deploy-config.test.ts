@@ -3,26 +3,28 @@ import { describe, expect, it } from 'vitest';
 
 const rootWranglerUrl = new URL('../../../wrangler.jsonc', import.meta.url);
 const rootLockUrl = new URL('../../../package-lock.json', import.meta.url);
+const legacyWorkerUrl = new URL('../../../worker/index.ts', import.meta.url);
+const legacyGlobalJsonUrl = new URL('../../../global.json', import.meta.url);
 const headersUrl = new URL('../public/_headers', import.meta.url);
 const ciUrl = new URL('../../../.github/workflows/ci.yml', import.meta.url);
 
 describe('Cloudflare deploy configuration', () => {
-  it('serves only the built web assets through the Worker', async () => {
+  it('serves only the built web assets directly through Workers Static Assets', async () => {
     const config = JSON.parse(await readFile(rootWranglerUrl, 'utf8')) as any;
     expect(config.name).toBe('nfe-agendamento-2');
     expect(config.build?.command).toBe('npm run build:web');
     expect(config.assets?.directory).toBe('./apps/web/dist');
+    expect(config.main).toBeUndefined();
+    expect(config.assets?.binding).toBeUndefined();
     expect(config.assets?.run_worker_first).toBeUndefined();
+    expect(config.exports).toBeUndefined();
     expect(config.ratelimits).toBeUndefined();
     expect(config.durable_objects).toBeUndefined();
   });
 
-  it('keeps the one-time Durable Object deletion tombstone', async () => {
-    const config = JSON.parse(await readFile(rootWranglerUrl, 'utf8')) as any;
-    expect(config.exports?.FiscalCoordinator).toEqual({
-      type: 'durable-object',
-      state: 'deleted',
-    });
+  it('does not keep legacy Worker or .NET deployment residue', async () => {
+    await expect(access(legacyWorkerUrl)).rejects.toBeDefined();
+    await expect(access(legacyGlobalJsonUrl)).rejects.toBeDefined();
   });
 
   it('pins npm dependencies and CI to web + extension + browser/DANFE gates', async () => {
