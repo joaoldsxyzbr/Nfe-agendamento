@@ -68,6 +68,50 @@ test('campos longos do destinatário permanecem dentro das células', async ({ p
   expect(emailMetrics.scrollWidth).toBeGreaterThanOrEqual(emailMetrics.clientWidth);
 });
 
+test('blocos condicionais de retirada, entrega e ISSQN permanecem dentro da A4', async ({ page }) => {
+  const base = createNfe(NUMERIC_KEY, 2);
+  const nfe: ParsedNfe = {
+    ...base,
+    issuer: { ...base.issuer, municipalRegistration: '987654' },
+    pickup: {
+      taxId: '11222333000144',
+      name: 'DEPÓSITO DE RETIRADA',
+      stateRegistration: '123450001',
+      address: {
+        street: 'Rua da Retirada',
+        number: '50',
+        district: 'Industrial',
+        city: 'Biguaçu',
+        state: 'SC',
+        postalCode: '88160001',
+        phone: '4830303030',
+      },
+    },
+    delivery: {
+      taxId: '55666777000188',
+      name: 'LOCAL DE ENTREGA',
+      stateRegistration: '987650001',
+      address: {
+        street: 'Avenida da Entrega',
+        number: '900',
+        complement: 'Galpão B',
+        district: 'Centro',
+        city: 'São José',
+        state: 'SC',
+        postalCode: '88100001',
+        phone: '4831313131',
+      },
+    },
+    issqn: { services: 150, base: 140, value: 7 },
+  };
+
+  const renderedPages = await renderForPrint(page, nfe);
+  expect(renderedPages).toBe(1);
+  await expectPrintBounds(page);
+  await expect(page.locator('.nfe-location-block')).toHaveCount(2);
+  await expect(page.locator('.issqn-grid')).toHaveCount(1);
+});
+
 test('NF-e longa preserva paginação, grade simplificada e cabeçalho fiscal nas continuações', async ({ page }, testInfo) => {
   const nfe = createNfe(ALPHA_KEY, 85, true);
   const renderedPages = await renderForPrint(page, nfe);

@@ -53,6 +53,24 @@
 .recipient-grid-refined > div:nth-child(n+8) { border-bottom: 0; }
 .recipient-email .fiscal-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 
+.location-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.location-grid > div { min-width: 0; min-height: 20px; overflow: hidden; padding: 2px 4px; border-right: 1px solid #111; border-bottom: 1px solid #111; }
+.location-grid > div:nth-child(1) { grid-column: span 6; }
+.location-grid > div:nth-child(2) { grid-column: span 3; }
+.location-grid > div:nth-child(3) { grid-column: span 3; border-right: 0; }
+.location-grid > div:nth-child(4) { grid-column: span 6; }
+.location-grid > div:nth-child(5) { grid-column: span 3; }
+.location-grid > div:nth-child(6) { grid-column: span 3; border-right: 0; }
+.location-grid > div:nth-child(7) { grid-column: span 5; }
+.location-grid > div:nth-child(8) { grid-column: span 2; }
+.location-grid > div:nth-child(9) { grid-column: span 5; border-right: 0; }
+.location-grid > div:nth-child(n+7) { border-bottom: 0; }
+
+.issqn-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.issqn-grid > div { min-width: 0; min-height: 24px; overflow: hidden; padding: 3px 4px 2px; border-right: 1px solid #111; }
+.issqn-grid > div:last-child { border-right: 0; }
+.issqn-grid .fiscal-value { text-align: right; }
+
 .refined-transport-grid { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); }
 .refined-transport-grid > div { min-width: 0; min-height: 22px; overflow: hidden; padding: 2.5px 4px; border-right: 1px solid #111; border-bottom: 1px solid #111; }
 .refined-transport-grid > div:nth-child(1) { grid-column: span 5; }

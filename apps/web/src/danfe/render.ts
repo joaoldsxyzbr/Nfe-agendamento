@@ -58,10 +58,12 @@ export function renderDanfeHtml(nfe: ParsedNfe): string {
         ${buildOperation(nfe)}
         ${buildIssuerRegistry(nfe)}
         ${buildRecipient(nfe)}
+        ${buildLocations(nfe)}
         ${buildPayments(nfe)}
         ${buildTotals(nfe)}
         ${buildTransport(nfe)}
         ${buildProductsTable(nfe, products)}
+        ${buildIssqn(nfe)}
         ${buildAdditional(nfe)}
         ${buildFooter(nfe)}
       </article>`;
@@ -261,6 +263,30 @@ function buildRecipient(nfe: ParsedNfe): string {
     </section>`;
 }
 
+function buildLocations(nfe: ParsedNfe): string {
+  return [
+    buildLocation('Informações do local de retirada', nfe.pickup),
+    buildLocation('Informações do local de entrega', nfe.delivery),
+  ].filter(Boolean).join('');
+}
+
+function buildLocation(title: string, location: ParsedNfeParty | null | undefined): string {
+  if (!location) return '';
+  const address = location.address;
+  return `<div class="danfe-section-title">${escapeHtml(title)}</div>
+    <section class="danfe-block location-grid nfe-location-block">
+      ${fiscalCell('Nome / Razão social', location.name)}
+      ${fiscalCell('CNPJ / CPF', formatDocument(location.taxId))}
+      ${fiscalCell('Inscrição estadual', location.stateRegistration || '')}
+      ${fiscalCell('Endereço', joinAddress(address))}
+      ${fiscalCell('Bairro / Distrito', address?.district || '')}
+      ${fiscalCell('CEP', formatCep(address?.postalCode || ''))}
+      ${fiscalCell('Município', address?.city || '')}
+      ${fiscalCell('UF', address?.state || '')}
+      ${fiscalCell('Fone / Fax', address?.phone || '')}
+    </section>`;
+}
+
 function buildPayments(nfe: ParsedNfe): string {
   const groups: string[] = [];
   const billingItems: string[] = [];
@@ -319,6 +345,19 @@ function buildTotals(nfe: ParsedNfe): string {
     ${row(primaryFields, 'total-row-primary')}
     ${row(secondaryFields, 'total-row-secondary')}
   </section>`;
+}
+
+function buildIssqn(nfe: ParsedNfe): string {
+  const issqn = nfe.issqn;
+  if (!issqn) return '';
+
+  return `<div class="danfe-section-title">Cálculo do ISSQN</div>
+    <section class="danfe-block issqn-grid">
+      ${fiscalCell('Inscrição municipal', nfe.issuer.municipalRegistration || '')}
+      ${fiscalCell('Valor total dos serviços', moneyFiscal(issqn.services))}
+      ${fiscalCell('Base de cálculo do ISSQN', moneyFiscal(issqn.base))}
+      ${fiscalCell('Valor do ISSQN', moneyFiscal(issqn.value))}
+    </section>`;
 }
 
 function buildTransport(nfe: ParsedNfe): string {
@@ -409,7 +448,12 @@ function paginateProductsByAvailableSpace(nfe: ParsedNfe): ParsedNfeProduct[][] 
   if (!products.length) return [[]];
   const pages: ParsedNfeProduct[][] = [];
   let current: ParsedNfeProduct[] = [];
-  let available = Math.max(58, FIRST_PAGE_PRODUCT_SPACE_MM - estimateAdditionalPenaltyMm(nfe.additional.contributor));
+  let available = Math.max(
+    58,
+    FIRST_PAGE_PRODUCT_SPACE_MM
+      - estimateAdditionalPenaltyMm(nfe.additional.contributor)
+      - estimateOptionalFiscalPenaltyMm(nfe),
+  );
   let used = 0;
 
   for (const product of products) {
@@ -459,6 +503,11 @@ function estimateAdditionalPenaltyMm(text: string): number {
   const value = text.trim();
   if (!value) return 0;
   return Math.max(0, Math.ceil(value.length / 145) - 4) * 1.35;
+}
+
+function estimateOptionalFiscalPenaltyMm(nfe: ParsedNfe): number {
+  const locations = Number(Boolean(nfe.pickup)) + Number(Boolean(nfe.delivery));
+  return locations * 18 + (nfe.issqn ? 8 : 0);
 }
 
 function hasText(value: unknown): boolean {

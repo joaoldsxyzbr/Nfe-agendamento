@@ -102,6 +102,55 @@ describe('parseNfeXml', () => {
     });
   });
 
+  it('extracts conditional pickup, delivery and ISSQN groups without changing ordinary invoices', async () => {
+    const conditionalXml = fullDanfeFixture
+      .replace(
+        '</dest>',
+        `</dest>
+      <retirada><CNPJ>11222333000144</CNPJ><xNome>DEPÓSITO DE RETIRADA</xNome><IE>123450001</IE><xLgr>Rua da Retirada</xLgr><nro>50</nro><xBairro>Industrial</xBairro><xMun>Biguaçu</xMun><UF>SC</UF><CEP>88160001</CEP><fone>4830303030</fone></retirada>
+      <entrega><CNPJ>55666777000188</CNPJ><xNome>LOCAL DE ENTREGA</xNome><IE>987650001</IE><xLgr>Avenida da Entrega</xLgr><nro>900</nro><xCpl>Galpão B</xCpl><xBairro>Centro</xBairro><xMun>São José</xMun><UF>SC</UF><CEP>88100001</CEP><fone>4831313131</fone></entrega>`,
+      )
+      .replace(
+        '</ICMSTot></total>',
+        '</ICMSTot><ISSQNtot><vServ>150.00</vServ><vBC>140.00</vBC><vISS>7.00</vISS></ISSQNtot></total>',
+      );
+
+    await expect(
+      import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(conditionalXml, VALID_KEY)),
+    ).resolves.toMatchObject({
+      pickup: {
+        taxId: '11222333000144',
+        name: 'DEPÓSITO DE RETIRADA',
+        stateRegistration: '123450001',
+        address: {
+          street: 'Rua da Retirada',
+          number: '50',
+          district: 'Industrial',
+          city: 'Biguaçu',
+          state: 'SC',
+          postalCode: '88160001',
+          phone: '4830303030',
+        },
+      },
+      delivery: {
+        taxId: '55666777000188',
+        name: 'LOCAL DE ENTREGA',
+        stateRegistration: '987650001',
+        address: {
+          street: 'Avenida da Entrega',
+          number: '900',
+          complement: 'Galpão B',
+          district: 'Centro',
+          city: 'São José',
+          state: 'SC',
+          postalCode: '88100001',
+          phone: '4831313131',
+        },
+      },
+      issqn: { services: 150, base: 140, value: 7 },
+    });
+  });
+
   it('extracts the extended fiscal model required by the approved DANFE', async () => {
     await expect(
       import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(fullDanfeFixture, VALID_KEY)),

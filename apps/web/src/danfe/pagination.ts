@@ -23,7 +23,12 @@ export function paginateDanfeForPrint(container: HTMLElement): void {
       if (rows.length <= 1) continue;
 
       const available = isFirstDanfePage(page)
-        ? Math.max(MIN_FIRST_PAGE_PRODUCT_SPACE_MM, FIRST_PAGE_PRODUCT_SPACE_MM - estimateAdditionalPenaltyMm(page))
+        ? Math.max(
+            MIN_FIRST_PAGE_PRODUCT_SPACE_MM,
+            FIRST_PAGE_PRODUCT_SPACE_MM
+              - estimateAdditionalPenaltyMm(page)
+              - estimateOptionalFiscalPenaltyMm(page),
+          )
         : CONTINUATION_PRODUCT_SPACE_MM;
 
       let used = 0;
@@ -93,6 +98,12 @@ function estimateAdditionalPenaltyMm(page: HTMLElement): number {
   const text = page.querySelector<HTMLElement>('.additional-grid p')?.textContent?.trim() ?? '';
   if (!text) return 0;
   return Math.max(0, Math.ceil(text.length / 145) - 4) * 1.35;
+}
+
+function estimateOptionalFiscalPenaltyMm(page: HTMLElement): number {
+  const locations = page.querySelectorAll('.nfe-location-block').length;
+  const issqn = page.querySelector('.issqn-grid') ? 1 : 0;
+  return locations * 18 + issqn * 8;
 }
 
 function createContinuationPage(page: HTMLElement): HTMLElement | null {

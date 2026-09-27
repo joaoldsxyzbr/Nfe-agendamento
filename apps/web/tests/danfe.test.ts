@@ -30,6 +30,44 @@ describe('DANFE approved behavior', () => {
     expect(html).toContain('class="products-filler"');
   });
 
+  it('renders pickup, delivery and ISSQN only when the corresponding XML groups exist', async () => {
+    const { renderDanfeHtml } = await import('../src/danfe/render');
+    const conditionalXml = fullXml
+      .replace(
+        '</dest>',
+        `</dest>
+      <retirada><CNPJ>11222333000144</CNPJ><xNome>DEPÓSITO DE RETIRADA</xNome><IE>123450001</IE><xLgr>Rua da Retirada</xLgr><nro>50</nro><xBairro>Industrial</xBairro><xMun>Biguaçu</xMun><UF>SC</UF><CEP>88160001</CEP><fone>4830303030</fone></retirada>
+      <entrega><CNPJ>55666777000188</CNPJ><xNome>LOCAL DE ENTREGA</xNome><IE>987650001</IE><xLgr>Avenida da Entrega</xLgr><nro>900</nro><xCpl>Galpão B</xCpl><xBairro>Centro</xBairro><xMun>São José</xMun><UF>SC</UF><CEP>88100001</CEP><fone>4831313131</fone></entrega>`,
+      )
+      .replace(
+        '</ICMSTot></total>',
+        '</ICMSTot><ISSQNtot><vServ>150.00</vServ><vBC>140.00</vBC><vISS>7.00</vISS></ISSQNtot></total>',
+      );
+    const html = renderDanfeHtml(parseNfeXml(conditionalXml, KEY));
+
+    for (const text of [
+      'Informações do local de retirada',
+      'DEPÓSITO DE RETIRADA',
+      'Informações do local de entrega',
+      'LOCAL DE ENTREGA',
+      'Cálculo do ISSQN',
+      'Valor total dos serviços',
+      'Base de cálculo do ISSQN',
+      'Valor do ISSQN',
+      '987654',
+      '150,00',
+      '140,00',
+      '7,00',
+    ]) {
+      expect(html).toContain(text);
+    }
+
+    const ordinaryHtml = renderDanfeHtml(parseNfeXml(basicXml, KEY));
+    expect(ordinaryHtml).not.toContain('Informações do local de retirada');
+    expect(ordinaryHtml).not.toContain('Informações do local de entrega');
+    expect(ordinaryHtml).not.toContain('Cálculo do ISSQN');
+  });
+
   it('renders the approved traditional-refined middle band', async () => {
     const { renderDanfeHtml } = await import('../src/danfe/render');
     const html = renderDanfeHtml(parseNfeXml(fullXml, KEY));
@@ -213,7 +251,7 @@ describe('DANFE approved behavior', () => {
     expect(css).toContain('.refined-transport-grid > div { min-width: 0; min-height: 22px; overflow: hidden;');
     expect(css).toContain('.products-table td { font-size: 8.15px; line-height: 1.18; }');
     expect(css).toContain('.products-table col.description { width: 62mm; }');
-    for (const rule of ['.recipient-grid-refined', '.financial-strip', '.refined-total-grid', '.total-row-primary', '.total-row-secondary', '.refined-transport-grid']) {
+    for (const rule of ['.recipient-grid-refined', '.location-grid', '.issqn-grid', '.financial-strip', '.refined-total-grid', '.total-row-primary', '.total-row-secondary', '.refined-transport-grid']) {
       expect(css).toContain(rule);
     }
     expect(css).toContain('align-items: flex-start; justify-content: center; padding: 5px 8px; text-align: left;');

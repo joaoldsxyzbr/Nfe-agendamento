@@ -20,6 +20,20 @@ O renderer continua próprio porque também atende regras operacionais internas 
 - grade de produtos com linha vazia `products-filler` para ocupar apenas o espaço restante, sem esticar mercadorias reais;
 - zoom do preview por `Ctrl + scroll`, sem transferir zoom para impressão/PDF.
 
+## Blocos fiscais condicionais
+
+O renderer cobre também grupos opcionais que podem aparecer no XML sem alterar o DANFE das notas que não os utilizam.
+
+Referência oficial adotada: **MOC 7.0 — Anexo II, Manual de Especificações Técnicas do DANFE e Código de Barras**, em especial as seções 3.1.4 e 3.1.5, além do quadro **Cálculo do ISSQN** do modelo DANFE.
+
+- **Local de retirada (grupo F / `retirada`):** quando o grupo existe no XML, o projeto opta pela exibição em quadro próprio com nome/razão social, CNPJ/CPF, IE, endereço, bairro, CEP, município, UF e telefone.
+- **Local de entrega (grupo G / `entrega`):** segue a mesma regra condicional e o mesmo conjunto visual de dados.
+- **ISSQN (`ISSQNtot`):** quando o grupo existe, o quadro mostra Inscrição Municipal do emitente, Valor Total dos Serviços, Base de Cálculo do ISSQN e Valor do ISSQN.
+- A ausência desses grupos mantém o layout anterior sem quadros vazios.
+- Os novos blocos reduzem de forma determinística o orçamento de altura disponível aos produtos na primeira folha para preservar a A4.
+
+O MOC usa linguagem de possibilidade para a exibição dos locais de retirada/entrega; portanto esta é uma escolha de completude visual do projeto, não uma declaração de obrigatoriedade para toda NF-e.
+
 ## Faixa intermediária — tradicional refinado
 
 A faixa entre o cabeçalho fiscal e a grade de produtos segue o padrão **tradicional refinado**: continua com aparência de DANFE convencional, mas reduz subdivisões pequenas e melhora a hierarquia dos dados.
@@ -125,6 +139,9 @@ A correção restaura apenas a grade de produtos e sua estimativa de largura. Pe
 - geração do código de barras híbrido para chave alfanumérica;
 - preservação das letras na representação da chave;
 - omissão de transporte sem dado útil;
+- extração e renderização condicionais de retirada, entrega e ISSQN;
+- ausência desses quadros em NF-e sem os grupos correspondentes;
+- regressão A4 via Playwright com retirada, entrega e ISSQN simultâneos;
 - embalagem e regras operacionais já existentes;
 - paginação determinística sem medição de viewport;
 - preservação de `products-filler`;

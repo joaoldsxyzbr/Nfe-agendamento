@@ -95,6 +95,12 @@ export type ParsedNfePayment = {
   value: number;
 };
 
+export type ParsedNfeIssqn = {
+  services: number;
+  base: number;
+  value: number;
+};
+
 export type ParsedNfeTransport = {
   freightMode: string;
   carrier: {
@@ -133,6 +139,9 @@ export type ParsedNfe = {
   exitedAt: string | null;
   issuer: ParsedNfeParty;
   recipient: ParsedNfeParty | null;
+  pickup?: ParsedNfeParty | null;
+  delivery?: ParsedNfeParty | null;
+  issqn?: ParsedNfeIssqn | null;
   totals: ParsedNfeTotals;
   products: ParsedNfeProduct[];
   billing: ParsedNfeBilling;
@@ -186,7 +195,10 @@ export function parseNfeXml(xml: string, expectedAccessKey: string): ParsedNfe {
   }
 
   const recipientElement = first(infNFe, 'dest');
+  const pickupElement = first(infNFe, 'retirada');
+  const deliveryElement = first(infNFe, 'entrega');
   const totalsElement = first(infNFe, 'ICMSTot');
+  const issqnElement = first(infNFe, 'ISSQNtot');
   const protocolElement = first(document, 'infProt');
   const billingElement = first(infNFe, 'cobr');
   const paymentElement = first(infNFe, 'pag');
@@ -204,6 +216,9 @@ export function parseNfeXml(xml: string, expectedAccessKey: string): ParsedNfe {
     exitedAt: nullableText(ide, 'dhSaiEnt'),
     issuer: parseParty(issuerElement, 'enderEmit'),
     recipient: recipientElement ? parseParty(recipientElement, 'enderDest') : null,
+    pickup: pickupElement ? parseLocation(pickupElement) : null,
+    delivery: deliveryElement ? parseLocation(deliveryElement) : null,
+    issqn: issqnElement ? parseIssqn(issqnElement) : null,
     totals: parseTotals(totalsElement),
     products: all(infNFe, 'det').map(parseProduct),
     billing: parseBilling(billingElement),
@@ -248,6 +263,27 @@ function parseParty(element: Element, addressTag: string): ParsedNfeParty {
     ...(stateRegistrationIndicator ? { stateRegistrationIndicator } : {}),
     ...(email ? { email } : {}),
     ...(addressElement ? { address: parseAddress(addressElement) } : {}),
+  };
+}
+
+function parseLocation(element: Element): ParsedNfeParty {
+  const stateRegistration = nullableText(element, 'IE');
+  const email = nullableText(element, 'email');
+
+  return {
+    taxId: text(element, 'CNPJ') || text(element, 'CPF'),
+    name: text(element, 'xNome'),
+    ...(stateRegistration ? { stateRegistration } : {}),
+    ...(email ? { email } : {}),
+    address: parseAddress(element),
+  };
+}
+
+function parseIssqn(element: Element): ParsedNfeIssqn {
+  return {
+    services: number(element, 'vServ'),
+    base: number(element, 'vBC'),
+    value: number(element, 'vISS'),
   };
 }
 
