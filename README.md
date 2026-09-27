@@ -78,11 +78,15 @@ Hosts:
 - `https://nfeagendamento.joaolds.xyz.br/*`;
 - `https://www.nfe.fazenda.gov.br/*`.
 
+A política de conteúdo da extensão é declarada explicitamente como `script-src 'self'; object-src 'self';`.
+
 Sem `<all_urls>`, Native Messaging, `downloads`, `webRequestBlocking`, acesso genérico ao sistema de arquivos ou host direto `www1.nfe.fazenda.gov.br`.
 
 ## Cloudflare
 
-O Worker serve o site. XML, certificado e regras privadas não são enviados ao Worker pelo fluxo de consulta.
+O site é publicado como **Workers Static Assets**, sem Worker script intermediário. O `wrangler.jsonc` aponta diretamente para `apps/web/dist`.
+
+XML, certificado e regras privadas não são enviados à Cloudflare pelo fluxo de consulta.
 
 ## Desenvolvimento e validação
 
