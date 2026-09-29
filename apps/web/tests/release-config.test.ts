@@ -17,7 +17,7 @@ describe('release quality gate', () => {
   it('publishes release candidates as prereleases without claiming physical approval', async () => {
     const release = await readFile(releaseUrl, 'utf8');
 
-    expect(release).toContain('-rc.');
+    expect(release).toContain('-rc\\\\.[0-9]+');
     expect(release).toContain('Status: PENDENTE');
     expect(release).toContain('--prerelease');
     expect(release).toContain('--latest=false');
