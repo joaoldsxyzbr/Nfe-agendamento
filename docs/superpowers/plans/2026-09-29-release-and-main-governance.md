@@ -58,7 +58,7 @@ E ler `.github/workflows/codeql.yml` para provar que o workflow separado mantém
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 ~~~
 
 Expected: FAIL porque o job `codeql` ainda não pertence ao CI e o workflow separado ainda reage a push/PR.
@@ -73,7 +73,7 @@ Adicionar job chamado exatamente `codeql` em `CI`:
 - `github/codeql-action/init` fixado pelo SHA vigente;
 - linguagem `javascript-typescript`;
 - `github/codeql-action/analyze` fixado pelo SHA vigente;
-- permissões do workflow CI passam a incluir `security-events: write`.
+- manter as permissões globais de `CI` em `contents: read`; no job `codeql`, declarar `contents: read` e `security-events: write` em nível de job.
 
 No `codeql.yml`, manter somente o trigger semanal e o mesmo scan.
 
@@ -82,7 +82,7 @@ No `codeql.yml`, manter somente o trigger semanal e o mesmo scan.
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 ~~~
 
 Expected: PASS.
@@ -125,7 +125,7 @@ Usar as formas literais equivalentes que ficarem no shell final, sem parser YAML
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/release-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/release-config.test.ts
 ~~~
 
 Expected: FAIL porque a evidência física ainda não é validada.
@@ -155,7 +155,7 @@ Expor `acceptance` em `GITHUB_OUTPUT` para diagnóstico do workflow.
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/release-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/release-config.test.ts
 ~~~
 
 Expected: PASS.
