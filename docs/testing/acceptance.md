@@ -71,9 +71,9 @@ Validar pelo menos uma consulta completa em cada navegador.
 
 ## Registro obrigatório por release
 
-Antes do teste, copiar `docs/testing/acceptance-results/template.md` para `docs/testing/acceptance-results/vX.Y.Z.md` ou `vX.Y.Z-rc.N.md` quando o teste ocorrer sobre uma release candidate.
+Para cada release, copiar `docs/testing/acceptance-results/template.md` para `docs/testing/acceptance-results/vX.Y.Z.md`.
 
-Release candidates `-rc.N` podem ser publicadas como prerelease enquanto o registro estiver `Status: PENDENTE`, exclusivamente para viabilizar o teste físico. Releases estáveis continuam bloqueadas até aprovação.\n\nO registro deve permanecer `Status: PENDENTE` enquanto houver item não executado. Só pode ser marcado `Status: APROVADO` quando Chrome, Edge e todos os itens obrigatórios estiverem aprovados. Se qualquer item obrigatório falhar, usar `Status: REPROVADO`.
+A publicação da release é condicionada ao CI automatizado; a aceitação física é registrada separadamente e pode ser executada após a publicação. O registro deve permanecer `Status: PENDENTE` enquanto houver item não executado. Só pode ser marcado `Status: APROVADO` quando Chrome, Edge e todos os itens obrigatórios estiverem aprovados. Se qualquer item obrigatório falhar, usar `Status: REPROVADO`.
 
 Se o Portal não solicitar certificado em nenhuma consulta legítima do gate, `Certificate: NÃO APLICÁVEL` é permitido. Isso não autoriza afirmar que seleção de certificado foi validada.
 

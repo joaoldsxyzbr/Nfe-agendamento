@@ -109,7 +109,7 @@ CI: `web`, `extension`, `danfe-print` e `codeql`. O CodeQL analisa JavaScript/Ty
 
 ## Releases
 
-A **v0.0.35 / extensão 0.2.12** mantém a arquitetura Portal-only e reduz trabalho repetido no site/extensão: cache curto de handshake, cache/index local de fornecedor, render incremental do lote e debounce da entrada.
+A **v0.0.36 / extensão 0.2.12** consolida o hardening pós-auditoria: CI com CodeQL, testes comportamentais adicionais da extensão, cobertura mínima, configuração Wrangler consolidada e rastreabilidade da aceitação física.\n\nA **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste hardening.
 
 A v0.0.34/extensão 0.2.11 consolidou a arquitetura Portal-only e permanece como base funcional anterior a esta otimização.
 
@@ -121,6 +121,6 @@ O gate físico vigente é o Portal Nacional: popup, chave preenchida, hCaptcha m
 
 Checklist: `docs/testing/acceptance.md`.
 
-Cada release candidata registra o resultado em `docs/testing/acceptance-results/vX.Y.Z.md` ou `vX.Y.Z-rc.N.md`. Release candidates podem ser publicadas como prerelease com `Status: PENDENTE` para viabilizar o teste físico; releases estáveis exigem `Status: APROVADO`, Chrome e Edge aprovados, além da versão da extensão correspondente.
+Cada release registra o resultado físico em `docs/testing/acceptance-results/vX.Y.Z.md`. A publicação depende do CI automatizado; Chrome e Edge são validados separadamente e o registro permanece `PENDENTE` até o teste real.
 
-A baseline `v0.0.35 / extensão 0.2.12` está registrada em `docs/testing/acceptance-results/v0.0.35.md` como **PENDENTE** até execução física real.
+A `v0.0.36 / extensão 0.2.12` está registrada em `docs/testing/acceptance-results/v0.0.36.md` como **PENDENTE** até execução física real.
