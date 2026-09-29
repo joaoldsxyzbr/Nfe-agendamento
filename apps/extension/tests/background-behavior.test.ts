@@ -265,6 +265,7 @@ describe('extension background behavior', () => {
       fake.emitBeforeRequest(details),
       fake.emitBeforeRequest(details),
     ]);
+    await fake.waitForWindowRemoval(operation.portalWindowId);
     await fake.flush();
 
     const replayExecutions = fake.scriptExecutions.filter((input: any) =>
