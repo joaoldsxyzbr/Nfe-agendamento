@@ -71,7 +71,7 @@ Cancellation recovery: APROVADO|REPROVADO|NÃO EXECUTADO
 Run:
 
 ~~~bash
-grep -En '[0-9]{44}|BEGIN (RSA )?PRIVATE KEY|BEGIN CERTIFICATE' docs/testing/acceptance-results/*.md
+grep -En '[A-Z0-9]{44}|BEGIN (RSA )?PRIVATE KEY|BEGIN CERTIFICATE' docs/testing/acceptance-results/*.md
 ~~~
 
 Expected: nenhuma ocorrência.
@@ -156,7 +156,7 @@ Marcar `Status: APROVADO` somente se Chrome, Edge e todos os itens obrigatórios
 Run:
 
 ~~~bash
-grep -En '[0-9]{44}|BEGIN (RSA )?PRIVATE KEY|BEGIN CERTIFICATE' docs/testing/acceptance-results/v0.0.35.md
+grep -En '[A-Z0-9]{44}|BEGIN (RSA )?PRIVATE KEY|BEGIN CERTIFICATE' docs/testing/acceptance-results/v0.0.35.md
 ~~~
 
 Expected: nenhuma ocorrência.
