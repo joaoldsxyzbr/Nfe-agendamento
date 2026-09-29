@@ -88,6 +88,17 @@ function storedOperation() {
   };
 }
 
+const SITE_URL = 'https://nfeagendamento.joaolds.xyz.br/';
+const ACCESS_KEY_A = '123456ABCDEF12345600000000000000000000000000';
+const ACCESS_KEY_B = '654321FEDCBA65432111111111111111111111111111';
+
+function siteSender(tabId: number) {
+  return {
+    url: SITE_URL,
+    tab: { id: tabId, url: SITE_URL },
+  };
+}
+
 describe('extension background behavior', () => {
   it('registers background listeners against the fake Chrome runtime', async () => {
     const fake = await loadBackground();
