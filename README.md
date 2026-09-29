@@ -99,12 +99,13 @@ npm run test:web
 npm run coverage:web
 npm run build:web
 npm run test:extension
+npm run coverage:extension
 npm run build:extension
 npm test --prefix tests/playwright
 ./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-CI: `web`, `extension` e `danfe-print`. CodeQL analisa JavaScript/TypeScript.
+CI: `web`, `extension`, `danfe-print` e `codeql`. O CodeQL analisa JavaScript/TypeScript dentro do mesmo workflow usado como gate de release.
 
 ## Releases
 
@@ -119,3 +120,7 @@ A seta do site baixa sempre `NFeAgendamento-Extension.zip` da release mais recen
 O gate físico vigente é o Portal Nacional: popup, chave preenchida, hCaptcha manual, certificado quando exigido, captura do XML, segunda consulta, lote e cancelamento.
 
 Checklist: `docs/testing/acceptance.md`.
+
+Cada release candidata registra o resultado em `docs/testing/acceptance-results/vX.Y.Z.md`. O workflow de release exige `Status: APROVADO`, Chrome e Edge aprovados, além da versão da extensão correspondente.
+
+A baseline `v0.0.35 / extensão 0.2.12` está registrada em `docs/testing/acceptance-results/v0.0.35.md` como **PENDENTE** até execução física real.

@@ -37,9 +37,17 @@ jobs:
           notes="docs/releases/v${version}.md"
           test -s "$notes"
           extension_version="$(node -p "require('./apps/extension/manifest.json').version")"
+          acceptance="docs/testing/acceptance-results/v${version}.md"
+          test -s "$acceptance"
+          grep -Fx "Release: v${version}" "$acceptance" >/dev/null
+          grep -Fx "Extension: ${extension_version}" "$acceptance" >/dev/null
+          grep -Fx "Status: APROVADO" "$acceptance" >/dev/null
+          grep -Fx "Chrome: APROVADO" "$acceptance" >/dev/null
+          grep -Fx "Edge: APROVADO" "$acceptance" >/dev/null
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
+          echo "acceptance=$acceptance" >> "$GITHUB_OUTPUT"
           echo "extension_version=$extension_version" >> "$GITHUB_OUTPUT"
 
       - name: Download validated browser extension
