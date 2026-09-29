@@ -60,7 +60,9 @@ A rodada fica concluída quando:
 
 ## Referências oficiais
 
-- GitHub Rulesets: required pull request e required status checks.
-- GitHub Actions/Checks: checks de `push`/`pull_request` podem satisfazer rulesets.
-- Vitest: `coverage.thresholds` é o mecanismo nativo para falhar o CI abaixo de um piso.
-- Cloudflare: `wrangler.jsonc` deve ser tratado como fonte de verdade da configuração de deploy.
+- GitHub Rulesets — regras disponíveis: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
+- GitHub required status checks — troubleshooting e eventos elegíveis: https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks
+- Vitest coverage thresholds: https://vitest.dev/config/coverage
+- Cloudflare Wrangler configuration: https://developers.cloudflare.com/workers/wrangler/configuration/
+- Cloudflare Workers Static Assets: https://developers.cloudflare.com/workers/static-assets/
+- Chrome extension storage/session: https://developer.chrome.com/docs/extensions/reference/api/storage
