@@ -35,6 +35,7 @@ describe('Cloudflare deploy configuration', () => {
     expect(ci).toContain('- run: npm audit --audit-level=high');
     expect(ci).toContain('  web:');
     expect(ci).toContain('  extension:');
+    expect(ci).toContain('- run: npm run coverage:extension');
     expect(ci).toContain('  danfe-print:');
     expect(ci).toContain('  codeql:');
     expect(ci).toContain('github/codeql-action/init@');
