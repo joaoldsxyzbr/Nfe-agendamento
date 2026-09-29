@@ -75,7 +75,7 @@ Fluxo:
 Run:
 
 ~~~bash
-npm run test:extension -- --run apps/extension/tests/background-behavior.test.ts
+cd apps/extension && ../../node_modules/.bin/vitest run tests/background-behavior.test.ts
 ~~~
 
 Expected: FAIL porque `fake-chrome.ts` ainda não existe.
@@ -91,7 +91,7 @@ Implementar eventos com `addListener(listener)`, arrays de listeners e métodos 
 - `action.onClicked`;
 - `storage.local.setAccessLevel`;
 - `storage.local.get/set`;
-- `storage.local.onChanged`;
+- `storage.onChanged`;
 - `storage.session.get/set/remove`;
 - `windows.onRemoved/create/get/remove`;
 - `tabs.onRemoved/query/get/update/sendMessage`;
@@ -105,7 +105,7 @@ Usar Maps/arrays em memória; nenhuma espera artificial.
 Run:
 
 ~~~bash
-npm run test:extension -- --run apps/extension/tests/background-behavior.test.ts
+cd apps/extension && ../../node_modules/.bin/vitest run tests/background-behavior.test.ts
 ~~~
 
 Expected: PASS no teste de bootstrap.
@@ -162,7 +162,7 @@ expect(fake.createdWindows).toHaveLength(1)
 
 Teste: `rejects another operation while one is active`.
 
-Depois do primeiro start, enviar outra chave válida ou outra aba.
+Disparar dois `start` em `Promise.all`: o primeiro com uma chave/aba e o segundo com outra chave ou outra aba, sem aguardar o primeiro concluir.
 
 Assertions:
 
@@ -179,7 +179,7 @@ expect(fake.createdWindows).toHaveLength(1)
 Run:
 
 ~~~bash
-npm run test:extension -- --run apps/extension/tests/background-behavior.test.ts
+cd apps/extension && ../../node_modules/.bin/vitest run tests/background-behavior.test.ts
 ~~~
 
 Expected: PASS sem mudar `background.ts`. Se falhar, corrigir o comportamento de produção somente quando o teste provar regressão real.
@@ -248,7 +248,7 @@ Se a janela ainda existir, ela deve ser removida.
 Run:
 
 ~~~bash
-npm run test:extension -- --run apps/extension/tests/background-behavior.test.ts
+cd apps/extension && ../../node_modules/.bin/vitest run tests/background-behavior.test.ts
 ~~~
 
 Expected: PASS.
@@ -311,7 +311,7 @@ expect(event).toMatchObject({
 Run:
 
 ~~~bash
-npm run test:extension -- --run apps/extension/tests/background-behavior.test.ts
+cd apps/extension && ../../node_modules/.bin/vitest run tests/background-behavior.test.ts
 ~~~
 
 Expected: PASS.
