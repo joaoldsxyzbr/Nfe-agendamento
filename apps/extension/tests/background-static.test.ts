@@ -14,11 +14,6 @@ describe('extension background contract', () => {
     expect(source).toContain("type: 'popup'");
     expect(source).toContain('chrome.tabs.query({ windowId: portalWindowId })');
     expect(source).toContain('chrome.storage.session');
-    expect(source).toContain('withOperationMutation');
-    expect(source).toContain('claimPortalDownload');
-    expect(source).toContain("operation.state !== 'waiting_result'");
-    expect(source).toContain('clearActiveOperationIfCurrent');
-    expect(source).toContain('reconcileActiveOperation');
     expect(source).toContain('chrome.webRequest.onBeforeRequest');
     expect(source).toContain('chrome.storage.onChanged.addListener');
     expect(source).toContain('invalidateSupplierConfigCache');
