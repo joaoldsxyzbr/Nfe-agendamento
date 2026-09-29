@@ -13,7 +13,8 @@
     "format:web": "npm --workspace @nfe-agendamento/web run format",
     "format:check:web": "npm --workspace @nfe-agendamento/web run format:check",
     "test:extension": "npm --workspace @nfe-agendamento/extension test",
-    "build:extension": "npm --workspace @nfe-agendamento/extension run build"
+    "build:extension": "npm --workspace @nfe-agendamento/extension run build",
+    "coverage:extension": "npm --workspace @nfe-agendamento/extension run coverage"
   },
   "overrides": {
     "sharp": "0.35.4"
