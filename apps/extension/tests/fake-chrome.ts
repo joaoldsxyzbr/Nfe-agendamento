@@ -16,6 +16,7 @@ export type FakeChromeOptions = {
   sessionState?: Record<string, unknown>;
   windows?: Array<Record<string, any>>;
   tabs?: Array<Record<string, any>>;
+  executeScriptResults?: unknown[][];
 };
 
 export type FakeChromeController = {
@@ -24,6 +25,7 @@ export type FakeChromeController = {
   createdWindows: Array<Record<string, unknown>>;
   removedWindows: number[];
   sessionState: Map<string, unknown>;
+  scriptExecutions: Array<Record<string, unknown>>;
   emitRuntimeMessage(message: unknown, sender: unknown): Promise<unknown>;
   emitWindowRemoved(windowId: number): Promise<void>;
   emitTabRemoved(tabId: number): Promise<void>;
@@ -48,6 +50,8 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
   const sentSiteEvents: unknown[] = [];
   const createdWindows: Array<Record<string, unknown>> = [];
   const removedWindows: number[] = [];
+  const scriptExecutions: Array<Record<string, unknown>> = [];
+  const executeScriptResults = [...(options.executeScriptResults ?? [])];
   let nextWindowId = 100;
   let nextTabId = 1_000;
 
@@ -164,7 +168,10 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
       onBeforeRequest: beforeRequest,
     },
     scripting: {
-      executeScript: vi.fn(async () => []),
+      executeScript: vi.fn(async (input: Record<string, unknown>) => {
+        scriptExecutions.push(input);
+        return executeScriptResults.shift() ?? [];
+      }),
     },
   };
 
@@ -226,6 +233,7 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
     createdWindows,
     removedWindows,
     sessionState,
+    scriptExecutions,
     emitRuntimeMessage,
     emitWindowRemoved,
     emitTabRemoved,
