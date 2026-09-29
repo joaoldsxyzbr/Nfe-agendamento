@@ -12,6 +12,12 @@ function createEvent() {
   };
 }
 
+export type FakeChromeOptions = {
+  sessionState?: Record<string, unknown>;
+  windows?: Array<Record<string, any>>;
+  tabs?: Array<Record<string, any>>;
+};
+
 export type FakeChromeController = {
   chrome: unknown;
   sentSiteEvents: unknown[];
@@ -25,7 +31,7 @@ export type FakeChromeController = {
   flush(): Promise<void>;
 };
 
-export function createFakeChrome(): FakeChromeController {
+export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeController {
   const runtimeMessage = createEvent();
   const runtimeInstalled = createEvent();
   const runtimeStartup = createEvent();
@@ -35,7 +41,7 @@ export function createFakeChrome(): FakeChromeController {
   const tabRemoved = createEvent();
   const beforeRequest = createEvent();
 
-  const sessionState = new Map<string, unknown>();
+  const sessionState = new Map<string, unknown>(Object.entries(options.sessionState ?? {}));
   const localState = new Map<string, unknown>();
   const windows = new Map<number, Record<string, any>>();
   const tabs = new Map<number, Record<string, any>>();
@@ -44,6 +50,17 @@ export function createFakeChrome(): FakeChromeController {
   const removedWindows: number[] = [];
   let nextWindowId = 100;
   let nextTabId = 1_000;
+
+  for (const window of options.windows ?? []) {
+    if (!Number.isInteger(window.id)) continue;
+    windows.set(window.id, { ...window });
+    nextWindowId = Math.max(nextWindowId, window.id + 1);
+  }
+  for (const tab of options.tabs ?? []) {
+    if (!Number.isInteger(tab.id)) continue;
+    tabs.set(tab.id, { ...tab });
+    nextTabId = Math.max(nextTabId, tab.id + 1);
+  }
 
   const session = {
     get: vi.fn(async (key: string) => (
@@ -184,11 +201,16 @@ export function createFakeChrome(): FakeChromeController {
   }
 
   async function emitWindowRemoved(windowId: number): Promise<void> {
+    windows.delete(windowId);
+    for (const [tabId, tab] of tabs) {
+      if (tab.windowId === windowId) tabs.delete(tabId);
+    }
     for (const listener of windowRemoved.listeners) listener(windowId);
     await flush();
   }
 
   async function emitTabRemoved(tabId: number): Promise<void> {
+    tabs.delete(tabId);
     for (const listener of tabRemoved.listeners) listener(tabId);
     await flush();
   }
