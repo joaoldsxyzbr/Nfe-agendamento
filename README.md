@@ -122,3 +122,5 @@ O gate físico vigente é o Portal Nacional: popup, chave preenchida, hCaptcha m
 Checklist: `docs/testing/acceptance.md`.
 
 Cada release candidata registra o resultado em `docs/testing/acceptance-results/vX.Y.Z.md`. O workflow de release exige `Status: APROVADO`, Chrome e Edge aprovados, além da versão da extensão correspondente.
+
+A baseline `v0.0.35 / extensão 0.2.12` está registrada em `docs/testing/acceptance-results/v0.0.35.md` como **PENDENTE** até execução física real.
