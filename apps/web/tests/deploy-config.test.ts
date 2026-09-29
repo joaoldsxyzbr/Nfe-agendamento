@@ -21,6 +21,7 @@ describe('Cloudflare deploy configuration', () => {
     expect(config.exports).toBeUndefined();
     expect(config.ratelimits).toBeUndefined();
     expect(config.durable_objects).toBeUndefined();
+    await expect(access('wrangler.jsonc')).rejects.toBeDefined();
   });
 
   it('does not keep legacy Worker or .NET deployment residue', async () => {
