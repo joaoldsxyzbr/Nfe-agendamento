@@ -69,6 +69,16 @@ Quando houver falha real/controlada:
 
 Validar pelo menos uma consulta completa em cada navegador.
 
+## Registro obrigatório por release
+
+Antes do teste, copiar `docs/testing/acceptance-results/template.md` para `docs/testing/acceptance-results/vX.Y.Z.md`.
+
+O registro deve permanecer `Status: PENDENTE` enquanto houver item não executado. Só pode ser marcado `Status: APROVADO` quando Chrome, Edge e todos os itens obrigatórios estiverem aprovados. Se qualquer item obrigatório falhar, usar `Status: REPROVADO`.
+
+Se o Portal não solicitar certificado em nenhuma consulta legítima do gate, `Certificate: NÃO APLICÁVEL` é permitido. Isso não autoriza afirmar que seleção de certificado foi validada.
+
+O registro não pode conter chave NF-e completa, XML fiscal, CNPJ/CPF, certificado, senha, thumbprint, chave privada ou captura de tela com dados fiscais.
+
 ## Critério de aceite
 
 - CI e CodeQL verdes;
