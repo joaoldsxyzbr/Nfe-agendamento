@@ -7,6 +7,7 @@ const legacyWorkerUrl = new URL('../../../worker/index.ts', import.meta.url);
 const legacyGlobalJsonUrl = new URL('../../../global.json', import.meta.url);
 const headersUrl = new URL('../public/_headers', import.meta.url);
 const ciUrl = new URL('../../../.github/workflows/ci.yml', import.meta.url);
+const codeqlUrl = new URL('../../../.github/workflows/codeql.yml', import.meta.url);
 
 describe('Cloudflare deploy configuration', () => {
   it('serves only the built web assets directly through Workers Static Assets', async () => {
@@ -35,6 +36,14 @@ describe('Cloudflare deploy configuration', () => {
     expect(ci).toContain('  web:');
     expect(ci).toContain('  extension:');
     expect(ci).toContain('  danfe-print:');
+    expect(ci).toContain('  codeql:');
+    expect(ci).toContain('github/codeql-action/init@');
+    expect(ci).toContain('github/codeql-action/analyze@');
+
+    const codeql = await readFile(codeqlUrl, 'utf8');
+    expect(codeql).toContain('schedule:');
+    expect(codeql).not.toContain('  pull_request:');
+    expect(codeql).not.toContain('  push:');
     expect(ci).not.toContain('  bridge:');
     expect(ci).not.toContain('windows-package:');
     expect(ci).not.toContain('fiscal-compatibility:');
