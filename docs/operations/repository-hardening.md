@@ -63,6 +63,8 @@ O workflow de release só publica quando, no mesmo SHA da `main`:
 
 A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. O workflow não fabrica aprovação física; ele apenas valida o registro versionado.
 
+A baseline `v0.0.35 / extensão 0.2.12` possui registro em `docs/testing/acceptance-results/v0.0.35.md` com status atual **PENDENTE**.
+
 ## Cloudflare
 
 O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
