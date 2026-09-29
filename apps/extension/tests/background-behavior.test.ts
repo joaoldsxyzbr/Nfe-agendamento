@@ -44,6 +44,38 @@ function startCommand(requestId: string, accessKey: string) {
   };
 }
 
+function portalSender(tabId: number, windowId: number) {
+  return {
+    url: PORTAL_URL,
+    tab: {
+      id: tabId,
+      windowId,
+      url: PORTAL_URL,
+    },
+  };
+}
+
+function portalXml(accessKey: string): string {
+  return `<nfeProc><NFe><infNFe Id="NFe${accessKey}"></infNFe></NFe></nfeProc>`;
+}
+
+async function startToWaitingResult(fake: FakeChromeController) {
+  const started = await fake.emitRuntimeMessage(
+    startCommand('request-start', ACCESS_KEY_A),
+    siteSender(),
+  ) as any;
+  let operation = fake.sessionState.get('activePortalOperation') as any;
+  const sender = portalSender(operation.portalTabId, operation.portalWindowId);
+
+  await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, sender);
+  await fake.emitRuntimeMessage({ source: 'portal', type: 'submitting' }, sender);
+  await fake.emitRuntimeMessage({ source: 'portal', type: 'download_ready' }, sender);
+
+  operation = fake.sessionState.get('activePortalOperation') as any;
+  expect(operation.state).toBe('waiting_result');
+  return { started, operation };
+}
+
 function storedOperation() {
   return {
     operationId: 'operation-stored',
@@ -202,5 +234,91 @@ describe('extension background behavior', () => {
 
     expect(fake.sessionState.has('activePortalOperation')).toBe(false);
     expect(fake.removedWindows).toContain(operation.portalWindowId);
+  });
+
+  it('claims a Portal XML download only once when duplicate requests arrive', async () => {
+    const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?id=test';
+    const fake = await loadBackground({
+      executeScriptResults: [
+        [],
+        [{
+          result: {
+            ok: true,
+            status: 200,
+            redirected: false,
+            url: responseUrl,
+            payload: portalXml(ACCESS_KEY_A),
+            networkError: null,
+          },
+        }],
+      ],
+    });
+    const { operation } = await startToWaitingResult(fake);
+    const details = {
+      url: responseUrl,
+      method: 'GET',
+      initiator: 'https://www.nfe.fazenda.gov.br',
+      tabId: operation.portalTabId,
+    };
+
+    await Promise.all([
+      fake.emitBeforeRequest(details),
+      fake.emitBeforeRequest(details),
+    ]);
+    await fake.flush();
+
+    const replayExecutions = fake.scriptExecutions.filter((input: any) =>
+      Array.isArray(input.args) && input.args.length === 1
+    );
+    const terminalEvents = fake.sentSiteEvents.filter((entry: any) =>
+      ['completed', 'failed', 'cancelled'].includes(entry?.message?.event?.type)
+    );
+
+    expect(replayExecutions).toHaveLength(1);
+    expect(terminalEvents).toHaveLength(1);
+    expect((terminalEvents[0] as any).message.event).toMatchObject({
+      type: 'completed',
+      operationId: operation.operationId,
+    });
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    expect(fake.removedWindows).toContain(operation.portalWindowId);
+  });
+
+  it('fails the operation when the Portal XML belongs to another access key', async () => {
+    const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?id=test';
+    const fake = await loadBackground({
+      executeScriptResults: [
+        [],
+        [{
+          result: {
+            ok: true,
+            status: 200,
+            redirected: false,
+            url: responseUrl,
+            payload: portalXml(ACCESS_KEY_B),
+            networkError: null,
+          },
+        }],
+      ],
+    });
+    const { operation } = await startToWaitingResult(fake);
+
+    await fake.emitBeforeRequest({
+      url: responseUrl,
+      method: 'GET',
+      initiator: 'https://www.nfe.fazenda.gov.br',
+      tabId: operation.portalTabId,
+    });
+    await fake.flush();
+
+    const failed = fake.sentSiteEvents.find((entry: any) =>
+      entry?.message?.event?.type === 'failed'
+    ) as any;
+    expect(failed?.message?.event).toMatchObject({
+      type: 'failed',
+      code: 'portal_xml_invalid',
+      operationId: operation.operationId,
+    });
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
   });
 });
