@@ -333,4 +333,240 @@ describe('extension background behavior', () => {
     });
     expect(fake.sessionState.has('activePortalOperation')).toBe(false);
   });
+  it('cancel clears the current operation and closes its popup', async () => {
+    vi.resetModules();
+    const fake = createFakeChrome();
+    vi.stubGlobal('chrome', fake.chrome);
+    await import('../src/background');
+
+    const started = await fake.emitRuntimeMessage(
+      {
+        source: 'site',
+        command: { type: 'start', requestId: 'start-cancel', accessKey: ACCESS_KEY_A },
+      },
+      siteSender(31),
+    ) as any;
+    const active = fake.sessionState.get('activePortalOperation') as any;
+
+    const cancelled = await fake.emitRuntimeMessage(
+      {
+        source: 'site',
+        command: { type: 'cancel', requestId: 'cancel-1', operationId: started.operationId },
+      },
+      siteSender(31),
+    ) as any;
+
+    expect(cancelled.type).toBe('cancelled');
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    expect(fake.removedWindows).toContain(active.portalWindowId);
+  });
+
+  it('closing the Portal window cancels the active operation and notifies the site', async () => {
+    vi.resetModules();
+    const fake = createFakeChrome();
+    vi.stubGlobal('chrome', fake.chrome);
+    await import('../src/background');
+
+    await fake.emitRuntimeMessage(
+      {
+        source: 'site',
+        command: { type: 'start', requestId: 'start-close', accessKey: ACCESS_KEY_A },
+      },
+      siteSender(41),
+    );
+    const active = fake.sessionState.get('activePortalOperation') as any;
+
+    await fake.emitWindowRemoved(active.portalWindowId);
+
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    expect(fake.sentSiteEvents).toContainEqual({
+      tabId: 41,
+      message: {
+        source: 'background',
+        event: {
+          type: 'cancelled',
+          operationId: active.operationId,
+          message: 'A janela do Portal foi fechada antes da conclusão.',
+        },
+      },
+    });
+    expect(fake.createdWindows).toHaveLength(1);
+  });
+
+  it('keeps a valid stored operation after service worker reload', async () => {
+    vi.resetModules();
+    const operation = {
+      operationId: 'operation-valid',
+      accessKey: ACCESS_KEY_A,
+      siteTabId: 51,
+      portalTabId: 501,
+      portalWindowId: 601,
+      state: 'waiting_user',
+      stateChangedAt: 1,
+    };
+    const fake = createFakeChrome({
+      sessionState: { activePortalOperation: operation },
+      windows: [{ id: 601 }],
+      tabs: [
+        { id: 51, url: SITE_URL },
+        {
+          id: 501,
+          windowId: 601,
+          url: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx',
+        },
+      ],
+    });
+    vi.stubGlobal('chrome', fake.chrome);
+
+    await import('../src/background');
+    await fake.flush();
+
+    expect(fake.sessionState.get('activePortalOperation')).toEqual(operation);
+  });
+
+  it('clears a stored operation when its Portal tab no longer exists', async () => {
+    vi.resetModules();
+    const fake = createFakeChrome({
+      sessionState: {
+        activePortalOperation: {
+          operationId: 'operation-stale',
+          accessKey: ACCESS_KEY_A,
+          siteTabId: 61,
+          portalTabId: 999,
+          portalWindowId: 701,
+          state: 'waiting_user',
+          stateChangedAt: 1,
+        },
+      },
+      windows: [{ id: 701 }],
+      tabs: [{ id: 61, url: SITE_URL }],
+    });
+    vi.stubGlobal('chrome', fake.chrome);
+
+    await import('../src/background');
+    await fake.flush();
+
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    expect(fake.removedWindows).toContain(701);
+  });
+
+  it('claims the official XML download only once and completes the operation once', async () => {
+    vi.resetModules();
+    const validXml = `<nfeProc><NFe Id="NFe${ACCESS_KEY_A}"/></nfeProc>`;
+    const fake = createFakeChrome({
+      pageFetchResult: {
+        ok: true,
+        status: 200,
+        redirected: false,
+        url: 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx',
+        payload: validXml,
+        networkError: null,
+      },
+    });
+    vi.stubGlobal('chrome', fake.chrome);
+    await import('../src/background');
+
+    await fake.emitRuntimeMessage(
+      {
+        source: 'site',
+        command: { type: 'start', requestId: 'start-download', accessKey: ACCESS_KEY_A },
+      },
+      siteSender(71),
+    );
+    const opening = fake.sessionState.get('activePortalOperation') as any;
+    const portalSender = {
+      url: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx',
+      tab: {
+        id: opening.portalTabId,
+        windowId: opening.portalWindowId,
+        url: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx',
+      },
+    };
+
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, portalSender);
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'submitting' }, portalSender);
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'download_ready' }, portalSender);
+
+    const details = {
+      url: 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx',
+      method: 'GET',
+      tabId: opening.portalTabId,
+      initiator: 'https://www.nfe.fazenda.gov.br',
+    };
+
+    await Promise.all([
+      fake.emitBeforeRequest(details),
+      fake.emitBeforeRequest(details),
+    ]);
+    await fake.flush();
+
+    const chromeApi = fake.chrome as any;
+    const pageFetchCalls = chromeApi.scripting.executeScript.mock.calls.filter(
+      ([input]: any[]) => Array.isArray(input.args),
+    );
+    const completed = fake.sentSiteEvents.filter(
+      (entry: any) => entry.message?.event?.type === 'completed',
+    );
+
+    expect(pageFetchCalls).toHaveLength(1);
+    expect(completed).toHaveLength(1);
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    expect(fake.removedWindows).toContain(opening.portalWindowId);
+  });
+
+  it('fails the operation when the Portal returns XML for a different access key', async () => {
+    vi.resetModules();
+    const wrongXml = `<nfeProc><NFe Id="NFe${ACCESS_KEY_B}"/></nfeProc>`;
+    const fake = createFakeChrome({
+      pageFetchResult: {
+        ok: true,
+        status: 200,
+        redirected: false,
+        url: 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx',
+        payload: wrongXml,
+        networkError: null,
+      },
+    });
+    vi.stubGlobal('chrome', fake.chrome);
+    await import('../src/background');
+
+    await fake.emitRuntimeMessage(
+      {
+        source: 'site',
+        command: { type: 'start', requestId: 'start-invalid-xml', accessKey: ACCESS_KEY_A },
+      },
+      siteSender(81),
+    );
+    const opening = fake.sessionState.get('activePortalOperation') as any;
+    const portalSender = {
+      url: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx',
+      tab: {
+        id: opening.portalTabId,
+        windowId: opening.portalWindowId,
+        url: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx',
+      },
+    };
+
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, portalSender);
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'submitting' }, portalSender);
+    await fake.emitRuntimeMessage({ source: 'portal', type: 'download_ready' }, portalSender);
+    await fake.emitBeforeRequest({
+      url: 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx',
+      method: 'GET',
+      tabId: opening.portalTabId,
+      initiator: 'https://www.nfe.fazenda.gov.br',
+    });
+    await fake.flush();
+
+    const failed = fake.sentSiteEvents.find(
+      (entry: any) => entry.message?.event?.type === 'failed',
+    ) as any;
+
+    expect(failed.message.event).toMatchObject({
+      type: 'failed',
+      code: 'portal_xml_invalid',
+    });
+    expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+  });
+
 });
