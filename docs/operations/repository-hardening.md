@@ -30,6 +30,7 @@ Não há exigência de pull request ou status check antes do push, preservando o
 - `npm ci`;
 - audit;
 - testes;
+- cobertura com threshold;
 - typecheck/build;
 - empacotamento do ZIP MV3.
 
@@ -64,4 +65,6 @@ A release extension-only publica somente o ZIP da extensão produzido pelo CI de
 
 ## Cloudflare
 
-O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`; `wrangler.jsonc` aponta para `apps/web/dist`.
+O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
+
+O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, que aponta para `apps/web/dist`.
