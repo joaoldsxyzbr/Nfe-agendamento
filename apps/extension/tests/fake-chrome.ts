@@ -30,6 +30,7 @@ export type FakeChromeController = {
   emitWindowRemoved(windowId: number): Promise<void>;
   emitTabRemoved(tabId: number): Promise<void>;
   emitBeforeRequest(details: unknown): Promise<void>;
+  waitForWindowRemoval(windowId: number): Promise<void>;
   flush(): Promise<void>;
 };
 
@@ -52,6 +53,7 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
   const removedWindows: number[] = [];
   const scriptExecutions: Array<Record<string, unknown>> = [];
   const executeScriptResults = [...(options.executeScriptResults ?? [])];
+  const windowRemovalWaiters = new Map<number, Array<() => void>>();
   let nextWindowId = 100;
   let nextTabId = 1_000;
 
@@ -134,6 +136,8 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
           if (tab.windowId === windowId) tabs.delete(tabId);
         }
         removedWindows.push(windowId);
+        for (const resolve of windowRemovalWaiters.get(windowId) ?? []) resolve();
+        windowRemovalWaiters.delete(windowId);
       }),
     },
     tabs: {
@@ -227,6 +231,15 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
     await flush();
   }
 
+  async function waitForWindowRemoval(windowId: number): Promise<void> {
+    if (removedWindows.includes(windowId)) return;
+    await new Promise<void>((resolve) => {
+      const waiters = windowRemovalWaiters.get(windowId) ?? [];
+      waiters.push(resolve);
+      windowRemovalWaiters.set(windowId, waiters);
+    });
+  }
+
   return {
     chrome,
     sentSiteEvents,
@@ -238,6 +251,7 @@ export function createFakeChrome(options: FakeChromeOptions = {}): FakeChromeCon
     emitWindowRemoved,
     emitTabRemoved,
     emitBeforeRequest,
+    waitForWindowRemoval,
     flush,
   };
 }
