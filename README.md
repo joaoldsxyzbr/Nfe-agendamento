@@ -99,6 +99,7 @@ npm run test:web
 npm run coverage:web
 npm run build:web
 npm run test:extension
+npm run coverage:extension
 npm run build:extension
 npm test --prefix tests/playwright
 ./node_modules/.bin/wrangler deploy --dry-run
