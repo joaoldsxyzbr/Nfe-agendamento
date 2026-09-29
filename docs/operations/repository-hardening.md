@@ -39,9 +39,11 @@ A CSP das páginas da extensão é declarada explicitamente no manifesto e restr
 
 Executa os testes Playwright do fluxo web e regressão DANFE/PDF.
 
-### CodeQL
+### codeql
 
-Analisa JavaScript/TypeScript.
+O job `codeql` faz parte do workflow `CI` em push/PR e analisa JavaScript/TypeScript no mesmo gate usado pelo release.
+
+O workflow `CodeQL` separado permanece somente para a análise semanal agendada.
 
 ### Dependabot
 
@@ -51,7 +53,14 @@ Os updates de versão cobrem npm na raiz, npm dos testes Playwright e GitHub Act
 
 ## Release
 
-O workflow de release só roda após CI verde da `main` e commit exato `release: vX.Y.Z`. A release extension-only publica somente o ZIP da extensão validado pelo mesmo SHA.
+O workflow de release só publica quando, no mesmo SHA da `main`:
+
+1. o workflow `CI` concluiu com `web`, `extension`, `danfe-print` e `codeql` verdes;
+2. o commit é exatamente `release: vX.Y.Z`;
+3. existe `docs/releases/vX.Y.Z.md`;
+4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão, `Status: APROVADO`, `Chrome: APROVADO` e `Edge: APROVADO`.
+
+A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. O workflow não fabrica aprovação física; ele apenas valida o registro versionado.
 
 ## Cloudflare
 
