@@ -106,7 +106,7 @@ Na raiz:
 "coverage:extension": "npm --workspace @nfe-agendamento/extension run coverage"
 ~~~
 
-Não adicionar nova versão de `@vitest/coverage-v8`; reutilizar a versão já presente no workspace raiz/lockfile.
+Adicionar `@vitest/coverage-v8` em `devDependencies` da extensão usando exatamente a mesma faixa já usada pelo web (`^5.0.0`), sem introduzir versão divergente.
 
 - [ ] **Step 2: Criar config de cobertura da extensão**
 
@@ -178,7 +178,7 @@ expect(ci).toContain('- run: npm run coverage:extension')
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 ~~~
 
 Expected: FAIL.
@@ -202,7 +202,7 @@ Adicionar `npm run coverage:extension` ao bloco de desenvolvimento/validação.
 - [ ] **Step 5: Rodar GREEN**
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 npm run coverage:extension
 npm run build:extension
 ~~~
@@ -248,7 +248,7 @@ expect(config.assets?.directory).toBe('./apps/web/dist')
 Run:
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 ~~~
 
 Expected: FAIL porque `apps/web/wrangler.jsonc` ainda existe.
@@ -260,7 +260,7 @@ Remover `apps/web/wrangler.jsonc`. Não alterar o root `wrangler.jsonc`.
 - [ ] **Step 4: Rodar GREEN e dry-run oficial**
 
 ~~~bash
-npm run test:web -- --run apps/web/tests/deploy-config.test.ts
+cd apps/web && ../../node_modules/.bin/vitest run tests/deploy-config.test.ts
 npm run build:web
 ./node_modules/.bin/wrangler deploy --dry-run
 ~~~
