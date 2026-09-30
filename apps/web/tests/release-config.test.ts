@@ -18,5 +18,6 @@ describe('release quality gate', () => {
     expect(release).not.toContain('Status: APROVADO');
     expect(release).not.toContain('Chrome: APROVADO');
     expect(release).not.toContain('Edge: APROVADO');
+    expect(release.match(/- name: Download validated browser extension/g)).toHaveLength(1);
   });
 });
