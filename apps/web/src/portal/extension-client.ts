@@ -143,6 +143,11 @@ export class BrowserPortalExtensionClient {
     return null;
   }
 
+  async refreshInfo(signal?: AbortSignal): Promise<PortalExtensionInfo | null> {
+    this.cachedInfo = null;
+    return this.getInfo(signal);
+  }
+
   async isAvailable(signal?: AbortSignal): Promise<boolean> {
     return (await this.getInfo(signal)) !== null;
   }
