@@ -109,7 +109,11 @@ CI: `web`, `extension`, `danfe-print` e `codeql`. O CodeQL analisa JavaScript/Ty
 
 ## Releases
 
-A **próxima release / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.\n\nA **v0.0.36 / extensão 0.2.12** consolida o hardening pós-auditoria: CI com CodeQL, testes comportamentais adicionais da extensão, cobertura mínima, configuração Wrangler consolidada e rastreabilidade da aceitação física.\n\nA **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste hardening.
+A **próxima release / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.
+
+A **v0.0.36 / extensão 0.2.12** consolida o hardening pós-auditoria: CI com CodeQL, testes comportamentais adicionais da extensão, cobertura mínima, configuração Wrangler consolidada e rastreabilidade da aceitação física.
+
+A **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste hardening.
 
 A v0.0.34/extensão 0.2.11 consolidou a arquitetura Portal-only e permanece como base funcional anterior a esta otimização.
 
