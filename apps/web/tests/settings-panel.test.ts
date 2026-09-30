@@ -6,7 +6,10 @@ const styles = readFileSync(new URL('../src/settings-panel.css', import.meta.url
 describe('settings panel extension-only', () => {
   it('diagnoses the Portal integration without direct SEFAZ configuration', () => {
     expect(settings).toContain('BrowserPortalExtensionClient');
+    expect(settings).toContain("diagnosticRow('Integração'");
     expect(settings).toContain("extensionState.value.textContent = 'Conectada'");
+    expect(settings).toContain("integrationState.value.textContent = ready ? 'Pronta' : 'Parcial'");
+    expect(settings).toContain('client.refreshInfo()');
     expect(settings).toContain("diagnosticRow('Portal Nacional'");
     expect(settings).toContain("diagnosticRow('Regras de fornecedor'");
     expect(settings).not.toContain('Consulta direta');
