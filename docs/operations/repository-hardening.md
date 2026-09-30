@@ -67,7 +67,7 @@ O workflow de release só publica quando, no mesmo SHA da `main`:
 
 A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. A aceitação física em Chrome e Edge é **pós-release**: o workflow valida a existência e a coerência do registro, mas não fabrica nem exige aprovação física antes da publicação. Um resultado físico reprovado deve ser registrado e tratado como incidente/correção, nunca convertido em aprovação automática.
 
-A baseline `v0.0.35 / extensão 0.2.12` possui registro em `docs/testing/acceptance-results/v0.0.35.md` com status atual **PENDENTE**.
+A release pública atual `v0.0.36 / extensão 0.2.12` possui registro em `docs/testing/acceptance-results/v0.0.36.md` com status atual **PENDENTE**. A próxima extensão em desenvolvimento é a `0.2.13`.
 
 ## Cloudflare
 
