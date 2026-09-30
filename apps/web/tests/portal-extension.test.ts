@@ -134,6 +134,29 @@ describe('BrowserPortalExtensionClient', () => {
     expect(pings).toBe(1);
   });
 
+  it('forces a fresh handshake when diagnostics are manually refreshed', async () => {
+    const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+    let pings = 0;
+    const client = new BrowserPortalExtensionClient({
+      request: async (message: { type: string }) => {
+        if (message.type !== 'ping') throw new Error('unexpected');
+        pings += 1;
+        return {
+          type: 'ready',
+          version: '0.2.13',
+          capabilities: { openOptions: true, portalLookup: true, supplierResolution: true },
+        };
+      },
+      subscribe: () => () => {},
+    } as never);
+
+    await client.getInfo();
+    await client.getInfo();
+    expect(pings).toBe(1);
+    await client.refreshInfo();
+    expect(pings).toBe(2);
+  });
+
   it('retries start once so a lost response does not require opening a second popup', async () => {
     const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
     let starts = 0;
