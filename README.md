@@ -109,7 +109,7 @@ CI: `web`, `extension`, `danfe-print` e `codeql`. O CodeQL analisa JavaScript/Ty
 
 ## Releases
 
-A **próxima release / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.
+A **v0.0.37 / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.
 
 A **v0.0.36 / extensão 0.2.12** consolida o hardening pós-auditoria: CI com CodeQL, testes comportamentais adicionais da extensão, cobertura mínima, configuração Wrangler consolidada e rastreabilidade da aceitação física.
 
@@ -127,4 +127,4 @@ Checklist: `docs/testing/acceptance.md`.
 
 Cada release registra o resultado físico em `docs/testing/acceptance-results/vX.Y.Z.md`. A publicação depende do CI automatizado; Chrome e Edge são validados separadamente e o registro permanece `PENDENTE` até o teste real.
 
-A `v0.0.36 / extensão 0.2.12` está registrada em `docs/testing/acceptance-results/v0.0.36.md` como **PENDENTE** até execução física real.
+A `v0.0.37 / extensão 0.2.13` está registrada em `docs/testing/acceptance-results/v0.0.37.md` como **PENDENTE** até execução física real. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.

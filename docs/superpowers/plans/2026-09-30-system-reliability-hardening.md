@@ -41,8 +41,8 @@ Fechar as inconsistências restantes sem alterar a arquitetura Portal-only, sem 
 - [x] Reforçar cobertura dos módulos críticos.
 - [x] Reforçar diagnóstico de integração.
 - [x] Reabrir/documentar Ruleset da `main`.
-- [ ] Revisar diff, abrir PR e validar CI disponível.
-- [ ] Manter aceitação física da v0.0.36 como pendência real até Chrome/Edge serem executados.
+- [x] Revisar diff, abrir PR e validar CI disponível.
+- [ ] Executar a aceitação física da release vigente em Chrome e Edge reais; não inferir aprovação pelo CI.
 
 ## Critérios de aceite
 
