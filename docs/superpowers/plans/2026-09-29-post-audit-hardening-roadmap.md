@@ -1,6 +1,6 @@
 # Roadmap pós-auditoria — hardening da arquitetura extension-only
 
-**Data:** 2026-09-29  
+> **Atualização em 30/09/2026:** a política de release deste plano foi substituída por `2026-09-30-system-reliability-hardening.md`. A aceitação física passou a ser pós-release e rastreável; este arquivo permanece como histórico da decisão anterior.\n\n**Data:** 2026-09-29  
 **Baseline:** `main` em `6963bcb3fb29433b7ec1f6d59ea8b9562135b0d3`  
 **Release pública atual:** `v0.0.35` / extensão `0.2.12`
 
