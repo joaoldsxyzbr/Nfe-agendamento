@@ -41,6 +41,237 @@ jobs:
           test -s "$acceptance"
           grep -Fx "Release: v${version}" "$acceptance" >/dev/null
           grep -Fx "Extension: ${extension_version}" "$acceptance" >/dev/null
+          grep -Eq '^Status: (PENDENTE|APROVADO)
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "notes=$notes" >> "$GITHUB_OUTPUT"
+          echo "acceptance=$acceptance" >> "$GITHUB_OUTPUT"
+          echo "extension_version=$extension_version" >> "$GITHUB_OUTPUT"
+
+      - name: Download validated browser extension
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: NFeAgendamento-Extension-MV3
+          path: release/extension
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate extension asset
+        shell: bash
+        run: |
+          source="release/extension/NFeAgendamento-Extension-MV3.zip"
+          target="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable="release/NFeAgendamento-Extension.zip"
+          test -s "$source"
+          cp "$source" "$target"
+          cp "$source" "$stable"
+
+          python - "$target" "${{ steps.version.outputs.extension_version }}" <<'PY'
+          from zipfile import ZipFile
+          import json
+          import sys
+
+          archive_path, expected_version = sys.argv[1:]
+          with ZipFile(archive_path) as archive:
+              manifest = json.loads(archive.read('manifest.json'))
+              if manifest.get('manifest_version') != 3:
+                  raise SystemExit('Extensão publicada não é Manifest V3.')
+              if manifest.get('version') != expected_version:
+                  raise SystemExit('Versão da extensão divergente.')
+              required = {
+                  'background.js',
+                  'site-bridge.js',
+                  'portal-content.js',
+                  'options.js',
+                  'options.html',
+                  'manifest.json',
+              }
+              missing = required.difference(archive.namelist())
+              if missing:
+                  raise SystemExit(f'Extensão incompleta: {sorted(missing)}')
+          PY
+
+      - name: Publish GitHub release if absent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          validated_sha="${{ github.event.workflow_run.head_sha }}"
+          extension="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable_extension="release/NFeAgendamento-Extension.zip"
+
+          if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
+            if [ "$existing_sha" != "$validated_sha" ]; then
+              echo "Tag $tag aponta para outro SHA." >&2
+              exit 1
+            fi
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Release $tag já existe no SHA validado; nada a publicar."
+              exit 0
+            fi
+          fi
+
+          gh release create "$tag" \
+            "$extension" \
+            "$stable_extension" \
+            --target "$validated_sha" \
+            --title "$tag" \
+            --notes-file "${{ steps.version.outputs.notes }}"
+ "$acceptance"
+          grep -Eq '^Chrome: (NÃO EXECUTADO|APROVADO)
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "notes=$notes" >> "$GITHUB_OUTPUT"
+          echo "acceptance=$acceptance" >> "$GITHUB_OUTPUT"
+          echo "extension_version=$extension_version" >> "$GITHUB_OUTPUT"
+
+      - name: Download validated browser extension
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: NFeAgendamento-Extension-MV3
+          path: release/extension
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate extension asset
+        shell: bash
+        run: |
+          source="release/extension/NFeAgendamento-Extension-MV3.zip"
+          target="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable="release/NFeAgendamento-Extension.zip"
+          test -s "$source"
+          cp "$source" "$target"
+          cp "$source" "$stable"
+
+          python - "$target" "${{ steps.version.outputs.extension_version }}" <<'PY'
+          from zipfile import ZipFile
+          import json
+          import sys
+
+          archive_path, expected_version = sys.argv[1:]
+          with ZipFile(archive_path) as archive:
+              manifest = json.loads(archive.read('manifest.json'))
+              if manifest.get('manifest_version') != 3:
+                  raise SystemExit('Extensão publicada não é Manifest V3.')
+              if manifest.get('version') != expected_version:
+                  raise SystemExit('Versão da extensão divergente.')
+              required = {
+                  'background.js',
+                  'site-bridge.js',
+                  'portal-content.js',
+                  'options.js',
+                  'options.html',
+                  'manifest.json',
+              }
+              missing = required.difference(archive.namelist())
+              if missing:
+                  raise SystemExit(f'Extensão incompleta: {sorted(missing)}')
+          PY
+
+      - name: Publish GitHub release if absent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          validated_sha="${{ github.event.workflow_run.head_sha }}"
+          extension="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable_extension="release/NFeAgendamento-Extension.zip"
+
+          if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
+            if [ "$existing_sha" != "$validated_sha" ]; then
+              echo "Tag $tag aponta para outro SHA." >&2
+              exit 1
+            fi
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Release $tag já existe no SHA validado; nada a publicar."
+              exit 0
+            fi
+          fi
+
+          gh release create "$tag" \
+            "$extension" \
+            "$stable_extension" \
+            --target "$validated_sha" \
+            --title "$tag" \
+            --notes-file "${{ steps.version.outputs.notes }}"
+ "$acceptance"
+          grep -Eq '^Edge: (NÃO EXECUTADO|APROVADO)
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "notes=$notes" >> "$GITHUB_OUTPUT"
+          echo "acceptance=$acceptance" >> "$GITHUB_OUTPUT"
+          echo "extension_version=$extension_version" >> "$GITHUB_OUTPUT"
+
+      - name: Download validated browser extension
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: NFeAgendamento-Extension-MV3
+          path: release/extension
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate extension asset
+        shell: bash
+        run: |
+          source="release/extension/NFeAgendamento-Extension-MV3.zip"
+          target="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable="release/NFeAgendamento-Extension.zip"
+          test -s "$source"
+          cp "$source" "$target"
+          cp "$source" "$stable"
+
+          python - "$target" "${{ steps.version.outputs.extension_version }}" <<'PY'
+          from zipfile import ZipFile
+          import json
+          import sys
+
+          archive_path, expected_version = sys.argv[1:]
+          with ZipFile(archive_path) as archive:
+              manifest = json.loads(archive.read('manifest.json'))
+              if manifest.get('manifest_version') != 3:
+                  raise SystemExit('Extensão publicada não é Manifest V3.')
+              if manifest.get('version') != expected_version:
+                  raise SystemExit('Versão da extensão divergente.')
+              required = {
+                  'background.js',
+                  'site-bridge.js',
+                  'portal-content.js',
+                  'options.js',
+                  'options.html',
+                  'manifest.json',
+              }
+              missing = required.difference(archive.namelist())
+              if missing:
+                  raise SystemExit(f'Extensão incompleta: {sorted(missing)}')
+          PY
+
+      - name: Publish GitHub release if absent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          validated_sha="${{ github.event.workflow_run.head_sha }}"
+          extension="release/NFeAgendamento-Extension-v${{ steps.version.outputs.extension_version }}.zip"
+          stable_extension="release/NFeAgendamento-Extension.zip"
+
+          if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
+            if [ "$existing_sha" != "$validated_sha" ]; then
+              echo "Tag $tag aponta para outro SHA." >&2
+              exit 1
+            fi
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Release $tag já existe no SHA validado; nada a publicar."
+              exit 0
+            fi
+          fi
+
+          gh release create "$tag" \
+            "$extension" \
+            "$stable_extension" \
+            --target "$validated_sha" \
+            --title "$tag" \
+            --notes-file "${{ steps.version.outputs.notes }}"
+ "$acceptance"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
