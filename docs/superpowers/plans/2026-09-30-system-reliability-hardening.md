@@ -36,11 +36,11 @@ Fechar as inconsistências restantes sem alterar a arquitetura Portal-only, sem 
 ## Checkpoints
 
 - [x] Estado atual e documentação oficial revisados.
-- [ ] Alinhar política de release e testes/documentação.
-- [ ] Remover polling periódico e preservar timeouts.
-- [ ] Reforçar cobertura dos módulos críticos.
-- [ ] Reforçar diagnóstico de integração.
-- [ ] Reabrir/documentar Ruleset da `main`.
+- [x] Alinhar política de release e testes/documentação.
+- [x] Remover polling periódico e preservar timeouts.
+- [x] Reforçar cobertura dos módulos críticos.
+- [x] Reforçar diagnóstico de integração.
+- [x] Reabrir/documentar Ruleset da `main`.
 - [ ] Revisar diff, abrir PR e validar CI disponível.
 - [ ] Manter aceitação física da v0.0.36 como pendência real até Chrome/Edge serem executados.
 
