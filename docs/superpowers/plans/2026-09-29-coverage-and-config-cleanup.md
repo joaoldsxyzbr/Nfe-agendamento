@@ -1,6 +1,6 @@
 # Coverage and Configuration Cleanup Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Atualização em 30/09/2026:** a decisão de manter o fallback periódico foi substituída por `2026-09-30-system-reliability-hardening.md`. O content script agora é orientado a eventos e usa timers únicos apenas para deadlines. Este arquivo permanece como histórico da rodada anterior.\n\n> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Impedir regressões silenciosas de cobertura e remover a configuração Wrangler duplicada, mantendo um único deploy source-of-truth.
 
