@@ -14,7 +14,6 @@ const READY_ATTEMPTS = 4;
 const READY_RETRY_DELAY_MS = 250;
 const MESSAGE_ATTEMPTS = 2;
 const MESSAGE_RETRY_DELAY_MS = 200;
-const FALLBACK_TICK_MS = 1_000;
 const RESULT_TIMEOUT_MS = 90_000;
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
@@ -28,6 +27,8 @@ let resultTimeoutReported = false;
 let downloadTimeoutReported = false;
 let tickRunning = false;
 let tickScheduled = false;
+let resultTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+let downloadTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
 void initialize();
 
@@ -45,9 +46,11 @@ async function initialize(): Promise<void> {
 
     if (portalState === 'submitting') {
       submittedAt = stateChangedAt;
+      armResultTimeout(stateChangedAt);
     } else if (portalState === 'waiting_result') {
       downloadRequestedAt = stateChangedAt;
       downloadTriggered = true;
+      armDownloadTimeout(stateChangedAt);
     }
 
     fillAccessKey();
@@ -71,7 +74,12 @@ function installDomWatchers(): void {
 
   document.addEventListener('input', scheduleTick, true);
   document.addEventListener('change', scheduleTick, true);
-  window.setInterval(scheduleTick, FALLBACK_TICK_MS);
+  window.addEventListener('message', scheduleTick);
+  window.addEventListener('focus', scheduleTick);
+  window.addEventListener('pageshow', scheduleTick);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') scheduleTick();
+  });
 }
 
 function scheduleTick(): void {
@@ -111,6 +119,8 @@ async function tick(): Promise<void> {
           downloadTriggered = true;
           portalState = 'waiting_result';
           downloadRequestedAt = Date.now();
+          clearResultTimeout();
+          armDownloadTimeout(downloadRequestedAt);
           control.click();
           return;
         } catch {
@@ -119,33 +129,6 @@ async function tick(): Promise<void> {
       }
     }
 
-    if (
-      submittedAt !== null &&
-      !resultTimeoutReported &&
-      Date.now() - submittedAt >= RESULT_TIMEOUT_MS
-    ) {
-      resultTimeoutReported = true;
-      try {
-        await sendPortalMessageWithRetry({ source: 'portal', type: 'result_timeout' });
-      } catch {
-        resultTimeoutReported = false;
-      }
-    }
-    return;
-  }
-
-  if (
-    portalState === 'waiting_result' &&
-    downloadRequestedAt !== null &&
-    !downloadTimeoutReported &&
-    Date.now() - downloadRequestedAt >= DOWNLOAD_TIMEOUT_MS
-  ) {
-    downloadTimeoutReported = true;
-    try {
-      await sendPortalMessageWithRetry({ source: 'portal', type: 'download_timeout' });
-    } catch {
-      downloadTimeoutReported = false;
-    }
     return;
   }
 
@@ -165,11 +148,69 @@ async function tick(): Promise<void> {
         consultTriggered = true;
         portalState = 'submitting';
         submittedAt = Date.now();
+        armResultTimeout(submittedAt);
         consultButton.click();
       } catch {
-        // O próximo evento/fallback periódico pode tentar novamente sem duplicar clique.
+        // O próximo evento observado pode tentar novamente sem duplicar clique.
       }
     }
+  }
+}
+
+function armResultTimeout(startedAt: number): void {
+  clearResultTimeout();
+  const elapsed = Math.max(0, Date.now() - startedAt);
+  const remaining = Math.max(0, RESULT_TIMEOUT_MS - elapsed);
+  resultTimeoutHandle = globalThis.setTimeout(() => {
+    resultTimeoutHandle = null;
+    void reportResultTimeout();
+  }, remaining);
+}
+
+function clearResultTimeout(): void {
+  if (resultTimeoutHandle === null) return;
+  globalThis.clearTimeout(resultTimeoutHandle);
+  resultTimeoutHandle = null;
+}
+
+async function reportResultTimeout(): Promise<void> {
+  if (portalState !== 'submitting' || submittedAt === null || resultTimeoutReported) return;
+  resultTimeoutReported = true;
+  try {
+    await sendPortalMessageWithRetry({ source: 'portal', type: 'result_timeout' });
+  } catch {
+    resultTimeoutReported = false;
+  }
+}
+
+function armDownloadTimeout(requestedAt: number): void {
+  clearDownloadTimeout();
+  const elapsed = Math.max(0, Date.now() - requestedAt);
+  const remaining = Math.max(0, DOWNLOAD_TIMEOUT_MS - elapsed);
+  downloadTimeoutHandle = globalThis.setTimeout(() => {
+    downloadTimeoutHandle = null;
+    void reportDownloadTimeout();
+  }, remaining);
+}
+
+function clearDownloadTimeout(): void {
+  if (downloadTimeoutHandle === null) return;
+  globalThis.clearTimeout(downloadTimeoutHandle);
+  downloadTimeoutHandle = null;
+}
+
+async function reportDownloadTimeout(): Promise<void> {
+  if (
+    portalState !== 'waiting_result' ||
+    downloadRequestedAt === null ||
+    downloadTimeoutReported
+  ) return;
+
+  downloadTimeoutReported = true;
+  try {
+    await sendPortalMessageWithRetry({ source: 'portal', type: 'download_timeout' });
+  } catch {
+    downloadTimeoutReported = false;
   }
 }
 
