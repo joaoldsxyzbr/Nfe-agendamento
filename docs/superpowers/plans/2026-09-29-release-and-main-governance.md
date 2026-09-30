@@ -1,5 +1,7 @@
 # Release and Main Governance Hardening Implementation Plan
 
+> **Atualização em 30/09/2026:** a política de release deste plano foi substituída por `2026-09-30-system-reliability-hardening.md`. A aceitação física passou a ser pós-release e rastreável; este arquivo permanece como histórico da decisão anterior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Garantir que nenhuma release extension-only seja publicada sem CI completo, CodeQL do mesmo SHA e aceitação física versionada, e fazer a `main` receber mudanças somente após checks obrigatórios.

@@ -79,3 +79,17 @@ Validar no Windows real:
 - segunda consulta;
 - cancelamento;
 - Chrome e Edge.
+
+
+## Observação orientada a eventos
+
+O content script do Portal não usa polling periódico.
+
+Os sinais que disparam reavaliação são:
+
+- mutações do DOM via `MutationObserver`;
+- eventos `input` e `change`;
+- mensagens da janela, úteis para transições do widget hCaptcha sem ler ou fabricar token;
+- `focus`, `pageshow` e retorno de visibilidade da página.
+
+Os limites de espera de resultado e download continuam explícitos, mas são implementados com timers únicos armados na mudança de estado. A aceitação física em Chrome e Edge deve confirmar que a solução do hCaptcha continua sendo detectada sem `setInterval`.

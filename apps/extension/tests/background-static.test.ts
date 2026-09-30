@@ -38,6 +38,11 @@ describe('extension background contract', () => {
     expect(source).toContain('READY_ATTEMPTS');
     expect(source).toContain('sendReadyWithRetry');
     expect(source).toContain('MutationObserver');
+    expect(source).toContain("window.addEventListener('message', scheduleTick)");
+    expect(source).toContain('armResultTimeout');
+    expect(source).toContain('armDownloadTimeout');
+    expect(source).not.toContain('setInterval');
+    expect(source).not.toContain('FALLBACK_TICK_MS');
     expect(source).toContain('h-captcha-response');
     expect(source).toContain('isOfficialConsultUrl(location.href)');
   });

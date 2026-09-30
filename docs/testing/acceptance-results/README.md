@@ -2,7 +2,7 @@
 
 Este diretório registra o gate físico da arquitetura Portal-only por release.
 
-Cada release candidata deve copiar `template.md` para `vX.Y.Z.md` e preencher o resultado observado em Chrome e Edge reais.
+Cada release normal deve ter `vX.Y.Z.md` versionado antes da publicação, inicialmente como `PENDENTE` quando o teste físico ainda não ocorreu. Depois da publicação, o resultado observado em Chrome e Edge reais atualiza o mesmo arquivo para `APROVADO` ou `REPROVADO`. O CI não pode inferir aprovação física.
 
 ## Campos obrigatórios
 
@@ -25,9 +25,9 @@ Batch sequential: APROVADO|REPROVADO|NÃO EXECUTADO
 Cancellation recovery: APROVADO|REPROVADO|NÃO EXECUTADO
 ```
 
-## Regra de aprovação
+## Regra de publicação e aprovação
 
-`Status: APROVADO` só pode ser usado quando Chrome, Edge e todos os itens obrigatórios estiverem aprovados. Se qualquer item obrigatório falhar, usar `Status: REPROVADO`.
+Na publicação, o workflow aceita somente estado rastreável `PENDENTE` ou `APROVADO`; um registro conhecido como `REPROVADO` não deve gerar nova release. Após o teste físico, `Status: APROVADO` só pode ser usado quando Chrome, Edge e todos os itens obrigatórios estiverem aprovados. Se qualquer item obrigatório falhar, usar `Status: REPROVADO`.
 
 O campo `Certificate` pode ser `NÃO APLICÁVEL` somente quando o Portal não solicitar certificado durante o gate. Isso não significa que seleção de certificado foi validada.
 

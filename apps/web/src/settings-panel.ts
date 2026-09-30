@@ -49,11 +49,18 @@ function initializeSettingsPanel(): void {
 
   const diagnostics = document.createElement('div');
   diagnostics.className = 'diagnostics-card';
+  const integrationState = diagnosticRow('Integração', 'Verificando…');
   const extensionState = diagnosticRow('Extensão', 'Verificando…');
   const versionState = diagnosticRow('Versão', '—');
   const portalState = diagnosticRow('Portal Nacional', 'Verificando…');
   const supplierState = diagnosticRow('Regras de fornecedor', 'Verificando…');
-  diagnostics.append(extensionState.row, versionState.row, portalState.row, supplierState.row);
+  diagnostics.append(
+    integrationState.row,
+    extensionState.row,
+    versionState.row,
+    portalState.row,
+    supplierState.row,
+  );
 
   const note = document.createElement('p');
   note.className = 'settings-help';
@@ -81,7 +88,7 @@ function initializeSettingsPanel(): void {
   };
   trigger.addEventListener('click', () => panel.hidden ? open() : closePanel());
   close.addEventListener('click', closePanel);
-  refresh.addEventListener('click', () => void refreshDiagnostics());
+  refresh.addEventListener('click', () => void refreshDiagnostics(true));
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !panel.hidden) closePanel();
   });
@@ -95,12 +102,19 @@ function initializeSettingsPanel(): void {
   });
   void refreshDiagnostics();
 
-  async function refreshDiagnostics(): Promise<void> {
+  async function refreshDiagnostics(force = false): Promise<void> {
     refresh.disabled = true;
-    const info = await client.getInfo();
+    const info = force ? await client.refreshInfo() : await client.getInfo();
     if (info) {
-      statusElement.dataset.state = 'connected';
-      statusTextElement.textContent = `Extensão conectada · v${info.version}`;
+      const ready =
+        info.capabilities.openOptions &&
+        info.capabilities.portalLookup &&
+        info.capabilities.supplierResolution;
+      statusElement.dataset.state = ready ? 'connected' : 'partial';
+      statusTextElement.textContent = ready
+        ? `Extensão conectada · v${info.version}`
+        : `Extensão conectada · v${info.version} · integração parcial`;
+      integrationState.value.textContent = ready ? 'Pronta' : 'Parcial';
       extensionState.value.textContent = 'Conectada';
       versionState.value.textContent = info.version;
       portalState.value.textContent = info.capabilities.portalLookup ? 'Disponível' : 'Indisponível';
@@ -108,6 +122,7 @@ function initializeSettingsPanel(): void {
     } else {
       statusElement.dataset.state = 'disconnected';
       statusTextElement.textContent = 'Extensão não conectada';
+      integrationState.value.textContent = 'Indisponível';
       extensionState.value.textContent = 'Não conectada';
       versionState.value.textContent = '—';
       portalState.value.textContent = 'Indisponível';

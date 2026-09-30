@@ -10,10 +10,14 @@ describe('release quality gate', () => {
     expect(release).toContain('docs/testing/acceptance-results/v${version}.md');
     expect(release).toContain('Release: v${version}');
     expect(release).toContain('Extension: ${extension_version}');
+    expect(release).toContain("^Status: (PENDENTE|APROVADO)$");
+    expect(release).toContain("^Chrome: (NÃO EXECUTADO|APROVADO)$");
+    expect(release).toContain("^Edge: (NÃO EXECUTADO|APROVADO)$");
     expect(release).not.toContain('--prerelease');
     expect(release).not.toContain('--latest=false');
     expect(release).not.toContain('Status: APROVADO');
     expect(release).not.toContain('Chrome: APROVADO');
     expect(release).not.toContain('Edge: APROVADO');
+    expect(release.match(/- name: Download validated browser extension/g)).toHaveLength(1);
   });
 });

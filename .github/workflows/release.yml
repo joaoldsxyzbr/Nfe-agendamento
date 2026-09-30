@@ -41,6 +41,9 @@ jobs:
           test -s "$acceptance"
           grep -Fx "Release: v${version}" "$acceptance" >/dev/null
           grep -Fx "Extension: ${extension_version}" "$acceptance" >/dev/null
+          grep -Eq '^Status: (PENDENTE|APROVADO)$' "$acceptance"
+          grep -Eq '^Chrome: (NÃO EXECUTADO|APROVADO)$' "$acceptance"
+          grep -Eq '^Edge: (NÃO EXECUTADO|APROVADO)$' "$acceptance"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
