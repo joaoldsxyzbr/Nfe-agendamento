@@ -6,12 +6,16 @@ O produto atual é site + extensão Chromium. O CI não compila nem empacota com
 
 ## Proteção da `main`
 
-A branch principal permite o fluxo operacional de push direto, mas bloqueia:
+Em 30/09/2026, a API de Rulesets retorna nenhum Ruleset ativo para o repositório. A proteção administrativa desejada continua pendente:
 
-- exclusão da `main`;
-- force-push na `main`.
+- pull request obrigatório para a `main`;
+- zero aprovações de terceiro obrigatórias;
+- checks obrigatórios `web`, `extension`, `danfe-print` e `codeql`;
+- branch atualizada antes do merge: desabilitada;
+- force-push: bloqueado;
+- exclusão da `main`: bloqueada.
 
-Não há exigência de pull request ou status check antes do push, preservando o fluxo de trabalho atual.
+A integração GitHub usada pela automação do projeto possui leitura de Rulesets, mas não escrita administrativa. Portanto essa proteção só pode ser marcada como concluída depois de um Ruleset ativo ser observado no GitHub.
 
 ## Gates
 
@@ -59,9 +63,9 @@ O workflow de release só publica quando, no mesmo SHA da `main`:
 1. o workflow `CI` concluiu com `web`, `extension`, `danfe-print` e `codeql` verdes;
 2. o commit é exatamente `release: vX.Y.Z`;
 3. existe `docs/releases/vX.Y.Z.md`;
-4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão, `Status: APROVADO`, `Chrome: APROVADO` e `Edge: APROVADO`.
+4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão e estado rastreável (`PENDENTE` ou `APROVADO`), sem registrar navegador como aprovado por inferência.
 
-A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. O workflow não fabrica aprovação física; ele apenas valida o registro versionado.
+A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. A aceitação física em Chrome e Edge é **pós-release**: o workflow valida a existência e a coerência do registro, mas não fabrica nem exige aprovação física antes da publicação. Um resultado físico reprovado deve ser registrado e tratado como incidente/correção, nunca convertido em aprovação automática.
 
 A baseline `v0.0.35 / extensão 0.2.12` possui registro em `docs/testing/acceptance-results/v0.0.35.md` com status atual **PENDENTE**.
 
