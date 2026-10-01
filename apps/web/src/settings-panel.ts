@@ -20,7 +20,7 @@ function initializeSettingsPanel(): void {
   downloadTrigger.href = 'https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/latest/download/NFeAgendamento-Extension.zip';
   downloadTrigger.setAttribute('aria-label', 'Baixar extensão');
   downloadTrigger.title = 'Baixar extensão';
-  downloadTrigger.textContent = '↓';
+  downloadTrigger.innerHTML = iconSvg('download');
 
   const trigger = document.createElement('button');
   trigger.id = 'settings-trigger';
@@ -28,23 +28,23 @@ function initializeSettingsPanel(): void {
   trigger.type = 'button';
   trigger.setAttribute('aria-label', 'Abrir configurações');
   trigger.setAttribute('aria-expanded', 'false');
-  trigger.textContent = '⚙';
+  trigger.innerHTML = iconSvg('settings');
 
-  const panel = document.createElement('section');
+  const panel = document.createElement('dialog');
   panel.id = 'settings-panel';
   panel.className = 'settings-panel';
-  panel.hidden = true;
-  panel.setAttribute('aria-label', 'Configurações da integração');
+  panel.setAttribute('aria-labelledby', 'settings-title');
 
   const header = document.createElement('div');
   header.className = 'settings-panel-header';
   const title = document.createElement('strong');
+  title.id = 'settings-title';
   title.textContent = 'Integração do navegador';
   const close = document.createElement('button');
   close.id = 'settings-close';
   close.type = 'button';
   close.setAttribute('aria-label', 'Fechar configurações');
-  close.textContent = '×';
+  close.innerHTML = iconSvg('close');
   header.append(title, close);
 
   const diagnostics = document.createElement('div');
@@ -77,20 +77,23 @@ function initializeSettingsPanel(): void {
   document.body.append(panel);
 
   const open = () => {
-    panel.hidden = false;
+    if (panel.open) return;
+    panel.showModal();
+    document.body.classList.add('settings-open');
     trigger.setAttribute('aria-expanded', 'true');
+    close.focus();
     void refreshDiagnostics();
   };
   const closePanel = () => {
-    panel.hidden = true;
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.focus();
+    if (panel.open) panel.close();
   };
-  trigger.addEventListener('click', () => panel.hidden ? open() : closePanel());
+  trigger.addEventListener('click', () => panel.open ? closePanel() : open());
   close.addEventListener('click', closePanel);
   refresh.addEventListener('click', () => void refreshDiagnostics(true));
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !panel.hidden) closePanel();
+  panel.addEventListener('close', () => {
+    document.body.classList.remove('settings-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.focus();
   });
 
   const stopReadyHint = client.onReadyHint(() => void refreshDiagnostics());
@@ -141,4 +144,15 @@ function diagnosticRow(labelText: string, valueText: string): { row: HTMLElement
   value.textContent = valueText;
   row.append(label, value);
   return { row, value };
+}
+
+
+function iconSvg(icon: 'download' | 'settings' | 'close'): string {
+  const paths = {
+    download: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+    settings: '<path d="M4 7h10"/><circle cx="17" cy="7" r="2"/><path d="M20 17H10"/><circle cx="7" cy="17" r="2"/>',
+    close: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+  } as const;
+
+  return `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[icon]}</svg>`;
 }
