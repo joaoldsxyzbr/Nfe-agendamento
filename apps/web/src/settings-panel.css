@@ -1,11 +1,162 @@
-.topbar-actions { display: inline-flex; align-items: center; gap: 8px; }
-.topbar-icon-action { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; text-decoration: none; }
-.download-trigger { font-size: 22px; line-height: 1; }
-.settings-panel { position: fixed; top: 78px; right: 20px; z-index: 30; width: min(360px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 24px 70px rgb(0 0 0 / 35%); }
-.settings-panel[hidden] { display: none !important; }
-.settings-panel-header, .diagnostics-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.settings-panel-header button { border: 0; background: transparent; color: var(--text); font-size: 24px; cursor: pointer; }
-.diagnostics-card { display: grid; gap: 10px; margin-top: 16px; }
-.diagnostics-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
-.settings-help { margin: 16px 0; color: var(--muted); line-height: 1.5; }
-.settings-refresh { width: 100%; }
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: #cbd6e1;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.topbar-icon-action:hover {
+  border-color: #405166;
+  background: var(--surface-3);
+  color: #fff;
+}
+
+.ui-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+body.settings-open {
+  overflow: hidden;
+}
+
+.settings-panel {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(390px, calc(100vw - 24px));
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 22px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 16px 0 0 16px;
+  background: #111820;
+  color: var(--text);
+  font: inherit;
+  box-shadow: -24px 0 70px rgb(0 0 0 / 32%);
+}
+
+.settings-panel::backdrop {
+  background: rgb(3 7 12 / 62%);
+  backdrop-filter: blur(2px);
+}
+
+.settings-panel[open] {
+  animation: settings-drawer-in 160ms ease-out;
+}
+
+.settings-panel-header,
+.diagnostics-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-panel-header {
+  padding-bottom: 18px;
+}
+
+.settings-panel-header strong {
+  font-size: 17px;
+}
+
+.settings-panel-header button {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.settings-panel-header button:hover:not(:disabled) {
+  border-color: var(--line-soft);
+  background: var(--surface-2);
+}
+
+.diagnostics-card {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+}
+
+.diagnostics-row {
+  padding: 12px 14px;
+}
+
+.diagnostics-row + .diagnostics-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.diagnostics-row span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.diagnostics-row strong {
+  font-size: 12.5px;
+}
+
+.settings-help {
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.settings-refresh {
+  width: 100%;
+}
+
+@keyframes settings-drawer-in {
+  from {
+    transform: translateX(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .settings-panel {
+    width: 100vw;
+    border-left: 0;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-panel[open] {
+    animation: none;
+  }
+}
