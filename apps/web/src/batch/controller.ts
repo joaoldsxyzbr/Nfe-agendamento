@@ -298,8 +298,18 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
 
     if (!canReuseRows) {
       list.replaceChildren();
+
+      const header = documentRef.createElement('div');
+      header.className = 'batch-list-header';
+      header.setAttribute('aria-hidden', 'true');
+      for (const label of ['#', 'NF-e / fornecedor', 'Status', 'Ações']) {
+        const cell = documentRef.createElement('span');
+        cell.textContent = label;
+        header.append(cell);
+      }
+
       renderedRows = items.map((item, index) => createRenderedRow(item, index, documentRef));
-      list.append(...renderedRows.map((row) => row.root));
+      list.append(header, ...renderedRows.map((row) => row.root));
       return;
     }
 
