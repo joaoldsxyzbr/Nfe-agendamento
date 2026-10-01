@@ -8,7 +8,7 @@
   display: inline-flex;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: #0e141b;
 }
 
@@ -44,7 +44,7 @@
   resize: vertical;
   padding: 13px 14px;
   border: 1px solid #344252;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: #0e141b;
   color: var(--text);
   font-family: var(--font-mono);
@@ -58,7 +58,7 @@
 #batch-form textarea:focus {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.14);
+  box-shadow: var(--focus-ring);
 }
 
 #batch-form textarea::placeholder {
@@ -99,7 +99,7 @@
   margin: 0;
   padding: 0 9px;
   border: 1px solid var(--line-soft);
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: #151d26;
   color: #aebbc9;
   font-size: 12px;
@@ -109,9 +109,9 @@
 .batch-run-toolbar {
   align-items: center;
   margin-top: 16px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
+  padding: 12px 14px;
+  border-radius: var(--radius-control);
+  background: #10171f;
 }
 
 .batch-progress-copy {
@@ -146,7 +146,7 @@
   min-height: 36px;
   padding: 0 12px;
   border: 1px solid #3a495a;
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: #d2dce6;
   box-shadow: none;
@@ -181,12 +181,32 @@
 
 .batch-list {
   display: grid;
-  gap: 7px;
+  gap: 1px;
   margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  background: var(--line-soft);
+}
+
+.batch-list-header {
+  display: grid;
+  grid-template-columns: 32px minmax(220px, 1fr) minmax(120px, auto) minmax(250px, auto);
+  align-items: center;
+  gap: 11px;
+  padding: 8px 11px;
+  background: #0e141b;
+  color: var(--muted-2);
+  font-size: 9.5px;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
 }
 
 .batch-empty {
   min-height: 110px;
+  border: 0;
+  border-radius: 0;
 }
 
 .batch-item {
@@ -196,8 +216,8 @@
   gap: 11px;
   min-width: 0;
   padding: 11px;
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 0;
   background: #10171f;
 }
 
@@ -219,7 +239,7 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: var(--surface-3);
   color: #cbd6e1;
   font-size: 11.5px;
@@ -295,11 +315,12 @@
 }
 
 #batch-consultation-panel.is-compact-single #batch-form textarea {
-  min-height: 60px;
-  height: 60px;
-  padding: 14px;
-  font-size: 14.5px;
-  border-radius: 9px;
+  min-height: 66px;
+  height: 66px;
+  padding: 16px;
+  border-color: #405166;
+  border-radius: var(--radius-control);
+  font-size: 15px;
 }
 
 #batch-consultation-panel.is-compact-single #batch-help {
@@ -336,6 +357,10 @@
   margin-top: 10px;
 }
 
+#batch-consultation-panel.is-compact-single .batch-list-header {
+  display: none;
+}
+
 #batch-consultation-panel.is-compact-single .batch-empty {
   min-height: 80px;
   padding: 16px;
@@ -347,6 +372,10 @@
 }
 
 @media (max-width: 900px) {
+  .batch-list-header {
+    display: none;
+  }
+
   .batch-item {
     grid-template-columns: 32px minmax(0, 1fr) auto;
   }

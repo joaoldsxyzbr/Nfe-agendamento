@@ -5,13 +5,13 @@
 .brand-lockup {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
 }
 
 .brand-mark {
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
@@ -21,7 +21,7 @@
   gap: 7px;
   margin: 0;
   color: var(--text);
-  font-size: clamp(22px, 2.6vw, 27px);
+  font-size: clamp(22px, 2.4vw, 26px);
   font-weight: 740;
   line-height: 1.1;
   letter-spacing: -0.025em;
@@ -40,7 +40,7 @@
 }
 
 .brand-heading > .subtitle {
-  margin: 5px 0 0 51px;
+  margin: 4px 0 0 46px;
   color: var(--muted);
   font-size: 12.5px;
   line-height: 1.45;
@@ -48,12 +48,12 @@
 
 @media (max-width: 720px) {
   .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .brand-title {
-    font-size: 24px;
+    font-size: 23px;
   }
 
   .brand-heading > .subtitle {
