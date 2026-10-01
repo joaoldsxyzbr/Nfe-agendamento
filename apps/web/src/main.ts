@@ -391,12 +391,26 @@ function renderLookupSuccess(parsed: ParsedNfe): void {
   titleGroup.append(title);
   header.append(titleGroup, badge);
 
-  const issuer = document.createElement('p');
-  issuer.textContent = parsed.issuer.name || 'Emitente não informado';
+  const summary = document.createElement('dl');
+  summary.className = 'lookup-summary-grid';
+  appendLookupSummaryItem(summary, 'Emitente', parsed.issuer.name || 'Não informado', 'is-wide');
+  appendLookupSummaryItem(summary, 'Série', parsed.series || '—');
+  appendLookupSummaryItem(summary, 'Emissão', formatIssueDate(parsed.issuedAt));
+  appendLookupSummaryItem(summary, 'Valor', formatCurrency(parsed.totals.invoice), 'is-emphasis');
+  appendLookupSummaryItem(
+    summary,
+    'Itens',
+    `${parsed.products.length} ${parsed.products.length === 1 ? 'item' : 'itens'}`,
+  );
 
-  const metadata = document.createElement('p');
-  metadata.className = 'help-text';
-  metadata.textContent = `Série ${parsed.series || '-'} · Chave ${parsed.accessKey}`;
+  const accessKey = document.createElement('div');
+  accessKey.className = 'lookup-access-key';
+  const accessKeyLabel = document.createElement('span');
+  accessKeyLabel.textContent = 'Chave de acesso';
+  const accessKeyValue = document.createElement('code');
+  accessKeyValue.textContent = parsed.accessKey;
+  accessKeyValue.title = parsed.accessKey;
+  accessKey.append(accessKeyLabel, accessKeyValue);
 
   const actions = document.createElement('div');
   actions.className = 'result-actions';
@@ -434,8 +448,43 @@ function renderLookupSuccess(parsed: ParsedNfe): void {
   download.title = `Baixar arquivo XML completo (${parsed.accessKey}.xml)`;
 
   actions.append(preview, download);
-  card.append(header, issuer, metadata, actions);
+  card.append(header, summary, accessKey, actions);
   resultCard.append(card);
+}
+
+function appendLookupSummaryItem(
+  container: HTMLElement,
+  labelText: string,
+  valueText: string,
+  className?: string,
+): void {
+  const item = document.createElement('div');
+  item.className = 'lookup-summary-item';
+  if (className) item.classList.add(className);
+
+  const label = document.createElement('dt');
+  label.textContent = labelText;
+  const value = document.createElement('dd');
+  value.textContent = valueText;
+  value.title = valueText;
+
+  item.append(label, value);
+  container.append(item);
+}
+
+function formatIssueDate(value: string | null): string {
+  if (!value) return 'Não informada';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
+}
+
+function formatCurrency(value: number): string {
+  if (!Number.isFinite(value)) return 'Não informado';
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
 }
 
 function downloadXml(parsed: ParsedNfe): void {
