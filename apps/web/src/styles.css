@@ -18,6 +18,9 @@
   --yellow-soft: #efd47e;
   --green: #4fc394;
   --danger: #ef7180;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --focus-ring: 0 0 0 3px rgba(76, 141, 255, 0.18);
   font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg);
@@ -62,7 +65,7 @@ button {
   min-height: 46px;
   padding: 0 20px;
   border: 1px solid var(--blue-strong);
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: var(--blue-strong);
   color: #fff;
   font-size: 14px;
@@ -82,6 +85,15 @@ button:active:not(:disabled) {
   background: #2b6ed8;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -96,7 +108,7 @@ select {
   min-height: 46px;
   padding: 0 14px;
   border: 1px solid #344252;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: #0e141b;
   color: var(--text);
   font-size: 14px;
@@ -109,7 +121,7 @@ input:focus,
 select:focus {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.14);
+  box-shadow: var(--focus-ring);
 }
 
 input::placeholder {
@@ -131,10 +143,9 @@ select:disabled {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line-soft);
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 2px 0 4px;
 }
 
 .topbar-controls {
@@ -192,11 +203,11 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 0 13px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
   color: #c4cfda;
   font-size: 12.5px;
   font-weight: 650;
@@ -220,13 +231,10 @@ h2 {
 }
 
 .lookup-card {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-}
-
-.lookup-card {
-  padding: 22px;
+  padding: 24px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  background: #121920;
 }
 
 .certificate-card {
@@ -234,17 +242,12 @@ h2 {
   background: #10161d;
 }
 
-.lookup-card {
-  border-color: #344354;
-  background: #121920;
-}
-
 .section-heading {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .key-hint {
@@ -253,7 +256,7 @@ h2 {
   min-height: 28px;
   padding: 0 9px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   color: var(--muted);
   font-size: 11px;
   font-weight: 650;
@@ -292,9 +295,7 @@ label {
 }
 
 .lookup-result-section {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line-soft);
+  margin-top: 20px;
 }
 
 .result-toolbar {
@@ -307,7 +308,7 @@ label {
   margin-bottom: 9px;
   padding: 0 12px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: #c6d1dd;
   font-size: 12px;
@@ -327,7 +328,7 @@ label {
   gap: 5px;
   padding: 22px;
   border: 1px dashed #344252;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: #0f151c;
   color: var(--muted);
   text-align: center;
@@ -344,7 +345,8 @@ label {
 .lookup-success-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding: 2px 0;
 }
 
 .lookup-success-header {
@@ -362,7 +364,7 @@ label {
   min-height: 27px;
   padding: 0 9px;
   border: 1px solid rgba(79, 195, 148, 0.35);
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: rgba(79, 195, 148, 0.08);
   color: var(--green);
   font-size: 10.5px;
@@ -378,13 +380,74 @@ label {
   background: var(--green);
 }
 
+.lookup-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(90px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.lookup-summary-item {
+  min-width: 0;
+  padding: 12px 13px;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+}
+
+.lookup-summary-item dt {
+  margin-bottom: 5px;
+  color: var(--muted-2);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.lookup-summary-item dd {
+  overflow: hidden;
+  margin: 0;
+  color: #e7edf4;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookup-summary-item.is-emphasis dd {
+  color: #fff;
+  font-size: 14px;
+}
+
+.lookup-access-key {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 2px 1px;
+  color: var(--muted-2);
+  font-size: 11px;
+}
+
+.lookup-access-key span {
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.lookup-access-key code {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .result-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
   margin-top: 2px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line-soft);
 }
 
 .action-danfe-preview {
@@ -394,7 +457,7 @@ label {
   gap: 7px;
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   box-shadow: none;
 }
 
@@ -406,7 +469,7 @@ label {
   min-height: 44px;
   padding: 0 18px;
   border: 1px solid #465567;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: #d6e0ea;
   font-size: 14px;
@@ -536,6 +599,16 @@ label {
   overscroll-behavior: contain;
 }
 
+@media (max-width: 900px) {
+  .lookup-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lookup-summary-item.is-wide {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 20px, 1040px);
@@ -556,6 +629,19 @@ label {
   .section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .lookup-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lookup-summary-item.is-wide {
+    grid-column: auto;
+  }
+
+  .lookup-access-key {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .lookup-row,
