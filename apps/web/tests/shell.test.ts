@@ -9,12 +9,14 @@ describe('application shell', () => {
       'src/main.ts',
       'src/portal/extension-client.ts',
       'src/portal/contracts.ts',
-      'src/nfe/consultation-controller.ts',
       'src/batch/controller.ts',
+      'src/nfe/manual-xml-import.ts',
       'src/danfe/viewer.ts',
     ]) expect(existsSync(fromWeb(path)), path).toBe(true);
+
     expect(existsSync(fromWeb('src/bridge'))).toBe(false);
     expect(existsSync(fromWeb('src/portal/fallback.ts'))).toBe(false);
+
     const main = readFileSync(fromWeb('src/main.ts'), 'utf8');
     expect(main).toContain('Extensão conectada');
     expect(main).toContain('Portal Nacional');
@@ -24,12 +26,19 @@ describe('application shell', () => {
     expect(main).not.toContain('certificate-select');
   });
 
-  it('keeps DANFE/XML actions and batch UI', () => {
+  it('keeps one unified consultation UI with DANFE/XML and recovery actions', () => {
     const main = readFileSync(fromWeb('src/main.ts'), 'utf8');
-    expect(main).toContain('Visualizar DANFE');
-    expect(main).toContain('Baixar XML');
+    const batch = readFileSync(fromWeb('src/batch/controller.ts'), 'utf8');
+
+    expect(main).toContain('id="batch-keys"');
+    expect(main).toContain('id="batch-start"');
+    expect(main).toContain('id="batch-reset"');
+    expect(main).not.toContain('id="mode-single"');
+    expect(main).not.toContain('id="mode-batch"');
+    expect(batch).toContain('Visualizar DANFE');
+    expect(batch).toContain('Baixar XML');
+    expect(batch).toContain('Importar XML');
     expect(main).toContain('Baixar XMLs (.zip)');
     expect(main).toContain('Imprimir DANFEs');
-    expect(main).toContain('id="mode-batch"');
   });
 });
