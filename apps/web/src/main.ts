@@ -62,7 +62,7 @@ app.innerHTML = `
               <p id="batch-input-summary" class="batch-summary" aria-live="polite">Nenhuma chave informada.</p>
               <p id="batch-help" class="help-text">Todas as consultas usam o Portal Nacional. O lote processa uma NF-e por vez e o hCaptcha continua manual.</p>
             </div>
-            <div class="lookup-actions batch-actions" aria-label="Ações da consulta">
+            <div class="batch-actions" aria-label="Ações da consulta">
               <button id="batch-start" type="submit" disabled>Consultar</button>
               <button id="batch-reset" class="lookup-reset batch-reset" type="button" hidden>Nova consulta</button>
             </div>
