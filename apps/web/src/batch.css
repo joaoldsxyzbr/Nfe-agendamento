@@ -45,11 +45,19 @@
 }
 
 .batch-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 140px);
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+  min-height: 46px;
   margin-top: 0;
+}
+
+.batch-actions > button {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
 }
 
 .batch-actions .batch-reset {
@@ -165,7 +173,7 @@
 
 .batch-list-header {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) minmax(120px, auto) minmax(250px, auto);
+  grid-template-columns: 32px minmax(220px, 1fr) 150px 250px;
   align-items: center;
   gap: 11px;
   padding: 8px 11px;
@@ -185,7 +193,7 @@
 
 .batch-item {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) minmax(120px, auto) minmax(250px, auto);
+  grid-template-columns: 32px minmax(220px, 1fr) 150px 250px;
   align-items: center;
   gap: 11px;
   min-width: 0;
@@ -196,16 +204,16 @@
 }
 
 .batch-item[data-state='success'] {
-  border-left: 3px solid var(--green);
+  box-shadow: inset 3px 0 0 var(--green);
 }
 
 .batch-item[data-state='portal_waiting_user'] {
-  border-left: 3px solid var(--yellow);
+  box-shadow: inset 3px 0 0 var(--yellow);
 }
 
 .batch-item[data-state='transport_error'],
 .batch-item[data-state='portal_error'] {
-  border-left: 3px solid var(--danger);
+  box-shadow: inset 3px 0 0 var(--danger);
 }
 
 .batch-order {
@@ -310,6 +318,7 @@
 }
 
 #batch-consultation-panel.is-compact-single .batch-actions {
+  width: 140px;
   justify-content: flex-start;
   margin-top: 9px;
 }
@@ -332,6 +341,7 @@
 }
 
 #batch-consultation-panel.is-compact-single .batch-list {
+  min-height: 80px;
   margin-top: 10px;
 }
 
@@ -345,6 +355,7 @@
 }
 
 #batch-consultation-panel.is-compact-single .batch-item {
+  min-height: 80px;
   gap: 9px;
   padding: 9px 10px;
 }
@@ -373,8 +384,8 @@
   }
 
   .batch-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .batch-actions button {

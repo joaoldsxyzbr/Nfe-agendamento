@@ -57,6 +57,7 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 - tema escuro;
 - controles e foco padronizados;
 - consulta como ação protagonista;
+- geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;
 - `prefers-reduced-motion` respeitado no drawer;
 - interface responsiva sem duplicar controller ou estado.

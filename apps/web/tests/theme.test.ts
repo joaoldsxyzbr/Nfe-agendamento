@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const main = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+const batchStyles = readFileSync(new URL('../src/batch.css', import.meta.url), 'utf8');
 const danfeStyles = readFileSync(new URL('../src/danfe/styles.css', import.meta.url), 'utf8');
 
 describe('site theme', () => {
@@ -14,6 +15,13 @@ describe('site theme', () => {
     expect(styles).toContain('--yellow: #d9ae42');
     expect(styles).toMatch(/\.lookup-card[\s\S]*background:/);
     expect(danfeStyles).toMatch(/\.danfe-page[\s\S]*background:\s*#fff/);
+  });
+
+  it('keeps consultation geometry stable while states change', () => {
+    expect(styles).toContain('scrollbar-gutter: stable');
+    expect(batchStyles).toContain('grid-template-columns: 32px minmax(220px, 1fr) 150px 250px');
+    expect(batchStyles).toContain('min-height: 80px');
+    expect(batchStyles).toContain('box-shadow: inset 3px 0 0 var(--green)');
   });
 
   it('keeps one consultation card with a reset action for the unified flow', () => {
