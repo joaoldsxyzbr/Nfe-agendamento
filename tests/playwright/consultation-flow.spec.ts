@@ -1,7 +1,10 @@
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 const ACCESS_KEY = '42260812345678000123550010000012341000012342';
-const xml = await readFile(new URL('../../apps/web/tests/fixtures/nfe-basic.xml', import.meta.url), 'utf8');
+const xmlUrl = new URL('../../apps/web/tests/fixtures/nfe-basic.xml', import.meta.url);
+const xml = await readFile(xmlUrl, 'utf8');
+const xmlPath = fileURLToPath(xmlUrl);
 
 test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await page.addInitScript(({ xmlPayload }) => {
@@ -73,4 +76,93 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await expect(reset).toBeVisible();
   await reset.click();
   await expect(input).toHaveValue('');
+});
+
+
+test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ page }) => {
+  await page.addInitScript(() => {
+    const channel = 'nfe-agendamento:portal-extension';
+    let operationId = '';
+
+    window.addEventListener('message', (event) => {
+      if (event.source !== window || event.origin !== window.location.origin) return;
+      const envelope = event.data as any;
+      if (!envelope || envelope.channel !== channel || envelope.direction !== 'request') return;
+
+      const command = envelope.command;
+      const respond = (response: unknown) => window.postMessage(
+        { channel, direction: 'response', requestId: envelope.requestId, response },
+        window.location.origin,
+      );
+
+      if (command?.type === 'ping') {
+        respond({
+          type: 'ready',
+          requestId: command.requestId,
+          version: '0.2.13',
+          capabilities: { openOptions: true, portalLookup: true, supplierResolution: true },
+        });
+        return;
+      }
+
+      if (command?.type === 'start') {
+        operationId = 'e2e-recovery-op';
+        respond({ type: 'started', requestId: command.requestId, operationId });
+        window.setTimeout(() => window.postMessage(
+          {
+            channel,
+            direction: 'event',
+            event: {
+              type: 'failed',
+              operationId,
+              code: 'portal_download_not_found',
+              message: 'Falha controlada do Portal.',
+            },
+          },
+          window.location.origin,
+        ), 100);
+        return;
+      }
+
+      if (command?.type === 'status') {
+        respond({
+          type: 'operation_status',
+          requestId: command.requestId,
+          operationId,
+          active: true,
+          state: 'waiting_user',
+        });
+        return;
+      }
+
+      if (command?.type === 'resolve_supplier') {
+        respond({ type: 'supplier_resolved', requestId: command.requestId, supplierId: null });
+        return;
+      }
+
+      if (command?.type === 'cancel') {
+        respond({ type: 'cancelled', requestId: command.requestId, operationId });
+      }
+    });
+  });
+
+  await page.goto('/');
+  const input = page.locator('#batch-keys');
+  await input.fill(ACCESS_KEY);
+  await page.locator('#batch-start').click();
+
+  const failedRow = page.locator('.batch-item[data-state="portal_error"]');
+  await expect(failedRow).toBeVisible();
+  await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
+
+  const chooserPromise = page.waitForEvent('filechooser');
+  await failedRow.getByRole('button', { name: 'Importar XML' }).click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles(xmlPath);
+
+  const recoveredRow = page.locator('.batch-item[data-state="success"]');
+  await expect(recoveredRow).toBeVisible();
+  await expect(recoveredRow.locator('.batch-source')).toHaveText('XML manual');
+  await expect(recoveredRow.getByRole('button', { name: 'Visualizar DANFE' })).toBeEnabled();
+  await expect(recoveredRow.getByRole('button', { name: 'Baixar XML' })).toBeEnabled();
 });
