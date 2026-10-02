@@ -17,10 +17,12 @@ describe('site theme', () => {
     expect(danfeStyles).toMatch(/\.danfe-page[\s\S]*background:\s*#fff/);
   });
 
-  it('keeps consultation geometry stable while states change', () => {
+  it('keeps one fixed consultation layout for single and batch input', () => {
     expect(styles).toContain('scrollbar-gutter: stable');
+    expect(main).not.toContain('syncCompactMode');
+    expect(main).not.toContain('is-compact-single');
+    expect(batchStyles).not.toContain('is-compact-single');
     expect(batchStyles).toContain('grid-template-columns: 32px minmax(220px, 1fr) 150px 250px');
-    expect(batchStyles).toContain('min-height: 80px');
     expect(batchStyles).toContain('box-shadow: inset 3px 0 0 var(--green)');
   });
 

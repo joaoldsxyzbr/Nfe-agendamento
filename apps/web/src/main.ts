@@ -1,5 +1,4 @@
 import { createBatchController } from './batch/controller';
-import { parseBatchInput } from './batch/input';
 import { createStoredZip } from './batch/zip';
 import { attachDanfeZoom, renderDanfe } from './danfe/render';
 import { createDanfeViewer } from './danfe/viewer';
@@ -45,7 +44,7 @@ app.innerHTML = `
         <span class="key-hint">44 caracteres</span>
       </div>
 
-      <div id="batch-consultation-panel" class="is-compact-single">
+      <div id="batch-consultation-panel">
         <form id="batch-form" novalidate>
           <label for="batch-keys">Chaves das NF-e</label>
           <textarea
@@ -111,7 +110,6 @@ app.innerHTML = `
 const portalExtension = new BrowserPortalExtensionClient();
 const integrationStatus = requireElement<HTMLElement>('#integration-status');
 const integrationStatusText = requireElement<HTMLElement>('#integration-status-text');
-const batchPanel = requireElement<HTMLElement>('#batch-consultation-panel');
 const batchForm = requireElement<HTMLFormElement>('#batch-form');
 const batchKeysInput = requireElement<HTMLTextAreaElement>('#batch-keys');
 const batchInputSummary = requireElement<HTMLElement>('#batch-input-summary');
@@ -176,10 +174,7 @@ batchForm.addEventListener('submit', (event) => {
   void batchController.start();
 });
 
-batchKeysInput.addEventListener('input', () => {
-  syncCompactMode();
-  scheduleBatchDraftSync();
-});
+batchKeysInput.addEventListener('input', scheduleBatchDraftSync);
 batchReset.addEventListener('click', () => batchController.reset());
 batchCancel.addEventListener('click', () => {
   void batchController.cancel();
@@ -203,7 +198,6 @@ window.addEventListener('pagehide', () => {
 });
 
 void refreshExtensionStatus();
-syncCompactMode();
 batchController.syncDraft();
 batchKeysInput.focus();
 
@@ -215,10 +209,6 @@ function scheduleBatchDraftSync(): void {
   }, BATCH_DRAFT_DEBOUNCE_MS);
 }
 
-function syncCompactMode(): void {
-  const validKeyCount = parseBatchInput(batchKeysInput.value).validKeys.length;
-  batchPanel.classList.toggle('is-compact-single', validKeyCount <= 1);
-}
 
 async function refreshExtensionStatus(): Promise<void> {
   const info = await portalExtension.getInfo();

@@ -33,7 +33,7 @@ Existe um único campo de chaves.
 - resultados concluídos liberam DANFE e XML;
 - múltiplos resultados concluídos liberam ZIP e impressão conjunta.
 
-Quando existe somente uma chave, a tela usa apresentação compacta. Com múltiplas chaves, a lista exibe colunas para número, NF-e/fornecedor, status e ações.
+A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
 
 ## Recuperação por XML
 
