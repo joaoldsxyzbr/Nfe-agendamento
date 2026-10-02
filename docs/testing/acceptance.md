@@ -81,7 +81,7 @@ O registro não pode conter chave NF-e completa, XML fiscal, CNPJ/CPF, certifica
 
 ## Critério de aceite
 
-- CI e CodeQL verdes;
+- CI automatizado verde (`web`, `extension` e `danfe-print`);
 - popup Portal aprovado;
 - hCaptcha manual aprovado;
 - certificado aprovado quando exigido;
