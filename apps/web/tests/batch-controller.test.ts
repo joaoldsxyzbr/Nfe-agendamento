@@ -12,7 +12,7 @@ function harness(
 ) {
   const snapshots: BatchItemView[][] = [];
   const portalStarts: string[] = [];
-  const input = el({ value: '', disabled: false } as HTMLTextAreaElement);
+  const input = el({ value: '', disabled: false, focus: () => {} } as unknown as HTMLTextAreaElement);
   const route = el({ textContent: '' } as HTMLElement);
   const zipButton = el({ disabled: true } as HTMLButtonElement);
   const printButton = el({ disabled: true } as HTMLButtonElement);
