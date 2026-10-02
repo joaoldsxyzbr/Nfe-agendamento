@@ -56,11 +56,11 @@ A interface principal ainda pode continuar usando o parser legado enquanto a cam
 - rejeição de chave divergente;
 - sinalização de grupo monofásico estendido.
 
-O job `fiscal-compatibility` também mantém um POC isolado com `Unimake.DFe` para comparar a validação de chave/CNPJ alfanuméricos e confirmar a disponibilidade dos tipos RTC da versão avaliada.
+O CI vigente valida essa camada pelos testes TypeScript do parser e pelas regressões DANFE/Playwright. O antigo POC com `Unimake.DFe` foi retirado do caminho ativo junto com a arquitetura .NET e permanece apenas como registro histórico em `docs/architecture/unimake-poc.md`.
 
 ## Próximas etapas
 
 1. adicionar fixtures representativas de grupos monofásicos e demais cenários RTC que realmente apareçam no uso do projeto;
-2. comparar serialização/desserialização com schemas oficiais e com o POC do Unimake.DFe;
+2. comparar o parser com os schemas e notas técnicas oficiais vigentes;
 3. mapear as exigências de impressão antes de acrescentar IBS/CBS ao DANFE;
 4. conectar `parseNfeXmlWithRtc` ao fluxo principal somente depois de os testes de regressão cobrirem os XMLs reais necessários.
