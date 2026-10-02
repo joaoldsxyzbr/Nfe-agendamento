@@ -16,17 +16,13 @@ describe('site theme', () => {
     expect(danfeStyles).toMatch(/\.danfe-page[\s\S]*background:\s*#fff/);
   });
 
-  it('keeps consultation and result inside one visual card with a reset action', () => {
+  it('keeps one consultation card with a reset action for the unified flow', () => {
     expect(main).toContain('<section class="lookup-card"');
-    expect(main).toContain('<div class="lookup-result-section">');
-    expect(main).toContain('<div class="lookup-result" id="result"');
+    expect(main).toContain('id="batch-consultation-panel"');
+    expect(main).toContain('id="batch-list"');
     expect(main).not.toContain('class="result-card"');
-    expect(main).toContain('id="lookup-reset"');
-    expect(main).toContain("lookupReset.addEventListener('click', () => consultationController.reset());");
-    expect(main).toContain("clearAccessKey: () => {");
-    expect(main).toContain("accessKeyInput.value = '';");
-    expect(main).toContain("appendResultState('Nenhuma NF-e carregada', 'Informe uma chave para iniciar.');");
-    expect(styles).toContain('.lookup-result-section');
+    expect(main).toContain('id="batch-reset"');
+    expect(main).toContain("batchReset.addEventListener('click', () => batchController.reset())");
     expect(styles).toContain('.lookup-reset');
   });
 });
