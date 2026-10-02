@@ -214,9 +214,14 @@ describe('DANFE approved behavior', () => {
     expect(nextDanfeZoom(0.6, 100)).toBe(0.6);
   });
 
-  it('loads the direct DANFE viewport zoom listener', () => {
+  it('keeps a single Ctrl+wheel zoom implementation wired through the viewer', () => {
+    const main = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
+    const render = readFileSync(new URL('../src/danfe/render.ts', import.meta.url), 'utf8');
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-    expect(html).toContain('/src/danfe/zoom-direct.ts');
+
+    expect(main).toContain('attachZoom: attachDanfeZoom');
+    expect(render).toContain("container.addEventListener('wheel', wheel, { passive: false })");
+    expect(html).not.toContain('/src/danfe/zoom-direct.ts');
   });
 
   it('keeps print pagination deterministic and continuation headers complete', () => {
