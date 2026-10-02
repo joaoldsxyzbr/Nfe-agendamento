@@ -67,6 +67,15 @@ Hosts: site oficial e `www.nfe.fazenda.gov.br`.
 
 Não existe permissão para `www1.nfe.fazenda.gov.br`.
 
+## Recuperação manual
+
+Quando uma consulta termina em erro do Portal, o mesmo item pode:
+
+- tentar novamente pelo Portal;
+- importar um XML local correspondente à chave.
+
+A importação local não substitui o fluxo nominal, não dispara nova consulta e não envia o XML para a nuvem. O arquivo passa pela validação de tamanho, DTD e chave antes de liberar DANFE/XML.
+
 ## Gate físico
 
 Validar no Windows real:
@@ -78,6 +87,7 @@ Validar no Windows real:
 - captura do XML;
 - segunda consulta;
 - cancelamento;
+- recuperação por XML após uma falha controlada;
 - Chrome e Edge.
 
 
