@@ -1,21 +1,20 @@
-# Zoom do preview do DANFE
+# Zoom do DANFE
 
-## Comportamento esperado
+## Comportamento vigente
 
-No popup **Visualizar DANFE**, manter `Ctrl` pressionado e girar a roda do mouse deve ampliar ou reduzir somente as folhas do DANFE, preservando o zoom da página do navegador.
+O zoom de tela é implementado uma única vez por `attachDanfeZoom`, em `apps/web/src/danfe/render.ts`.
 
-## Correção de 2026-09-09
+Regras:
 
-Foi adicionado um listener diretamente no viewport `.danfe-scroll` por meio de `apps/web/src/danfe/zoom-direct.ts`. O listener usa `passive: false`, cancela o comportamento padrão do navegador, mantém o ponto sob o cursor durante o zoom e reutiliza os limites definidos por `nextDanfeZoom`.
+- somente `Ctrl + scroll` altera o zoom;
+- o listener usa `passive: false` para impedir o zoom da página;
+- o ponto sob o cursor é preservado durante a mudança;
+- o zoom fica limitado entre 60% e 200%;
+- impressão/PDF volta temporariamente para zoom 100% antes da paginação;
+- após a impressão, o conteúdo visual é restaurado.
 
-O listener direto interrompe a propagação do evento para evitar execução duplicada pelo listener legado no modal.
+O antigo `apps/web/src/danfe/zoom-direct.ts` foi removido em 02/10/2026 porque duplicava a mesma responsabilidade no viewport. O viewer agora possui uma única fonte de comportamento de zoom.
 
-## Aceitação física
+## Validação
 
-1. consultar uma NF-e;
-2. abrir **Visualizar DANFE**;
-3. posicionar o cursor sobre a folha;
-4. segurar `Ctrl` e girar a roda para cima e para baixo;
-5. confirmar que somente o DANFE muda de escala;
-6. confirmar que a rolagem continua funcional e o ponto sob o cursor permanece aproximadamente estável;
-7. confirmar que **Imprimir / PDF** continua usando escala normal de impressão.
+Os testes unitários cobrem os limites de `nextDanfeZoom` e verificam que o viewer usa `attachDanfeZoom`. A regressão visual/A4 continua coberta pela suíte Playwright de DANFE.
