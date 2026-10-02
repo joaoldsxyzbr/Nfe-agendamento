@@ -15,11 +15,13 @@ function initializeSettingsPanel(): void {
   const actions = document.createElement('div');
   actions.className = 'topbar-actions';
   const downloadTrigger = document.createElement('a');
-  downloadTrigger.id = 'app-download';
+  downloadTrigger.id = 'extension-releases';
   downloadTrigger.className = 'topbar-icon-action download-trigger';
-  downloadTrigger.href = 'https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/latest/download/NFeAgendamento-Extension.zip';
-  downloadTrigger.setAttribute('aria-label', 'Baixar extensão');
-  downloadTrigger.title = 'Baixar extensão';
+  downloadTrigger.href = 'https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/latest';
+  downloadTrigger.setAttribute('aria-label', 'Abrir releases da extensão no GitHub');
+  downloadTrigger.title = 'Abrir releases da extensão no GitHub';
+  downloadTrigger.target = '_blank';
+  downloadTrigger.rel = 'noopener noreferrer';
   downloadTrigger.innerHTML = iconSvg('download');
 
   const trigger = document.createElement('button');
