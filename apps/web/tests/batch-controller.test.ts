@@ -6,7 +6,10 @@ const A = '42260912345678000195550010000000011123456786';
 const B = '35260812345678000195550010000000011000000018';
 const el = <T extends object>(value: T): T => value;
 
-function harness(overrides: Record<string, unknown> = {}) {
+function harness(
+  overrides: Record<string, unknown> = {},
+  importManualXml: () => Promise<any> = async () => null,
+) {
   const snapshots: BatchItemView[][] = [];
   const portalStarts: string[] = [];
   const input = el({ value: '', disabled: false } as HTMLTextAreaElement);
@@ -56,7 +59,7 @@ function harness(overrides: Record<string, unknown> = {}) {
     downloadXml: () => {},
     openDanfeDocuments: () => {},
     printWindow: () => {},
-    importManualXml: async () => null,
+    importManualXml,
     renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
   });
 
@@ -158,6 +161,48 @@ describe('batch controller Portal-only', () => {
 
     expect(h.snapshots.at(-1)?.[0]?.status).toBe('portal_error');
     expect(attempts).toBe(1);
+  });
+
+  it('recovers a failed Portal item with a validated local XML', async () => {
+    const parsed = {
+      accessKey: A,
+      originalXml: '<xml />',
+      issuer: { taxId: '12345678000195', name: 'Emitente' },
+      totals: { invoice: 10 },
+      number: '1',
+      series: '1',
+    } as never;
+    const h = harness(
+      {
+        waitForResult: async (operationId: string) => ({
+          operationId,
+          state: 'failed' as const,
+          message: 'Portal indisponível',
+          xml: null,
+        }),
+      },
+      async () => parsed,
+    );
+    h.input.value = A;
+    h.controller.syncDraft();
+    await h.controller.start();
+
+    await h.controller.importManual(0);
+
+    expect(h.snapshots.at(-1)?.[0]?.status).toBe('success');
+    expect(h.snapshots.at(-1)?.[0]?.source).toBe('XML manual');
+    expect(h.snapshots.at(-1)?.[0]?.parsed).not.toBeNull();
+  });
+
+  it('resets the unified consultation state', () => {
+    const h = harness();
+    h.input.value = A;
+    h.controller.syncDraft();
+
+    h.controller.reset();
+
+    expect(h.input.value).toBe('');
+    expect(h.snapshots.at(-1)).toEqual([]);
   });
 });
 
