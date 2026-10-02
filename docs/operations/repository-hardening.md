@@ -2,22 +2,21 @@
 
 ## Estado atual
 
-O produto atual é site + extensão Chromium. O CI não compila nem empacota componentes Windows.
+O produto vigente é **site + extensão Chromium MV3**, Portal-only. O repositório `joaoldsxyzbr/Nfe-agendamento-2.0` é privado e de uso pessoal.
 
 ## Proteção da `main`
 
-Em 30/09/2026, a API de Rulesets retorna nenhum Ruleset ativo para o repositório. A proteção administrativa desejada continua pendente:
+A conta atual não disponibiliza Rulesets para este repositório privado. A API do GitHub responde `403` orientando upgrade do plano ou repositório público.
 
-- pull request obrigatório para a `main`;
-- zero aprovações de terceiro obrigatórias;
-- checks obrigatórios `web`, `extension`, `danfe-print` e `codeql`;
-- branch atualizada antes do merge: desabilitada;
-- force-push: bloqueado;
-- exclusão da `main`: bloqueada.
+Como o projeto possui um único proprietário, Ruleset/branch protection não é tratado como dependência operacional do produto. Se o plano GitHub mudar no futuro, a configuração recomendada continua sendo:
 
-A integração GitHub usada pela automação do projeto possui leitura de Rulesets, mas não escrita administrativa. Portanto essa proteção só pode ser marcada como concluída depois de um Ruleset ativo ser observado no GitHub.
+- pull request para mudanças relevantes;
+- checks `web`, `extension` e `danfe-print`;
+- force-push e exclusão da `main` bloqueados.
 
-## Gates
+Enquanto esse recurso não estiver disponível, a disciplina do projeto é: mudanças relevantes em branch, PR, CI verde e merge somente depois da revisão do diff.
+
+## Gates automatizados
 
 ### web
 
@@ -32,45 +31,62 @@ A integração GitHub usada pela automação do projeto possui leitura de Rulese
 ### extension
 
 - `npm ci`;
-- audit;
+- `npm audit --audit-level=high`;
 - testes;
 - cobertura com threshold;
 - typecheck/build;
-- empacotamento do ZIP MV3.
+- empacotamento do ZIP Manifest V3.
 
-A CSP das páginas da extensão é declarada explicitamente no manifesto e restringe scripts/objetos aos recursos empacotados.
+A CSP das páginas da extensão restringe scripts e objetos aos recursos empacotados.
 
 ### danfe-print
 
-Executa os testes Playwright do fluxo web e regressão DANFE/PDF.
+Executa Playwright para o fluxo web e regressão DANFE/PDF.
 
-### codeql
+### CodeQL
 
-O job `codeql` faz parte do workflow `CI` em push/PR e analisa JavaScript/TypeScript no mesmo gate usado pelo release.
+O repositório privado não é elegível para CodeQL/code scanning no plano GitHub atual. GitHub documenta que repositórios privados precisam de GitHub Code Security em plano compatível.
 
-O workflow `CodeQL` separado permanece somente para a análise semanal agendada.
+Por isso:
+
+- não existe job CodeQL no CI vigente;
+- o antigo workflow semanal foi removido;
+- `npm audit`, TypeScript, testes, cobertura, Playwright, revisão de código e permissões mínimas da extensão continuam sendo os controles automatizados disponíveis no projeto;
+- CodeQL pode ser reativado se o repositório voltar a ser público ou se um plano compatível com GitHub Code Security for adotado.
+
+Referência oficial: https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/private-repository-enablement
 
 ### Dependabot
 
-Os updates de versão cobrem npm na raiz, npm dos testes Playwright e GitHub Actions. Entradas NuGet legadas foram removidas porque o produto atual não contém projetos .NET.
+Os updates de versão cobrem:
 
-**Dependabot Alerts** e **Dependabot Security Updates** estão habilitados nas configurações do repositório, confirmados em 27/09/2026. O arquivo `.github/dependabot.yml` continua responsável apenas pelos updates de versão e de GitHub Actions.
+- npm da raiz;
+- npm dos testes Playwright;
+- GitHub Actions.
+
+O arquivo `.github/dependabot.yml` é a configuração versionada de manutenção das dependências.
 
 ## Release
 
 O workflow de release só publica quando, no mesmo SHA da `main`:
 
-1. o workflow `CI` concluiu com `web`, `extension`, `danfe-print` e `codeql` verdes;
+1. o workflow `CI` concluiu com `web`, `extension` e `danfe-print` verdes;
 2. o commit é exatamente `release: vX.Y.Z`;
 3. existe `docs/releases/vX.Y.Z.md`;
-4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão e estado rastreável (`PENDENTE` ou `APROVADO`), sem registrar navegador como aprovado por inferência.
+4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão e estado rastreável.
 
-A release extension-only publica somente o ZIP da extensão produzido pelo CI desse mesmo SHA. A aceitação física em Chrome e Edge é **pós-release**: o workflow valida a existência e a coerência do registro, mas não fabrica nem exige aprovação física antes da publicação. Um resultado físico reprovado deve ser registrado e tratado como incidente/correção, nunca convertido em aprovação automática.
+A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 
-A release pública atual `v0.0.36 / extensão 0.2.12` possui registro em `docs/testing/acceptance-results/v0.0.36.md` com status atual **PENDENTE**. A próxima extensão em desenvolvimento é a `0.2.13`.
+A release vigente é **v0.0.37 / extensão 0.2.13**. O registro físico correspondente permanece em `docs/testing/acceptance-results/v0.0.37.md`.
+
+## Distribuição da extensão
+
+Como o repositório é privado e só o proprietário usa o sistema, não existe infraestrutura pública adicional para distribuir a extensão.
+
+O atalho do site abre a release mais recente no GitHub. O proprietário autenticado baixa o ZIP diretamente da release privada.
 
 ## Cloudflare
 
 O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
 
-O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, que aponta para `apps/web/dist`.
+O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`.

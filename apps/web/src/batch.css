@@ -1,43 +1,3 @@
-.lookup-heading-actions {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.consultation-mode {
-  display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: #0e141b;
-}
-
-.mode-button {
-  min-height: 32px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  box-shadow: none;
-  font-size: 12px;
-}
-
-.mode-button:hover:not(:disabled) {
-  background: var(--surface-2);
-  border-color: transparent;
-}
-
-.mode-button.is-active {
-  background: #253140;
-  color: #fff;
-}
-
-#batch-consultation-panel[hidden],
-#single-consultation-panel[hidden] {
-  display: none !important;
-}
-
 #batch-form textarea {
   width: 100%;
   min-height: 136px;
@@ -82,6 +42,20 @@
 
 .batch-form-footer {
   margin-top: 10px;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.batch-actions .batch-reset {
+  min-height: 46px;
+  margin-bottom: 0;
+  padding: 0 18px;
 }
 
 .batch-form-footer > div {
@@ -328,11 +302,15 @@
 }
 
 #batch-consultation-panel.is-compact-single .batch-form-footer {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
   gap: 9px;
   margin-top: 9px;
 }
 
 #batch-consultation-panel.is-compact-single .batch-actions {
+  justify-content: flex-start;
   margin-top: 9px;
 }
 
@@ -387,7 +365,6 @@
 }
 
 @media (max-width: 720px) {
-  .lookup-heading-actions,
   .batch-form-footer,
   .batch-run-toolbar {
     width: 100%;
@@ -395,12 +372,15 @@
     flex-direction: column;
   }
 
-  .consultation-mode {
-    width: 100%;
+  .batch-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .mode-button {
-    width: 50%;
+  .batch-actions button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
   }
 
   .batch-toolbar-actions {

@@ -19,10 +19,11 @@ describe('settings panel extension-only', () => {
     expect(settings).not.toContain('WebView2');
   });
 
-  it('keeps a stable extension download shortcut', () => {
-    expect(settings).toContain("downloadTrigger.id = 'app-download'");
-    expect(settings).toContain("downloadTrigger.setAttribute('aria-label', 'Baixar extensão')");
-    expect(settings).toContain('releases/latest/download/NFeAgendamento-Extension.zip');
+  it('opens the private repository releases page for extension updates', () => {
+    expect(settings).toContain("downloadTrigger.id = 'extension-releases'");
+    expect(settings).toContain("downloadTrigger.setAttribute('aria-label', 'Abrir releases da extensão no GitHub')");
+    expect(settings).toContain('/releases/latest');
+    expect(settings).not.toContain('releases/latest/download/NFeAgendamento-Extension.zip');
   });
 
   it('keeps the compact settings popup', () => {

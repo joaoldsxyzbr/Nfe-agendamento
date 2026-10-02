@@ -6,10 +6,13 @@ const A = '42260912345678000195550010000000011123456786';
 const B = '35260812345678000195550010000000011000000018';
 const el = <T extends object>(value: T): T => value;
 
-function harness(overrides: Record<string, unknown> = {}) {
+function harness(
+  overrides: Record<string, unknown> = {},
+  importManualXml: () => Promise<any> = async () => null,
+) {
   const snapshots: BatchItemView[][] = [];
   const portalStarts: string[] = [];
-  const input = el({ value: '', disabled: false } as HTMLTextAreaElement);
+  const input = el({ value: '', disabled: false, focus: () => {} } as unknown as HTMLTextAreaElement);
   const route = el({ textContent: '' } as HTMLElement);
   const zipButton = el({ disabled: true } as HTMLButtonElement);
   const printButton = el({ disabled: true } as HTMLButtonElement);
@@ -39,8 +42,7 @@ function harness(overrides: Record<string, unknown> = {}) {
       printButton,
       progress: el({ textContent: '' } as HTMLElement),
       routeText: route,
-      modeSingleButton: el({ disabled: false } as HTMLButtonElement),
-      modeBatchButton: el({ disabled: false } as HTMLButtonElement),
+      resetButton: el({ hidden: true, disabled: false } as HTMLButtonElement),
     },
     portal: portal as never,
     parseXml: (xml, accessKey) => ({
@@ -57,6 +59,7 @@ function harness(overrides: Record<string, unknown> = {}) {
     downloadXml: () => {},
     openDanfeDocuments: () => {},
     printWindow: () => {},
+    importManualXml,
     renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
   });
 
@@ -138,14 +141,81 @@ describe('batch controller Portal-only', () => {
     expect(h.printButton.disabled).toBe(false);
     expect(h.route.textContent).toContain('Extensão não conectada');
   });
+
+  it('keeps a failed Portal item available for explicit recovery', async () => {
+    let attempts = 0;
+    const h = harness({
+      waitForResult: async (operationId: string) => {
+        attempts += 1;
+        return {
+          operationId,
+          state: 'failed' as const,
+          message: 'Portal indisponível',
+          xml: null,
+        };
+      },
+    });
+    h.input.value = A;
+    h.controller.syncDraft();
+    await h.controller.start();
+
+    expect(h.snapshots.at(-1)?.[0]?.status).toBe('portal_error');
+    expect(attempts).toBe(1);
+  });
+
+  it('recovers a failed Portal item with a validated local XML', async () => {
+    const parsed = {
+      accessKey: A,
+      originalXml: '<xml />',
+      issuer: { taxId: '12345678000195', name: 'Emitente' },
+      totals: { invoice: 10 },
+      number: '1',
+      series: '1',
+    } as never;
+    const h = harness(
+      {
+        waitForResult: async (operationId: string) => ({
+          operationId,
+          state: 'failed' as const,
+          message: 'Portal indisponível',
+          xml: null,
+        }),
+      },
+      async () => parsed,
+    );
+    h.input.value = A;
+    h.controller.syncDraft();
+    await h.controller.start();
+
+    await h.controller.importManual(0);
+
+    expect(h.snapshots.at(-1)?.[0]?.status).toBe('success');
+    expect(h.snapshots.at(-1)?.[0]?.source).toBe('XML manual');
+    expect(h.snapshots.at(-1)?.[0]?.parsed).not.toBeNull();
+  });
+
+  it('resets the unified consultation state', () => {
+    const h = harness();
+    h.input.value = A;
+    h.controller.syncDraft();
+
+    h.controller.reset();
+
+    expect(h.input.value).toBe('');
+    expect(h.snapshots.at(-1)).toEqual([]);
+  });
 });
 
 describe('batch preflight action guards', () => {
   it('locks Portal retry while preflight is pending', () => {
     const source = readFileSync(new URL('../src/batch/controller.ts', import.meta.url), 'utf8');
-    expect(source).toContain("item.status !== 'portal_error' || preflighting || running || manualPortalBusy");
-    expect(source).toContain('retry.disabled = preflighting || running || manualPortalBusy');
+    expect(source).toContain("item.status !== 'portal_error' || preflighting || running || manualActionBusy");
+    expect(source).toContain('row.retry.disabled = disabled');
+    expect(source).toContain('row.importManual.disabled = disabled');
     expect(source).toContain('refreshResultActions();');
+    expect(source).toContain("importManualButton.textContent = 'Importar XML'");
+    expect(source).toContain('const parsed = await deps.importManualXml(item.accessKey)');
+    expect(source).toContain("item.source = 'XML manual'");
   });
 
   it('keeps stable row objects and updates item state incrementally', () => {

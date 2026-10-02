@@ -10,6 +10,7 @@ import { isLikelyHtmlDocument, isOfficialDownloadUrl } from './portal-dom';
 import {
   buildPageReplayRequest,
   shouldCapturePortalRequest,
+  type CapturedRequest,
   type PageReplayRequest,
 } from './portal-request';
 import {
@@ -28,6 +29,18 @@ const PORTAL_DOWNLOAD_FILTER = {
   urls: ['https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx*'],
 };
 let operationMutationQueue: Promise<void> = Promise.resolve();
+
+type ChromeMessageSender = {
+  url?: string;
+  tab?: {
+    id?: number;
+    url?: string;
+  };
+};
+
+type PortalWebRequestDetails = CapturedRequest & {
+  tabId: number;
+};
 
 type ActiveOperation = {
   operationId: string;
@@ -65,7 +78,7 @@ chrome.action.onClicked.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener(
-  (message: unknown, sender: any, sendResponse: (response: unknown) => void) => {
+  (message: unknown, sender: ChromeMessageSender, sendResponse: (response: unknown) => void) => {
     void handleMessage(message, sender)
       .then(sendResponse)
       .catch((error) => {
@@ -88,7 +101,7 @@ chrome.tabs.onRemoved.addListener((tabId: number) => {
 });
 
 chrome.webRequest.onBeforeRequest.addListener(
-  (details: any) => {
+  (details: PortalWebRequestDetails) => {
     void handlePortalDownload(details);
   },
   PORTAL_DOWNLOAD_FILTER,
@@ -126,7 +139,7 @@ async function injectSiteBridgeIntoOpenTabs(): Promise<void> {
   );
 }
 
-async function handleMessage(message: unknown, sender: any): Promise<unknown> {
+async function handleMessage(message: unknown, sender: ChromeMessageSender): Promise<unknown> {
   if (!message || typeof message !== 'object' || Array.isArray(message)) {
     throw new Error('Mensagem inválida.');
   }
@@ -142,10 +155,12 @@ async function handleMessage(message: unknown, sender: any): Promise<unknown> {
   throw new Error('Origem da mensagem não reconhecida.');
 }
 
-async function handleSiteCommand(commandValue: unknown, sender: any): Promise<unknown> {
+async function handleSiteCommand(commandValue: unknown, sender: ChromeMessageSender): Promise<unknown> {
   assertSenderOrigin(sender, SITE_ORIGIN);
   const siteTabId = sender.tab?.id;
-  if (!Number.isInteger(siteTabId)) throw new Error('A aba do site não pôde ser identificada.');
+  if (typeof siteTabId !== 'number' || !Number.isInteger(siteTabId)) {
+    throw new Error('A aba do site não pôde ser identificada.');
+  }
 
   const command = parseSiteCommand(commandValue);
   if (command.type === 'ping') {
@@ -307,7 +322,7 @@ async function handleSiteCommand(commandValue: unknown, sender: any): Promise<un
 
 async function handlePortalMessage(
   envelope: Record<string, unknown>,
-  sender: any,
+  sender: ChromeMessageSender,
 ): Promise<unknown> {
   assertSenderOrigin(sender, PORTAL_ORIGIN);
   const operation = await getActiveOperation();
@@ -416,7 +431,7 @@ async function handlePortalMessage(
   );
 }
 
-async function handlePortalDownload(details: any): Promise<void> {
+async function handlePortalDownload(details: PortalWebRequestDetails): Promise<void> {
   const operation = await claimPortalDownload(details);
   if (!operation) return;
 
@@ -671,7 +686,7 @@ async function transition(
   return next;
 }
 
-async function claimPortalDownload(details: any): Promise<ActiveOperation | null> {
+async function claimPortalDownload(details: PortalWebRequestDetails): Promise<ActiveOperation | null> {
   if (!shouldCapturePortalRequest(details)) return null;
 
   return withOperationMutation(async () => {
@@ -842,7 +857,7 @@ class ExtensionFailure extends Error {
   }
 }
 
-function assertSenderOrigin(sender: any, expectedOrigin: string): void {
+function assertSenderOrigin(sender: ChromeMessageSender, expectedOrigin: string): void {
   const value = sender?.url ?? sender?.tab?.url;
   if (typeof value !== 'string') throw new Error('Origem da mensagem ausente.');
 

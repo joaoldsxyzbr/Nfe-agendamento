@@ -38,18 +38,19 @@ Fluxo nominal:
 
 Não existe solver/bypass de captcha. O acompanhamento da página do Portal é orientado a eventos (`MutationObserver`, eventos de formulário/navegação e mensagens da página), sem `setInterval` periódico.
 
-## Consulta em lote
+## Consulta unificada
 
-O lote também é Portal-only:
+A tela usa um único fluxo para uma ou várias chaves:
 
-- processamento estritamente sequencial;
-- uma NF-e por vez;
-- no máximo uma janela do Portal ativa;
+- uma chave usa a mesma máquina de estados do lote;
+- várias chaves são processadas estritamente em sequência;
+- no máximo uma janela do Portal fica ativa;
 - cancelamento impede abrir os próximos itens;
-- falha de um item não inicia uma segunda rota escondida;
+- falha de um item não inicia rota escondida;
+- quando o Portal falha, o item pode ser reconsultado ou recuperado com um XML local validado contra a mesma chave;
 - resultados concluídos podem ser baixados em ZIP ou impressos em conjunto.
 
-Não existem limite/cooldown de consulta direta, porque o projeto não chama mais `NFeDistribuicaoDFe`.
+Não existem limite/cooldown de consulta direta, porque o projeto não chama `NFeDistribuicaoDFe`.
 
 ## Certificado digital
 
@@ -105,7 +106,13 @@ npm test --prefix tests/playwright
 ./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-CI: `web`, `extension`, `danfe-print` e `codeql`. O CodeQL analisa JavaScript/TypeScript dentro do mesmo workflow usado como gate de release.
+CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, typecheck/lint, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler.
+
+O repositório é privado. No plano GitHub atual, CodeQL/code scanning para repositórios privados não está disponível; por isso o workflow CodeQL não faz parte do gate vigente.
+
+## Repositório privado
+
+O código e as releases ficam no repositório privado `joaoldsxyzbr/Nfe-agendamento-2.0`. O site continua público via Cloudflare Static Assets, mas não depende do GitHub para consultar NF-e. O GitHub é usado como fonte de verdade, histórico e distribuição manual da extensão para o próprio proprietário.
 
 ## Releases
 
@@ -117,7 +124,7 @@ A **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste ha
 
 A v0.0.34/extensão 0.2.11 consolidou a arquitetura Portal-only e permanece como base funcional anterior a esta otimização.
 
-A seta do site baixa sempre `NFeAgendamento-Extension.zip` da release mais recente.
+O atalho do site abre a release mais recente no GitHub. Como o repositório é privado e de uso pessoal, o download da extensão exige a sessão GitHub autorizada do proprietário.
 
 ## Aceitação física
 

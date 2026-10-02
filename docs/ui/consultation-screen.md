@@ -2,49 +2,61 @@
 
 ## Cabeçalho
 
-À esquerda: logo, nome e descrição em composição compacta. À direita: status da extensão, download e configurações agrupados como controles discretos.
+À esquerda: logo, nome e descrição compacta. À direita: status da extensão, atalho para Releases e configurações.
 
-Download, configurações e fechamento usam ícones SVG do mesmo padrão visual. A descrição vigente informa que a consulta é feita pelo Portal Nacional.
+Como o repositório é privado, o atalho da extensão abre a release mais recente no GitHub em vez de depender de um download público anônimo.
 
 ## Diagnóstico
 
-As configurações abrem em um drawer modal lateral nativo do navegador, com fundo atenuado, foco movido para o painel e retorno ao acionador ao fechar.
+As configurações abrem em um drawer modal lateral nativo do navegador.
 
 O painel mostra:
 
+- integração;
 - extensão;
 - versão;
-- **Portal Nacional**: disponível / indisponível;
-- **Regras de fornecedor**: disponíveis / indisponíveis.
+- Portal Nacional;
+- regras locais de fornecedor.
 
-Não existe diagnóstico de consulta direta nem configuração de CNPJ do A1.
+Não existe diagnóstico de consulta direta, Bridge ou configuração de CNPJ do A1.
 
-## Consulta
+## Consulta unificada
 
-A tela aceita uma ou várias chaves.
+Existe um único campo de chaves.
 
-Fluxo visível:
+- uma chave usa o mesmo controller e a mesma máquina de estados do lote;
+- várias chaves são processadas sequencialmente;
+- não existe seletor visual “uma NF-e / lote”;
+- uma única janela do Portal pode ficar ativa;
+- hCaptcha continua manual;
+- cancelamento interrompe a sequência;
+- resultados concluídos liberam DANFE e XML;
+- múltiplos resultados concluídos liberam ZIP e impressão conjunta.
 
-1. o usuário inicia a consulta;
-2. o Portal Nacional abre em popup;
-3. hCaptcha é resolvido manualmente;
-4. o XML retorna automaticamente ao site;
-5. ações DANFE/XML ficam disponíveis.
+Quando existe somente uma chave, a tela usa apresentação compacta. Com múltiplas chaves, a lista exibe colunas para número, NF-e/fornecedor, status e ações.
 
-Depois da consulta, o resumo prioriza emitente, série, data de emissão, valor e quantidade de itens. A chave de acesso permanece disponível em segundo nível visual.
+## Recuperação por XML
 
-Em lote, os itens são processados sequencialmente e a origem concluída é `Portal`. Para múltiplas NF-e, a lista usa colunas visuais para número, NF-e/fornecedor, status e ações; em consulta unitária esse cabeçalho fica oculto para manter a tela compacta.
+Se um item terminar em erro do Portal, ficam disponíveis duas ações explícitas:
+
+- **Tentar novamente** pelo Portal;
+- **Importar XML** localmente.
+
+O XML manual passa pelo mesmo limite, bloqueio de DTD e validação de correspondência da chave. O arquivo não é enviado para Cloudflare.
+
+## DANFE
+
+O viewer possui uma única implementação de zoom, ligada por `attachDanfeZoom`. `Ctrl + scroll` mantém o ponto sob o cursor e a impressão sempre volta temporariamente para zoom 100%.
 
 ## Segurança
 
-Nenhuma UI pede PFX/P12, senha ou chave privada. O navegador trata o certificado quando o Portal exigir. Regras privadas de fornecedor permanecem somente no storage local da extensão.
-
+Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o certificado quando o Portal exigir. Regras privadas de fornecedor permanecem somente em `chrome.storage.local`.
 
 ## Direção visual
 
-- tema escuro existente preservado;
-- raios de canto e foco visual padronizados por tokens;
-- menos divisores e bordas entre blocos;
-- consulta permanece como ação protagonista;
-- controles mantêm foco visível e alvos de interação confortáveis;
-- animação do drawer é desativada quando `prefers-reduced-motion` estiver ativo.
+- tema escuro;
+- controles e foco padronizados;
+- consulta como ação protagonista;
+- menos camadas de compatibilidade no DOM;
+- `prefers-reduced-motion` respeitado no drawer;
+- interface responsiva sem duplicar controller ou estado.
