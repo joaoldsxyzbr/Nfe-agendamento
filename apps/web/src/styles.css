@@ -225,8 +225,7 @@ h2 {
   background: var(--green);
 }
 
-.integration-pill[data-state="missing"] .integration-dot,
-.integration-pill[data-state="permission"] .integration-dot {
+.integration-pill[data-state="disconnected"] .integration-dot {
   background: var(--danger);
 }
 
