@@ -1,17 +1,14 @@
 import { createBatchController } from './batch/controller';
+import { parseBatchInput } from './batch/input';
 import { createStoredZip } from './batch/zip';
 import { attachDanfeZoom, renderDanfe } from './danfe/render';
 import { createDanfeViewer } from './danfe/viewer';
-import { validateAccessKey } from './nfe/access-key';
-import { createConsultationController } from './nfe/consultation-controller';
 import { validateManualNfeXml } from './nfe/manual-xml-import';
 import { parseNfeXml, type ParsedNfe } from './nfe/xml';
 import { BrowserPortalExtensionClient } from './portal/extension-client';
 import './styles.css';
 import './batch.css';
 import './danfe/styles.css';
-
-type ConsultationMode = 'single' | 'batch';
 
 const BATCH_DRAFT_DEBOUNCE_MS = 120;
 
@@ -43,65 +40,32 @@ app.innerHTML = `
       <div class="section-heading lookup-heading">
         <div>
           <p class="eyebrow">Consulta</p>
-          <h2 id="lookup-title">Chave de acesso</h2>
+          <h2 id="lookup-title">Chaves de acesso</h2>
         </div>
-        <div class="lookup-heading-actions">
-          <span class="key-hint">44 dígitos</span>
-          <div class="consultation-mode" role="group" aria-label="Modo de consulta">
-            <button id="mode-single" class="mode-button is-active" type="button" aria-pressed="true">Uma NF-e</button>
-            <button id="mode-batch" class="mode-button" type="button" aria-pressed="false">Lote</button>
-          </div>
-        </div>
+        <span class="key-hint">44 caracteres</span>
       </div>
 
-      <div id="single-consultation-panel">
-        <form id="lookup-form" novalidate>
-          <label for="access-key">Chave da NF-e</label>
-          <div class="lookup-row">
-            <input
-              id="access-key"
-              name="accessKey"
-              inputmode="numeric"
-              autocomplete="off"
-              maxlength="44"
-              placeholder="Digite ou cole a chave de acesso"
-              aria-describedby="lookup-help"
-            />
-            <button id="lookup-submit" type="submit">Consultar</button>
-          </div>
-          <p id="lookup-help" class="help-text">A extensão abre o Portal Nacional. Resolva o hCaptcha manualmente; o XML retorna automaticamente ao site.</p>
-        </form>
-
-        <div class="lookup-result-section">
-          <div class="result-toolbar">
-            <button id="lookup-reset" class="lookup-reset" type="button" hidden>Nova consulta</button>
-          </div>
-          <div class="lookup-result" id="result" aria-live="polite">
-            <div class="empty-state">
-              <strong>Nenhuma NF-e carregada</strong>
-              <span>Informe uma chave para iniciar.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="batch-consultation-panel" hidden>
+      <div id="batch-consultation-panel" class="is-compact-single">
         <form id="batch-form" novalidate>
           <label for="batch-keys">Chaves das NF-e</label>
           <textarea
             id="batch-keys"
             rows="6"
             autocomplete="off"
+            autocapitalize="characters"
             spellcheck="false"
-            placeholder="Cole as chaves, uma por linha"
+            placeholder="Cole uma ou várias chaves, uma por linha"
             aria-describedby="batch-help batch-input-summary"
           ></textarea>
           <div class="batch-form-footer">
             <div>
               <p id="batch-input-summary" class="batch-summary" aria-live="polite">Nenhuma chave informada.</p>
-              <p id="batch-help" class="help-text">As chaves válidas aparecem abaixo antes de iniciar. O lote abre o Portal para uma NF-e por vez.</p>
+              <p id="batch-help" class="help-text">Todas as consultas usam o Portal Nacional. O lote processa uma NF-e por vez e o hCaptcha continua manual.</p>
             </div>
-            <button id="batch-start" type="submit" disabled>Iniciar lote</button>
+            <div class="lookup-actions batch-actions" aria-label="Ações da consulta">
+              <button id="batch-start" type="submit" disabled>Consultar</button>
+              <button id="batch-reset" class="lookup-reset batch-reset" type="button" hidden>Nova consulta</button>
+            </div>
           </div>
         </form>
 
@@ -111,7 +75,7 @@ app.innerHTML = `
             <span id="batch-route">Aguardando início</span>
           </div>
           <div class="batch-toolbar-actions">
-            <button id="batch-cancel" class="secondary-button" type="button" hidden>Cancelar lote</button>
+            <button id="batch-cancel" class="secondary-button" type="button" hidden>Cancelar consulta</button>
             <button id="batch-zip" class="secondary-button" type="button" disabled>Baixar XMLs (.zip)</button>
             <button id="batch-print" class="secondary-button" type="button" disabled>Imprimir DANFEs</button>
           </div>
@@ -119,8 +83,8 @@ app.innerHTML = `
 
         <div id="batch-list" class="batch-list" aria-live="polite">
           <div class="empty-state batch-empty">
-            <strong>Nenhuma chave no lote</strong>
-            <span>Cole as chaves acima para montar a lista.</span>
+            <strong>Nenhuma NF-e carregada</strong>
+            <span>Cole uma ou mais chaves acima para iniciar.</span>
           </div>
         </div>
       </div>
@@ -147,19 +111,12 @@ app.innerHTML = `
 const portalExtension = new BrowserPortalExtensionClient();
 const integrationStatus = requireElement<HTMLElement>('#integration-status');
 const integrationStatusText = requireElement<HTMLElement>('#integration-status-text');
-const modeSingle = requireElement<HTMLButtonElement>('#mode-single');
-const modeBatch = requireElement<HTMLButtonElement>('#mode-batch');
-const singlePanel = requireElement<HTMLElement>('#single-consultation-panel');
 const batchPanel = requireElement<HTMLElement>('#batch-consultation-panel');
-const lookupForm = requireElement<HTMLFormElement>('#lookup-form');
-const accessKeyInput = requireElement<HTMLInputElement>('#access-key');
-const lookupSubmit = requireElement<HTMLButtonElement>('#lookup-submit');
-const lookupReset = requireElement<HTMLButtonElement>('#lookup-reset');
-const resultCard = requireElement<HTMLElement>('#result');
 const batchForm = requireElement<HTMLFormElement>('#batch-form');
 const batchKeysInput = requireElement<HTMLTextAreaElement>('#batch-keys');
 const batchInputSummary = requireElement<HTMLElement>('#batch-input-summary');
 const batchStart = requireElement<HTMLButtonElement>('#batch-start');
+const batchReset = requireElement<HTMLButtonElement>('#batch-reset');
 const batchProgress = requireElement<HTMLElement>('#batch-progress');
 const batchRouteText = requireElement<HTMLElement>('#batch-route');
 const batchCancel = requireElement<HTMLButtonElement>('#batch-cancel');
@@ -171,8 +128,6 @@ const danfeTitle = requireElement<HTMLElement>('#danfe-title');
 const danfeContent = requireElement<HTMLElement>('#danfe-content');
 const danfeClose = requireElement<HTMLButtonElement>('#danfe-close');
 const danfePrint = requireElement<HTMLButtonElement>('#danfe-print');
-let currentDownloadUrl: string | null = null;
-let consultationMode: ConsultationMode = 'single';
 let batchDraftTimer: ReturnType<typeof setTimeout> | null = null;
 
 const danfeViewerController = createDanfeViewer({
@@ -197,13 +152,12 @@ const batchController = createBatchController({
     keysInput: batchKeysInput,
     inputSummary: batchInputSummary,
     startButton: batchStart,
+    resetButton: batchReset,
     cancelButton: batchCancel,
     zipButton: batchZip,
     printButton: batchPrint,
     progress: batchProgress,
     routeText: batchRouteText,
-    modeSingleButton: modeSingle,
-    modeBatchButton: modeBatch,
     list: batchList,
   },
   portal: portalExtension,
@@ -214,46 +168,28 @@ const batchController = createBatchController({
   downloadXml,
   openDanfeDocuments: (documents, title) => danfeViewerController.openMany(documents, title),
   printWindow: () => danfeViewerController.print(),
-});
-
-const consultationController = createConsultationController({
-  getAccessKey: () => accessKeyInput.value,
-  clearAccessKey: () => {
-    accessKeyInput.value = '';
-  },
-  validateAccessKey,
-  portal: portalExtension,
-  parseXml: parseNfeXml,
-  renderState: renderLookupState,
-  renderPortalFailure,
-  renderSuccess: renderLookupSuccess,
-  renderInvalidXml,
-  setBusy: setLookupBusy,
-  focusInput: () => accessKeyInput.focus(),
-  resetView: renderInitialResult,
-});
-
-modeSingle.addEventListener('click', () => setConsultationMode('single'));
-modeBatch.addEventListener('click', () => setConsultationMode('batch'));
-
-lookupForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  void consultationController.submit();
+  importManualXml: selectManualXml,
 });
 
 batchForm.addEventListener('submit', (event) => {
   event.preventDefault();
   void batchController.start();
 });
-batchKeysInput.addEventListener('input', scheduleBatchDraftSync);
+
+batchKeysInput.addEventListener('input', () => {
+  syncCompactMode();
+  scheduleBatchDraftSync();
+});
+batchReset.addEventListener('click', () => batchController.reset());
 batchCancel.addEventListener('click', () => {
   void batchController.cancel();
 });
 batchZip.addEventListener('click', () => batchController.downloadZip());
 batchPrint.addEventListener('click', () => batchController.printDanfes());
 
-lookupReset.addEventListener('click', () => consultationController.reset());
-const stopExtensionReadyHint = portalExtension.onReadyHint(() => { void refreshExtensionStatus(); });
+const stopExtensionReadyHint = portalExtension.onReadyHint(() => {
+  void refreshExtensionStatus();
+});
 window.addEventListener('focus', () => void refreshExtensionStatus());
 window.addEventListener('pageshow', () => void refreshExtensionStatus());
 document.addEventListener('visibilitychange', () => {
@@ -264,10 +200,12 @@ window.addEventListener('pagehide', () => {
   stopExtensionReadyHint();
   danfeViewerController.dispose();
   batchController.dispose();
-  void consultationController.cancelActivePortal();
 });
+
 void refreshExtensionStatus();
+syncCompactMode();
 batchController.syncDraft();
+batchKeysInput.focus();
 
 function scheduleBatchDraftSync(): void {
   if (batchDraftTimer !== null) globalThis.clearTimeout(batchDraftTimer);
@@ -275,6 +213,11 @@ function scheduleBatchDraftSync(): void {
     batchDraftTimer = null;
     batchController.syncDraft();
   }, BATCH_DRAFT_DEBOUNCE_MS);
+}
+
+function syncCompactMode(): void {
+  const validKeyCount = parseBatchInput(batchKeysInput.value).validKeys.length;
+  batchPanel.classList.toggle('is-compact-single', validKeyCount <= 1);
 }
 
 async function refreshExtensionStatus(): Promise<void> {
@@ -288,203 +231,37 @@ async function refreshExtensionStatus(): Promise<void> {
   integrationStatusText.textContent = 'Extensão não conectada';
 }
 
-function setConsultationMode(mode: ConsultationMode): void {
-  if (batchController.isBusy() || mode === consultationMode) return;
-  consultationMode = mode;
-  const single = mode === 'single';
-  singlePanel.hidden = !single;
-  batchPanel.hidden = single;
-  modeSingle.classList.toggle('is-active', single);
-  modeBatch.classList.toggle('is-active', !single);
-  modeSingle.setAttribute('aria-pressed', String(single));
-  modeBatch.setAttribute('aria-pressed', String(!single));
+function selectManualXml(accessKey: string): Promise<ParsedNfe | null> {
+  return new Promise((resolve, reject) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xml,application/xml,text/xml';
+    input.hidden = true;
 
-  if (single) {
-    accessKeyInput.focus();
-  } else {
-    batchController.syncDraft();
-    batchKeysInput.focus();
-  }
-}
+    let settled = false;
+    const finish = (complete: () => void) => {
+      if (settled) return;
+      settled = true;
+      input.remove();
+      complete();
+    };
 
-function renderInvalidXml(error: unknown): void {
-  renderLookupState(
-    'XML inválido',
-    error instanceof Error ? error.message : 'O XML retornado não pôde ser validado para a chave consultada.',
-  );
-}
+    input.addEventListener('cancel', () => finish(() => resolve(null)), { once: true });
+    input.addEventListener('change', () => {
+      const file = input.files?.item(0) ?? null;
+      if (!file) {
+        finish(() => resolve(null));
+        return;
+      }
 
-function renderPortalFailure(titleText: string, messageText: string, accessKey: string): void {
-  renderLookupState(titleText, messageText);
-  appendManualXmlRecovery(accessKey);
-}
+      void validateManualNfeXml(file, accessKey)
+        .then((parsed) => finish(() => resolve(parsed)))
+        .catch((error) => finish(() => reject(error)));
+    }, { once: true });
 
-function appendManualXmlRecovery(accessKey: string): void {
-  const recovery = document.createElement('div');
-  recovery.className = 'manual-xml-recovery';
-
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'manual-xml-recovery-button';
-  button.textContent = 'Importar XML baixado manualmente';
-  button.addEventListener('click', () => openManualXmlPicker(accessKey));
-
-  recovery.append(button);
-  resultCard.append(recovery);
-}
-
-function openManualXmlPicker(accessKey: string): void {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.xml,application/xml,text/xml';
-  input.hidden = true;
-
-  const cleanup = () => input.remove();
-  input.addEventListener('cancel', cleanup, { once: true });
-  input.addEventListener('change', () => {
-    const file = input.files?.item(0) ?? null;
-    cleanup();
-    void importManualXml(file, accessKey);
-  }, { once: true });
-
-  document.body.append(input);
-  input.click();
-}
-
-async function importManualXml(file: File | null, accessKey: string): Promise<void> {
-  try {
-    const parsed = await validateManualNfeXml(file, accessKey);
-    if (!parsed) return;
-
-    setLookupBusy(true);
-    renderLookupState('Importando XML', 'Validando o arquivo selecionado…');
-    await consultationController.completeManualImport(parsed);
-  } catch (error) {
-    renderLookupState(
-      'XML não importado',
-      error instanceof Error ? error.message : 'Não foi possível validar o XML selecionado.',
-    );
-    appendManualXmlRecovery(accessKey);
-  } finally {
-    setLookupBusy(false);
-  }
-}
-
-function renderLookupSuccess(parsed: ParsedNfe): void {
-  resetResult();
-  lookupReset.hidden = false;
-
-  const card = document.createElement('div');
-  card.className = 'lookup-success-card';
-
-  const header = document.createElement('div');
-  header.className = 'lookup-success-header';
-
-  const titleGroup = document.createElement('div');
-  const title = document.createElement('h2');
-  title.textContent = `NF-e ${parsed.number || parsed.accessKey}`;
-
-  const badge = document.createElement('span');
-  badge.className = 'lookup-success-badge';
-  badge.textContent = 'Autorizada';
-
-  titleGroup.append(title);
-  header.append(titleGroup, badge);
-
-  const summary = document.createElement('dl');
-  summary.className = 'lookup-summary-grid';
-  appendLookupSummaryItem(summary, 'Emitente', parsed.issuer.name || 'Não informado', 'is-wide');
-  appendLookupSummaryItem(summary, 'Série', parsed.series || '—');
-  appendLookupSummaryItem(summary, 'Emissão', formatIssueDate(parsed.issuedAt));
-  appendLookupSummaryItem(summary, 'Valor', formatCurrency(parsed.totals.invoice), 'is-emphasis');
-  appendLookupSummaryItem(
-    summary,
-    'Itens',
-    `${parsed.products.length} ${parsed.products.length === 1 ? 'item' : 'itens'}`,
-  );
-
-  const accessKey = document.createElement('div');
-  accessKey.className = 'lookup-access-key';
-  const accessKeyLabel = document.createElement('span');
-  accessKeyLabel.textContent = 'Chave de acesso';
-  const accessKeyValue = document.createElement('code');
-  accessKeyValue.textContent = parsed.accessKey;
-  accessKeyValue.title = parsed.accessKey;
-  accessKey.append(accessKeyLabel, accessKeyValue);
-
-  const actions = document.createElement('div');
-  actions.className = 'result-actions';
-
-  const preview = document.createElement('button');
-  preview.type = 'button';
-  preview.className = 'action-danfe-preview';
-  preview.innerHTML = `
-    <span class="action-icon" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-    </span>
-    <span>Visualizar DANFE</span>
-  `;
-  preview.title = 'Abrir DANFE para visualização e impressão';
-  preview.addEventListener('click', () => danfeViewerController.open(parsed));
-
-  currentDownloadUrl = URL.createObjectURL(new Blob([parsed.originalXml], { type: 'application/xml;charset=utf-8' }));
-  const download = document.createElement('a');
-  download.className = 'download-action';
-  download.href = currentDownloadUrl;
-  download.download = `${parsed.accessKey}.xml`;
-  download.innerHTML = `
-    <span class="action-icon" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-    </span>
-    <span>Baixar XML</span>
-  `;
-  download.title = `Baixar arquivo XML completo (${parsed.accessKey}.xml)`;
-
-  actions.append(preview, download);
-  card.append(header, summary, accessKey, actions);
-  resultCard.append(card);
-}
-
-function appendLookupSummaryItem(
-  container: HTMLElement,
-  labelText: string,
-  valueText: string,
-  className?: string,
-): void {
-  const item = document.createElement('div');
-  item.className = 'lookup-summary-item';
-  if (className) item.classList.add(className);
-
-  const label = document.createElement('dt');
-  label.textContent = labelText;
-  const value = document.createElement('dd');
-  value.textContent = valueText;
-  value.title = valueText;
-
-  item.append(label, value);
-  container.append(item);
-}
-
-function formatIssueDate(value: string | null): string {
-  if (!value) return 'Não informada';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
-}
-
-function formatCurrency(value: number): string {
-  if (!Number.isFinite(value)) return 'Não informado';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
+    document.body.append(input);
+    input.click();
+  });
 }
 
 function downloadXml(parsed: ParsedNfe): void {
@@ -502,46 +279,6 @@ function downloadBlob(blob: Blob, fileName: string): void {
   link.click();
   link.remove();
   globalThis.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-function renderLookupState(titleText: string, messageText: string): void {
-  resetResult();
-  lookupReset.hidden = false;
-  appendResultState(titleText, messageText);
-}
-
-function renderInitialResult(): void {
-  resetResult();
-  lookupReset.hidden = true;
-  appendResultState('Nenhuma NF-e carregada', 'Informe uma chave para iniciar.');
-}
-
-function appendResultState(titleText: string, messageText: string): void {
-  const state = document.createElement('div');
-  state.className = 'empty-state';
-  const title = document.createElement('strong');
-  title.textContent = titleText;
-  const message = document.createElement('span');
-  message.textContent = messageText;
-  state.append(title, message);
-  resultCard.append(state);
-}
-
-function resetResult(): void {
-  danfeViewerController.close();
-  if (currentDownloadUrl) {
-    URL.revokeObjectURL(currentDownloadUrl);
-    currentDownloadUrl = null;
-  }
-  resultCard.replaceChildren();
-}
-
-function setLookupBusy(busy: boolean): void {
-  lookupSubmit.disabled = busy;
-  lookupReset.disabled = busy;
-  accessKeyInput.disabled = busy;
-  modeBatch.disabled = busy;
-  lookupSubmit.textContent = busy ? 'Consultando…' : 'Consultar';
 }
 
 function requireElement<T extends Element>(selector: string): T {
