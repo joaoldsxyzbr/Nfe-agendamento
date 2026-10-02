@@ -88,6 +88,7 @@ export type BatchController = Readonly<{
   cancel(): Promise<void>;
   downloadZip(): void;
   printDanfes(): void;
+  importManual(index: number): Promise<void>;
   reset(): void;
   isBusy(): boolean;
   dispose(): void;
@@ -574,6 +575,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     cancel,
     downloadZip,
     printDanfes,
+    importManual,
     reset,
     isBusy: () => preflighting || running || manualActionBusy,
     dispose,
