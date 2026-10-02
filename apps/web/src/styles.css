@@ -391,9 +391,6 @@ label {
   overscroll-behavior: contain;
 }
 
-@media (max-width: 900px) {
-}
-
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 20px, 1040px);
