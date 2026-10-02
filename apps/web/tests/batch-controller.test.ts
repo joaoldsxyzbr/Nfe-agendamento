@@ -139,7 +139,7 @@ describe('batch controller Portal-only', () => {
     expect(h.route.textContent).toContain('Extensão não conectada');
   });
 
-  it('allows a failed Portal item to recover from a validated manual XML', async () => {
+  it('keeps a failed Portal item available for explicit recovery', async () => {
     let attempts = 0;
     const h = harness({
       waitForResult: async (operationId: string) => {
@@ -168,6 +168,9 @@ describe('batch preflight action guards', () => {
     expect(source).toContain('row.retry.disabled = disabled');
     expect(source).toContain('row.importManual.disabled = disabled');
     expect(source).toContain('refreshResultActions();');
+    expect(source).toContain("importManualButton.textContent = 'Importar XML'");
+    expect(source).toContain('const parsed = await deps.importManualXml(item.accessKey)');
+    expect(source).toContain("item.source = 'XML manual'");
   });
 
   it('keeps stable row objects and updates item state incrementally', () => {
