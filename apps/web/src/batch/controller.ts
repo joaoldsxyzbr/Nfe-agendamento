@@ -140,7 +140,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       if (!info) {
         renderState('Extensão não conectada');
         elements.routeText.textContent =
-          'Extensão não conectada. Instale ou ative a extensão antes de iniciar o lote.';
+          'Extensão não conectada. Instale ou ative a extensão antes de consultar.';
         return;
       }
       if (!info.capabilities.portalLookup) {
@@ -170,7 +170,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       }
     } catch (error) {
       if (!isAbortError(error)) {
-        finalFailureMessage = error instanceof Error ? error.message : 'Não foi possível iniciar o lote.';
+        finalFailureMessage = error instanceof Error ? error.message : 'Não foi possível iniciar a consulta.';
         markQueuedItems('cancelled', 'Não processada porque o lote foi interrompido.');
       }
     } finally {
@@ -180,7 +180,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       setControlsRunning(false);
       elements.startButton.hidden = true;
       elements.resetButton.hidden = false;
-      renderState(cancelled ? 'Lote cancelado' : finalFailureMessage ?? 'Lote concluído', undefined, true);
+      const doneLabel = items.length === 1 ? 'Consulta concluída' : 'Lote concluído';
+      const cancelledLabel = items.length === 1 ? 'Consulta cancelada' : 'Lote cancelado';
+      renderState(cancelled ? cancelledLabel : finalFailureMessage ?? doneLabel, undefined, true);
     }
   }
 
@@ -292,7 +294,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     } finally {
       manualActionBusy = false;
       setControlsLocked(false);
-      renderState('Importação manual concluída', item);
+      renderState(item.status === 'success' ? 'XML importado' : 'Aguardando ação', item);
     }
   }
 
@@ -323,9 +325,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       const empty = documentRef.createElement('div');
       empty.className = 'empty-state batch-empty';
       const title = documentRef.createElement('strong');
-      title.textContent = 'Nenhuma chave no lote';
+      title.textContent = 'Nenhuma NF-e carregada';
       const message = documentRef.createElement('span');
-      message.textContent = 'Cole as chaves acima para montar a lista.';
+      message.textContent = 'Cole uma ou mais chaves acima para iniciar.';
       empty.append(title, message);
       list.append(empty);
       return;
