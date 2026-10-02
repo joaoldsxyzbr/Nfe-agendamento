@@ -39,8 +39,7 @@ function harness(overrides: Record<string, unknown> = {}) {
       printButton,
       progress: el({ textContent: '' } as HTMLElement),
       routeText: route,
-      modeSingleButton: el({ disabled: false } as HTMLButtonElement),
-      modeBatchButton: el({ disabled: false } as HTMLButtonElement),
+      resetButton: el({ hidden: true, disabled: false } as HTMLButtonElement),
     },
     portal: portal as never,
     parseXml: (xml, accessKey) => ({
@@ -57,6 +56,7 @@ function harness(overrides: Record<string, unknown> = {}) {
     downloadXml: () => {},
     openDanfeDocuments: () => {},
     printWindow: () => {},
+    importManualXml: async () => null,
     renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
   });
 
@@ -138,13 +138,35 @@ describe('batch controller Portal-only', () => {
     expect(h.printButton.disabled).toBe(false);
     expect(h.route.textContent).toContain('Extensão não conectada');
   });
+
+  it('allows a failed Portal item to recover from a validated manual XML', async () => {
+    let attempts = 0;
+    const h = harness({
+      waitForResult: async (operationId: string) => {
+        attempts += 1;
+        return {
+          operationId,
+          state: 'failed' as const,
+          message: 'Portal indisponível',
+          xml: null,
+        };
+      },
+    });
+    h.input.value = A;
+    h.controller.syncDraft();
+    await h.controller.start();
+
+    expect(h.snapshots.at(-1)?.[0]?.status).toBe('portal_error');
+    expect(attempts).toBe(1);
+  });
 });
 
 describe('batch preflight action guards', () => {
   it('locks Portal retry while preflight is pending', () => {
     const source = readFileSync(new URL('../src/batch/controller.ts', import.meta.url), 'utf8');
-    expect(source).toContain("item.status !== 'portal_error' || preflighting || running || manualPortalBusy");
-    expect(source).toContain('retry.disabled = preflighting || running || manualPortalBusy');
+    expect(source).toContain("item.status !== 'portal_error' || preflighting || running || manualActionBusy");
+    expect(source).toContain('row.retry.disabled = disabled');
+    expect(source).toContain('row.importManual.disabled = disabled');
     expect(source).toContain('refreshResultActions();');
   });
 
