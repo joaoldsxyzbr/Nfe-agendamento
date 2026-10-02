@@ -1,4 +1,4 @@
-# POC fiscal — Unimake.DFe
+> **Documento histórico / superseded.** O POC .NET/Unimake não faz parte da arquitetura Portal-only atual. Este arquivo é mantido apenas para rastreabilidade técnica.\n\n# POC fiscal — Unimake.DFe
 
 Data: 15/09/2026.
 
