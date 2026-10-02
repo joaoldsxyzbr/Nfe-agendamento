@@ -4,7 +4,7 @@
 
 - O GitHub é a única fonte de verdade e área de trabalho do projeto.
 - Trabalhe exclusivamente no repositório `joaoldsxyzbr/Nfe-agendamento-2.0`.
-- Antes de alterar código, arquitetura, configuração ou documentação, consulte o estado atual da `main`, o `README.md` e os documentos relacionados em `docs/`.
+- Antes de alterar código, arquitetura, configuração ou documentação, consulte o estado atual da `main`, o `README.md`, `docs/README.md` e os documentos vigentes relacionados.
 - Se houver divergência entre conversa anterior e repositório, valide o estado atual no GitHub e trate o repositório como referência.
 
 ## Assistente e skills
@@ -18,7 +18,7 @@
 
 ## Arquitetura e implementação
 
-- Preserve a arquitetura vigente documentada no `README.md` e em `docs/architecture/`.
+- Preserve a arquitetura vigente documentada no `README.md` e no índice `docs/README.md`. Documentos marcados como históricos/superseded não definem comportamento de produção.
 - Não introduza rotas alternativas escondidas, fallbacks não documentados ou comportamento que contradiga a arquitetura atual.
 - **Não implemente polling.** Prefira eventos, sinais nativos da plataforma, listeners, callbacks, mensagens ou outros fluxos orientados a eventos.
 - Faça mudanças pequenas, coerentes e completas. Evite código morto, duplicação desnecessária e soluções temporárias sem registro.
