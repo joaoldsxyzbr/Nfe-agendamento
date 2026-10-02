@@ -158,7 +158,9 @@ async function handleMessage(message: unknown, sender: ChromeMessageSender): Pro
 async function handleSiteCommand(commandValue: unknown, sender: ChromeMessageSender): Promise<unknown> {
   assertSenderOrigin(sender, SITE_ORIGIN);
   const siteTabId = sender.tab?.id;
-  if (!Number.isInteger(siteTabId)) throw new Error('A aba do site não pôde ser identificada.');
+  if (typeof siteTabId !== 'number' || !Number.isInteger(siteTabId)) {
+    throw new Error('A aba do site não pôde ser identificada.');
+  }
 
   const command = parseSiteCommand(commandValue);
   if (command.type === 'ping') {
