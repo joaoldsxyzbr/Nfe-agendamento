@@ -11,7 +11,7 @@ export type BatchItemStatus =
   | 'portal_error'
   | 'cancelled';
 
-export type BatchSource = 'Portal';
+export type BatchSource = 'Portal' | 'XML manual';
 
 const BRL_CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -43,6 +43,7 @@ type RenderedBatchRow = {
   preview: HTMLButtonElement;
   download: HTMLButtonElement;
   retry: HTMLButtonElement;
+  importManual: HTMLButtonElement;
 };
 
 type ExtensionBatchClient = Readonly<{
@@ -65,8 +66,7 @@ export type BatchControllerDependencies = Readonly<{
     printButton: HTMLButtonElement;
     progress: HTMLElement;
     routeText: HTMLElement;
-    modeSingleButton: HTMLButtonElement;
-    modeBatchButton: HTMLButtonElement;
+    resetButton: HTMLButtonElement;
     list?: HTMLElement;
   }>;
   portal: ExtensionBatchClient;
@@ -77,6 +77,7 @@ export type BatchControllerDependencies = Readonly<{
   downloadXml(parsed: ParsedNfe): void;
   openDanfeDocuments(documents: readonly ParsedNfe[], title: string): void;
   printWindow(): void;
+  importManualXml(accessKey: string): Promise<ParsedNfe | null>;
   renderRows?: (items: readonly BatchItemView[]) => void;
   document?: Document;
 }>;
@@ -87,6 +88,7 @@ export type BatchController = Readonly<{
   cancel(): Promise<void>;
   downloadZip(): void;
   printDanfes(): void;
+  reset(): void;
   isBusy(): boolean;
   dispose(): void;
 }>;
@@ -96,14 +98,14 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
   let items: MutableBatchItem[] = [];
   let running = false;
   let preflighting = false;
-  let manualPortalBusy = false;
+  let manualActionBusy = false;
   let cancelled = false;
   let abortController: AbortController | null = null;
   let activePortalOperationId: string | null = null;
   let renderedRows: RenderedBatchRow[] = [];
 
   function syncDraft(): void {
-    if (running || preflighting || manualPortalBusy) return;
+    if (running || preflighting || manualActionBusy) return;
     const summary = parseBatchInput(elements.keysInput.value);
     const parts = [
       `${summary.validKeys.length} válida${summary.validKeys.length === 1 ? '' : 's'}`,
@@ -115,12 +117,14 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       : parts.join(' · ');
     if (summary.exceedsLimit) elements.inputSummary.textContent += ` · máximo ${MAX_BATCH_ITEMS} por lote`;
     elements.startButton.disabled = summary.validKeys.length === 0 || summary.exceedsLimit;
+    elements.startButton.hidden = false;
+    elements.resetButton.hidden = true;
     items = summary.validKeys.map(createBatchItem);
     renderState('Aguardando início', undefined, true);
   }
 
   async function start(): Promise<void> {
-    if (running || preflighting || manualPortalBusy) return;
+    if (running || preflighting || manualActionBusy) return;
     const summary = parseBatchInput(elements.keysInput.value);
     if (summary.validKeys.length === 0 || summary.exceedsLimit) {
       syncDraft();
@@ -174,6 +178,8 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       running = false;
       abortController = null;
       setControlsRunning(false);
+      elements.startButton.hidden = true;
+      elements.resetButton.hidden = false;
       renderState(cancelled ? 'Lote cancelado' : finalFailureMessage ?? 'Lote concluído', undefined, true);
     }
   }
@@ -246,14 +252,47 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
 
   async function retryPortal(index: number): Promise<void> {
     const item = items[index];
-    if (!item || item.status !== 'portal_error' || preflighting || running || manualPortalBusy) return;
-    manualPortalBusy = true;
+    if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy) return;
+    manualActionBusy = true;
     setControlsLocked(true);
     try { await processPortalItem(item); }
     finally {
-      manualPortalBusy = false;
+      manualActionBusy = false;
       setControlsLocked(false);
       renderState('Reconsulta pelo Portal concluída', item);
+    }
+  }
+
+  async function importManual(index: number): Promise<void> {
+    const item = items[index];
+    if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy) return;
+
+    manualActionBusy = true;
+    setControlsLocked(true);
+    try {
+      const parsed = await deps.importManualXml(item.accessKey);
+      if (!parsed) return;
+
+      let supplierRuleId: string | null = null;
+      try {
+        supplierRuleId = (await deps.portal.resolveSupplier(parsed.issuer.taxId)).supplierId;
+      } catch {
+        supplierRuleId = null;
+      }
+
+      item.parsed = { ...parsed, supplierRuleId };
+      item.source = 'XML manual';
+      item.status = 'success';
+      item.message = 'XML importado e validado manualmente.';
+    } catch (error) {
+      item.status = 'portal_error';
+      item.message = error instanceof Error
+        ? error.message
+        : 'Não foi possível validar o XML selecionado.';
+    } finally {
+      manualActionBusy = false;
+      setControlsLocked(false);
+      renderState('Importação manual concluída', item);
     }
   }
 
@@ -373,7 +412,13 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     retry.textContent = 'Tentar novamente';
     retry.addEventListener('click', () => void retryPortal(index));
 
-    actions.append(preview, download, retry);
+    const importManualButton = documentRef.createElement('button');
+    importManualButton.type = 'button';
+    importManualButton.className = 'batch-action';
+    importManualButton.textContent = 'Importar XML';
+    importManualButton.addEventListener('click', () => void importManual(index));
+
+    actions.append(preview, download, retry, importManualButton);
     root.append(order, information, status, actions);
 
     const rendered = {
@@ -385,6 +430,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       preview,
       download,
       retry,
+      importManual: importManualButton,
     };
     updateRenderedRowState(rendered, item);
     return rendered;
@@ -411,7 +457,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     row.preview.disabled = item.parsed === null;
     row.download.disabled = item.parsed === null;
     row.retry.hidden = item.status !== 'portal_error';
-    row.retry.disabled = preflighting || running || manualPortalBusy;
+    row.retry.disabled = preflighting || running || manualActionBusy;
+    row.importManual.hidden = item.status !== 'portal_error';
+    row.importManual.disabled = preflighting || running || manualActionBusy;
   }
 
   function updateRenderedRow(item: MutableBatchItem): void {
@@ -432,7 +480,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
   function refreshRenderedActionState(): void {
     if (deps.renderRows) return;
     for (const row of renderedRows) {
-      row.retry.disabled = preflighting || running || manualPortalBusy;
+      const disabled = preflighting || running || manualActionBusy;
+      row.retry.disabled = disabled;
+      row.importManual.disabled = disabled;
     }
   }
 
@@ -441,8 +491,8 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     refreshAllRows = false,
   ): void {
     const completed = completedItems();
-    elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualPortalBusy;
-    elements.printButton.disabled = completed.length === 0 || preflighting || running || manualPortalBusy;
+    elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
+    elements.printButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
 
     if (refreshAllRows) {
       renderRows();
@@ -488,8 +538,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     elements.keysInput.disabled = value;
     elements.startButton.disabled = value;
     elements.cancelButton.hidden = !value;
-    elements.modeSingleButton.disabled = value;
-    elements.modeBatchButton.disabled = value;
+    elements.resetButton.disabled = value;
   }
 
   function setControlsLocked(locked: boolean): void {
@@ -497,8 +546,17 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     elements.keysInput.disabled = locked;
     elements.startButton.disabled =
       locked || summary.validKeys.length === 0 || summary.exceedsLimit;
-    elements.modeSingleButton.disabled = locked;
-    elements.modeBatchButton.disabled = locked;
+    elements.resetButton.disabled = locked;
+  }
+
+  function reset(): void {
+    if (preflighting || running || manualActionBusy) return;
+    elements.keysInput.value = '';
+    items = [];
+    elements.startButton.hidden = false;
+    elements.resetButton.hidden = true;
+    syncDraft();
+    elements.keysInput.focus();
   }
 
   function dispose(): void {
@@ -514,7 +572,8 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     cancel,
     downloadZip,
     printDanfes,
-    isBusy: () => preflighting || running || manualPortalBusy,
+    reset,
+    isBusy: () => preflighting || running || manualActionBusy,
     dispose,
   };
 }
