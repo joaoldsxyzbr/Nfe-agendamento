@@ -97,4 +97,4 @@ O atalho do site abre a release mais recente no GitHub. O proprietário autentic
 
 O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
 
-O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`.
+O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`. O nome do Worker no Wrangler é `nfe-agendamento-2-0`, correspondente ao Worker existente na Cloudflare. Essa igualdade evita o aviso de override automático de nome durante Builds; não cria nem renomeia um Worker em produção.
