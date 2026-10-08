@@ -25,24 +25,6 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - name: Refresh lockfile for security fixes (temporary)
-        run: |
-          npm update sharp source-map-js --package-lock-only --ignore-scripts --no-audit --no-fund
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const cp = require('node:child_process');
-          const original = JSON.parse(cp.execFileSync('git', ['show', 'HEAD:package-lock.json'], {encoding: 'utf8'}));
-          const updated = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
-          const changed = {};
-          const removed = [];
-          for (const key of new Set([...Object.keys(original.packages), ...Object.keys(updated.packages)])) {
-            if (!(key in updated.packages)) removed.push(key);
-            else if (JSON.stringify(updated.packages[key]) !== JSON.stringify(original.packages[key])) changed[key] = updated.packages[key];
-          }
-          console.log('LOCKFILE_PATCH_START');
-          console.log(JSON.stringify({changed, removed, metadata: {name: updated.name, version: updated.version, lockfileVersion: updated.lockfileVersion, requires: updated.requires}}));
-          console.log('LOCKFILE_PATCH_END');
-          NODE
       - run: npm ci
       - run: npm audit --audit-level=high
       - run: npm run lint:web
