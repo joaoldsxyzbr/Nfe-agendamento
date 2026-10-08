@@ -98,3 +98,14 @@ O atalho do site abre a release mais recente no GitHub. O proprietário autentic
 O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
 
 O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`. O nome do Worker no Wrangler é `nfe-agendamento-2-0`, correspondente ao Worker existente na Cloudflare. Essa igualdade evita o aviso de override automático de nome durante Builds; não cria nem renomeia um Worker em produção.
+
+## Dependabot — 08/10/2026
+
+O lote de atualização mantém a compatibilidade das ferramentas sem alterar o comportamento fiscal do produto:
+
+- PR #67: Vitest 5.0.3, integrada com CI verde.
+- PR #70: tipos Node 26.6.4, integrada com CI verde.
+- PR #69: `@vitest/coverage-v8` 5.0.3, integrada **depois** da atualização do Vitest para manter as peer dependencies compatíveis (a PR isolada falhava com `ERESOLVE`).
+- PRs #66 (Vite 8.3.2) e #68 (Wrangler 4.147.0): atualização consolidada numa única branch a partir da `main`, para resolver conflitos cruzados no `package-lock.json`. As dependências resolvidas dessas PRs do Dependabot foram aplicadas ao lockfile vigente, preservando as versões de Vitest/cobertura e tipos Node já integradas.
+
+Critérios de entrega: `npm ci`, auditoria npm, gates `web`, `extension`, `danfe-print` e build de prévia Cloudflare aprovados no mesmo SHA antes do merge. A publicação e o CI da `main` serão verificados depois. Não atualizar releases/versões de extensão nem marcar a aceitação física Chrome/Edge como executada nesta manutenção.
