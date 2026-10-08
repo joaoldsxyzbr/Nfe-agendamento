@@ -2,8 +2,17 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 const releaseUrl = new URL('../../../.github/workflows/release.yml', import.meta.url);
+const ciUrl = new URL('../../../.github/workflows/ci.yml', import.meta.url);
 
 describe('release quality gate', () => {
+  it('validates all areas without consuming Actions artifact storage', async () => {
+    const ci = await readFile(ciUrl, 'utf8');
+    expect(ci).toContain('npm audit --audit-level=high');
+    expect(ci).toContain('npm run build:extension');
+    expect(ci).toContain('npm test --prefix tests/playwright');
+    expect(ci).not.toContain('upload-artifact@');
+  });
+
   it('publishes normal releases after CI while keeping physical acceptance traceable', async () => {
     const release = await readFile(releaseUrl, 'utf8');
 
@@ -18,6 +27,9 @@ describe('release quality gate', () => {
     expect(release).not.toContain('Status: APROVADO');
     expect(release).not.toContain('Chrome: APROVADO');
     expect(release).not.toContain('Edge: APROVADO');
-    expect(release.match(/- name: Download validated browser extension/g)).toHaveLength(1);
+    expect(release).toContain('- name: Rebuild extension from the CI-approved commit');
+    expect(release).toContain('npm run build:extension');
+    expect(release).toContain('zip -q -r ../../../release/extension/NFeAgendamento-Extension-MV3.zip .');
+    expect(release).not.toContain('download-artifact@');
   });
 });

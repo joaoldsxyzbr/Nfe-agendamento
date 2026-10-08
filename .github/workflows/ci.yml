@@ -50,18 +50,6 @@ jobs:
       - run: npm run test:extension
       - run: npm run coverage:extension
       - run: npm run build:extension
-      - name: Package unpacked Chromium extension
-        run: |
-          mkdir -p artifacts
-          cd apps/extension/dist
-          zip -r ../../../artifacts/NFeAgendamento-Extension-MV3.zip .
-      - name: Upload Chromium extension
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: NFeAgendamento-Extension-MV3
-          path: artifacts/NFeAgendamento-Extension-MV3.zip
-          if-no-files-found: error
-          retention-days: 14
 
   danfe-print:
     runs-on: ubuntu-24.04
@@ -81,11 +69,3 @@ jobs:
       - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
       - name: Generate and validate browser/DANFE flows
         run: npm test --prefix tests/playwright
-      - name: Upload DANFE print regression artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: danfe-print-regression
-          path: tests/playwright/test-results
-          if-no-files-found: warn
-          retention-days: 7

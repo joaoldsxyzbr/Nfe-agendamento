@@ -11,7 +11,7 @@ const ciUrl = new URL('../../../.github/workflows/ci.yml', import.meta.url);
 describe('Cloudflare deploy configuration', () => {
   it('serves only the built web assets directly through Workers Static Assets', async () => {
     const config = JSON.parse(await readFile(rootWranglerUrl, 'utf8')) as any;
-    expect(config.name).toBe('nfe-agendamento-2');
+    expect(config.name).toBe('nfe-agendamento-2-0');
     expect(config.build?.command).toBe('npm run build:web');
     expect(config.assets?.directory).toBe('./apps/web/dist');
     expect(config.main).toBeUndefined();

@@ -35,13 +35,13 @@ Enquanto esse recurso não estiver disponível, a disciplina do projeto é: muda
 - testes;
 - cobertura com threshold;
 - typecheck/build;
-- empacotamento do ZIP Manifest V3.
+- build da extensão Manifest V3, sem upload de artefato temporário no CI.
 
 A CSP das páginas da extensão restringe scripts e objetos aos recursos empacotados.
 
 ### danfe-print
 
-Executa Playwright para o fluxo web e regressão DANFE/PDF.
+Executa Playwright para o fluxo web e regressão DANFE/PDF. O resultado dos testes fica nos logs do CI; não envia artefatos temporários ao armazenamento de Actions.
 
 ### CodeQL
 
@@ -75,6 +75,14 @@ O workflow de release só publica quando, no mesmo SHA da `main`:
 3. existe `docs/releases/vX.Y.Z.md`;
 4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão e estado rastreável.
 
+A extensão é recompilada com `npm ci` e empacotada no próprio workflow de release, a partir do SHA exato aprovado pelo CI (lockfile versionado), e o ZIP Manifest V3 é verificado antes de publicar. Não se usam `upload-artifact` ou `download-artifact`: assim a cota de armazenamento do Actions não bloqueia validações e releases. Os ZIPs finais continuam disponíveis nos assets da release privada.
+
+### Dependências e armazenamento (08/10/2026)
+
+- Correção das vulnerabilidades altas reportadas pelo `npm audit` em `sharp` (GHSA-wq5f-xc86-pv6w) e `source-map-js` (GHSA-68fv-2mgg-jv7q), com overrides atualizados e lockfile reproduzível.
+- O CI continua com audit de segurança, testes, cobertura, build e dry-run, mesmo sem upload de artefatos intermediários.
+- O armazenamento de artefatos antigos do Actions pode continuar ocupado até expirar ou ser limpo no GitHub. Isso não bloqueia mais o novo fluxo de CI/release.
+
 A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 
 A release vigente é **v0.0.37 / extensão 0.2.13**. O registro físico correspondente permanece em `docs/testing/acceptance-results/v0.0.37.md`.
@@ -89,4 +97,4 @@ O atalho do site abre a release mais recente no GitHub. O proprietário autentic
 
 O site usa Workers Static Assets diretamente. Não existe Worker script intermediário nem binding `ASSETS`.
 
-O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`.
+O único arquivo de configuração Wrangler vigente é o `wrangler.jsonc` da raiz, apontando para `apps/web/dist`. O nome do Worker no Wrangler é `nfe-agendamento-2-0`, correspondente ao Worker existente na Cloudflare. Essa igualdade evita o aviso de override automático de nome durante Builds; não cria nem renomeia um Worker em produção.
