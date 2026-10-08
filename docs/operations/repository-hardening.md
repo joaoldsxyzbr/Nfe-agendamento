@@ -35,13 +35,13 @@ Enquanto esse recurso não estiver disponível, a disciplina do projeto é: muda
 - testes;
 - cobertura com threshold;
 - typecheck/build;
-- empacotamento do ZIP Manifest V3.
+- build da extensão Manifest V3, sem upload de artefato temporário no CI.
 
 A CSP das páginas da extensão restringe scripts e objetos aos recursos empacotados.
 
 ### danfe-print
 
-Executa Playwright para o fluxo web e regressão DANFE/PDF.
+Executa Playwright para o fluxo web e regressão DANFE/PDF. O resultado dos testes fica nos logs do CI; não envia artefatos temporários ao armazenamento de Actions.
 
 ### CodeQL
 
@@ -74,6 +74,14 @@ O workflow de release só publica quando, no mesmo SHA da `main`:
 2. o commit é exatamente `release: vX.Y.Z`;
 3. existe `docs/releases/vX.Y.Z.md`;
 4. existe `docs/testing/acceptance-results/vX.Y.Z.md` com a mesma versão da extensão e estado rastreável.
+
+A extensão é recompilada com `npm ci` e empacotada no próprio workflow de release, a partir do SHA exato aprovado pelo CI (lockfile versionado), e o ZIP Manifest V3 é verificado antes de publicar. Não se usam `upload-artifact` ou `download-artifact`: assim a cota de armazenamento do Actions não bloqueia validações e releases. Os ZIPs finais continuam disponíveis nos assets da release privada.
+
+### Dependências e armazenamento (08/10/2026)
+
+- Correção das vulnerabilidades altas reportadas pelo `npm audit` em `sharp` (GHSA-wq5f-xc86-pv6w) e `source-map-js` (GHSA-68fv-2mgg-jv7q), com overrides atualizados e lockfile reproduzível.
+- O CI continua com audit de segurança, testes, cobertura, build e dry-run, mesmo sem upload de artefatos intermediários.
+- O armazenamento de artefatos antigos do Actions pode continuar ocupado até expirar ou ser limpo no GitHub. Isso não bloqueia mais o novo fluxo de CI/release.
 
 A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 

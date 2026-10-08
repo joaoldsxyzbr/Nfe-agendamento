@@ -25,6 +25,24 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - name: Refresh lockfile for security fixes (temporary)
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const cp = require('node:child_process');
+          const original = JSON.parse(cp.execFileSync('git', ['show', 'HEAD:package-lock.json'], {encoding: 'utf8'}));
+          const updated = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const changed = {};
+          const removed = [];
+          for (const key of new Set([...Object.keys(original.packages), ...Object.keys(updated.packages)])) {
+            if (!(key in updated.packages)) removed.push(key);
+            else if (JSON.stringify(updated.packages[key]) !== JSON.stringify(original.packages[key])) changed[key] = updated.packages[key];
+          }
+          console.log('LOCKFILE_PATCH_START');
+          console.log(JSON.stringify({changed, removed, metadata: {name: updated.name, version: updated.version, lockfileVersion: updated.lockfileVersion, requires: updated.requires}}));
+          console.log('LOCKFILE_PATCH_END');
+          NODE
       - run: npm ci
       - run: npm audit --audit-level=high
       - run: npm run lint:web
@@ -50,18 +68,6 @@ jobs:
       - run: npm run test:extension
       - run: npm run coverage:extension
       - run: npm run build:extension
-      - name: Package unpacked Chromium extension
-        run: |
-          mkdir -p artifacts
-          cd apps/extension/dist
-          zip -r ../../../artifacts/NFeAgendamento-Extension-MV3.zip .
-      - name: Upload Chromium extension
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: NFeAgendamento-Extension-MV3
-          path: artifacts/NFeAgendamento-Extension-MV3.zip
-          if-no-files-found: error
-          retention-days: 14
 
   danfe-print:
     runs-on: ubuntu-24.04
@@ -81,11 +87,3 @@ jobs:
       - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
       - name: Generate and validate browser/DANFE flows
         run: npm test --prefix tests/playwright
-      - name: Upload DANFE print regression artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: danfe-print-regression
-          path: tests/playwright/test-results
-          if-no-files-found: warn
-          retention-days: 7

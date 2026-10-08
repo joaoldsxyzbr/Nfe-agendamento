@@ -106,7 +106,7 @@ npm test --prefix tests/playwright
 ./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, typecheck/lint, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler.
+CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, typecheck/lint, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler. O CI não envia mais artefatos temporários ao Actions: a release recompila e empacota a extensão a partir do commit validado pelo CI. Consulte `docs/operations/repository-hardening.md`.
 
 O repositório é privado. No plano GitHub atual, CodeQL/code scanning para repositórios privados não está disponível; por isso o workflow CodeQL não faz parte do gate vigente.
 

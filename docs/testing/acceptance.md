@@ -69,6 +69,14 @@ Quando houver falha real/controlada:
 
 Validar pelo menos uma consulta completa em cada navegador.
 
+## Como executar e registrar uma validação real
+
+1. Instale a versão da extensão indicada no registro da release, primeiro no Chrome e depois no Edge.
+2. Em cada navegador, execute a consulta unitária completa com chave legítima, conclua manualmente o hCaptcha e confirme XML/DANFE; se o Portal exigir, use a seleção de certificado do navegador.
+3. No mesmo navegador, faça a segunda consulta, teste lote sequencial com pelo menos duas chaves, cancelamento e recuperação após falha.
+4. No arquivo `docs/testing/acceptance-results/vX.Y.Z.md`, registre apenas resultados observados (`APROVADO`, `REPROVADO` ou `NÃO EXECUTADO`) e o ambiente Windows sem dados identificadores. Nunca marque como aprovado só por CI verde ou por simulação.
+5. Se não houver acesso ao Windows/navegadores/certificado reais, deixe `Status: PENDENTE` e registre a limitação; não modifique nem fabrique resultados.
+
 ## Registro obrigatório por release
 
 Para cada release, copiar `docs/testing/acceptance-results/template.md` para `docs/testing/acceptance-results/vX.Y.Z.md`.
