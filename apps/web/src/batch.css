@@ -68,7 +68,7 @@
   gap: 6px;
 }
 
-.batch-form-footer > div {
+.batch-form-footer > div:first-child {
   display: flex;
   align-items: center;
   gap: 4px 14px;
@@ -213,13 +213,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
   min-height: 34px;
-  padding: 6px 7px;
+  padding: 6px 5px;
   border-radius: 5px;
   background: #18212b;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
@@ -294,7 +294,7 @@
 
 .batch-list-header {
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 118px 250px;
+  grid-template-columns: 26px minmax(0, 1fr) 118px 280px;
   align-items: center;
   gap: 9px;
   padding: 7px 10px;
@@ -314,7 +314,7 @@
 
 .batch-item {
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 118px 250px;
+  grid-template-columns: 26px minmax(0, 1fr) 118px 280px;
   align-items: center;
   gap: 9px;
   min-width: 0;
@@ -512,5 +512,20 @@
 
   .batch-details {
     white-space: normal;
+  }
+}
+
+@media (max-width: 420px) {
+  .batch-item-actions .batch-action {
+    flex-direction: column;
+    gap: 2px;
+    min-height: 44px;
+    padding: 4px 2px;
+    font-size: 9.5px;
+  }
+
+  .batch-item-actions .batch-action .action-icon {
+    width: 14px;
+    height: 14px;
   }
 }

@@ -22,7 +22,7 @@ describe('site theme', () => {
     expect(main).not.toContain('syncCompactMode');
     expect(main).not.toContain('is-compact-single');
     expect(batchStyles).not.toContain('is-compact-single');
-    expect(batchStyles).toContain('grid-template-columns: 26px minmax(0, 1fr) 118px 250px');
+    expect(batchStyles).toContain('grid-template-columns: 26px minmax(0, 1fr) 118px 280px');
     expect(batchStyles).toContain('box-shadow: inset 3px 0 0 var(--green)');
     expect(batchStyles).toContain('#batch-start:not(:disabled)');
     expect(batchStyles).toContain('background: #259e53');
@@ -33,6 +33,7 @@ describe('site theme', () => {
     expect(batchStyles).not.toContain("grid-row: 2;");
     expect(batchStyles).toContain('min-height: 34px');
     expect(batchStyles).toContain('max-height: 148px');
+    expect(batchStyles).toContain('.batch-form-footer > div:first-child');
     expect(styles).toContain('padding: 18px;');
   });
 
