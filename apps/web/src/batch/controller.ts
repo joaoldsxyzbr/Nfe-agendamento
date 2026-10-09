@@ -2,6 +2,7 @@ import type { PortalOperationStatus, SupplierResolution } from '../portal/contra
 import type { PortalExtensionInfo } from '../portal/extension-client';
 import type { ParsedNfe } from '../nfe/xml';
 import { MAX_BATCH_ITEMS, parseBatchInput } from './input';
+import { actionIconMarkup } from '../ui/action-icons';
 
 export type BatchItemStatus =
   | 'queued'
@@ -123,7 +124,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     if (summary.exceedsLimit) elements.inputSummary.textContent += ` · máximo ${MAX_BATCH_ITEMS} por lote`;
     elements.startButton.disabled = summary.validKeys.length === 0 || summary.exceedsLimit;
     elements.startButton.hidden = false;
-    elements.resetButton.hidden = true;
+    elements.resetButton.hidden = false;
     items = summary.validKeys.map(createBatchItem);
     renderState('Aguardando início', undefined, true);
   }
@@ -184,7 +185,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       running = false;
       abortController = null;
       setControlsRunning(false);
-      elements.startButton.hidden = true;
+      elements.startButton.hidden = false;
       elements.resetButton.hidden = false;
       const doneLabel = items.length === 1 ? 'Consulta concluída' : 'Lote concluído';
       const cancelledLabel = items.length === 1 ? 'Consulta cancelada' : 'Lote cancelado';
@@ -326,6 +327,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     const list = elements.list;
     if (!list) throw new Error('BatchController requer elements.list quando renderRows não é fornecido.');
     const documentRef = deps.document ?? document;
+    list.dataset.count = String(items.length);
 
     if (items.length === 0) {
       list.replaceChildren();
@@ -402,6 +404,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     preview.type = 'button';
     preview.className = 'batch-action';
     preview.textContent = 'Visualizar DANFE';
+    preview.insertAdjacentHTML('afterbegin', actionIconMarkup('view'));
     preview.addEventListener('click', () => {
       const current = items[index];
       if (current?.parsed) deps.openDanfe(current.parsed);
@@ -411,6 +414,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     print.type = 'button';
     print.className = 'batch-action';
     print.textContent = 'Imprimir';
+    print.insertAdjacentHTML('afterbegin', actionIconMarkup('print'));
     print.addEventListener('click', () => {
       const current = items[index];
       if (!current?.parsed) return;
@@ -422,6 +426,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     download.type = 'button';
     download.className = 'batch-action batch-download';
     download.textContent = 'Baixar XML';
+    download.insertAdjacentHTML('afterbegin', actionIconMarkup('download'));
     download.addEventListener('click', () => {
       const current = items[index];
       if (current?.parsed) deps.downloadXml(current.parsed);
@@ -431,12 +436,14 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     retry.type = 'button';
     retry.className = 'batch-action';
     retry.textContent = 'Tentar novamente';
+    retry.insertAdjacentHTML('afterbegin', actionIconMarkup('retry'));
     retry.addEventListener('click', () => void retryPortal(index));
 
     const importManualButton = documentRef.createElement('button');
     importManualButton.type = 'button';
     importManualButton.className = 'batch-action';
     importManualButton.textContent = 'Importar XML';
+    importManualButton.insertAdjacentHTML('afterbegin', actionIconMarkup('import'));
     importManualButton.addEventListener('click', () => void importManual(index));
 
     actions.append(preview, print, download, retry, importManualButton);
@@ -583,7 +590,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     hasRun = false;
     items = [];
     elements.startButton.hidden = false;
-    elements.resetButton.hidden = true;
+    elements.resetButton.hidden = false;
     syncDraft();
     elements.keysInput.focus();
   }
