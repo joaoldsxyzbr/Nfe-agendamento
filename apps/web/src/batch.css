@@ -101,7 +101,8 @@
 }
 
 .batch-run-toolbar[hidden],
-.batch-list[hidden] {
+.batch-list[hidden],
+.batch-toolbar-actions > button[hidden] {
   display: none !important;
 }
 
