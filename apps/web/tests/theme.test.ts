@@ -7,7 +7,7 @@ const batchStyles = readFileSync(new URL('../src/batch.css', import.meta.url), '
 const danfeStyles = readFileSync(new URL('../src/danfe/styles.css', import.meta.url), 'utf8');
 
 describe('site theme', () => {
-  it('keeps the application dark with a restrained blue primary while DANFE stays white', () => {
+  it('keeps the application dark with blue focus, green consultation and white DANFE', () => {
     expect(styles).toContain('color-scheme: dark');
     expect(styles).toContain('--bg: #0b0f14');
     expect(styles).toContain('--blue: #4c8dff');
@@ -22,8 +22,9 @@ describe('site theme', () => {
     expect(main).not.toContain('syncCompactMode');
     expect(main).not.toContain('is-compact-single');
     expect(batchStyles).not.toContain('is-compact-single');
-    expect(batchStyles).toContain('grid-template-columns: 32px minmax(220px, 1fr) 150px 250px');
+    expect(batchStyles).toContain('grid-template-columns: 32px minmax(220px, 1fr) 140px 290px');
     expect(batchStyles).toContain('box-shadow: inset 3px 0 0 var(--green)');
+    expect(batchStyles).toContain('#batch-start:not(:disabled)');
   });
 
   it('keeps one consultation card with a reset action for the unified flow', () => {
@@ -32,7 +33,9 @@ describe('site theme', () => {
     expect(main).toContain('id="batch-list"');
     expect(main).not.toContain('class="result-card"');
     expect(main).toContain('id="batch-reset"');
-    expect(main).toContain("batchReset.addEventListener('click', () => batchController.reset())");
+    expect(main).toContain("batchReset.addEventListener('click', () => {");
+    expect(main).toContain('batchController.reset();');
+    expect(main).toContain('updateKeyCount();');
     expect(styles).toContain('.lookup-reset');
   });
 });
