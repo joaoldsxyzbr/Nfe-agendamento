@@ -1,8 +1,10 @@
 #batch-form textarea {
   width: 100%;
-  min-height: 136px;
+  min-height: 48px;
+  max-height: 184px;
+  field-sizing: content;
   resize: vertical;
-  padding: 13px 14px;
+  padding: 12px 14px;
   border: 1px solid #344252;
   border-radius: var(--radius-control);
   background: #0e141b;
@@ -32,6 +34,20 @@
   cursor: not-allowed;
 }
 
+.batch-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+.batch-input-label label { margin: 0; }
+.batch-input-label span {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
 .batch-form-footer,
 .batch-run-toolbar {
   display: flex;
@@ -41,12 +57,12 @@
 }
 
 .batch-form-footer {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .batch-actions {
   display: grid;
-  grid-template-columns: minmax(0, 140px);
+  grid-template-columns: minmax(0, 158px);
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
@@ -77,15 +93,27 @@
 .batch-summary {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  min-height: 24px;
   margin: 0;
-  padding: 0 9px;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-control);
-  background: #151d26;
-  color: #aebbc9;
+  color: #c4d0dd;
   font-size: 12px;
   font-weight: 600;
+}
+
+.batch-run-toolbar[hidden],
+.batch-list[hidden] {
+  display: none !important;
+}
+
+#batch-start:not(:disabled) {
+  border-color: #259e53;
+  background: #259e53;
+  color: #fff;
+}
+
+#batch-start:hover:not(:disabled) {
+  border-color: #2cbb61;
+  background: #2cbb61;
 }
 
 .batch-run-toolbar {
@@ -173,7 +201,7 @@
 
 .batch-list-header {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) 150px 250px;
+  grid-template-columns: 32px minmax(220px, 1fr) 140px 290px;
   align-items: center;
   gap: 11px;
   padding: 8px 11px;
@@ -193,7 +221,7 @@
 
 .batch-item {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) 150px 250px;
+  grid-template-columns: 32px minmax(220px, 1fr) 140px 290px;
   align-items: center;
   gap: 11px;
   min-width: 0;
