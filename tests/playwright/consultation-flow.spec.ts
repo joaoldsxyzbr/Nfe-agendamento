@@ -85,6 +85,17 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await expect(row.locator('.batch-item-actions')).toHaveCSS('display', 'grid');
   await expect(row.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(3);
   await expect(page.locator('#batch-list')).toHaveAttribute('data-count', '1');
+  const desktopRow = await row.boundingBox();
+  expect(desktopRow).not.toBeNull();
+  expect(desktopRow!.height).toBeLessThan(90);
+  const desktopActions = await row.locator('.batch-item-actions').boundingBox();
+  expect(desktopActions).not.toBeNull();
+  expect(desktopActions!.y + desktopActions!.height).toBeLessThanOrEqual(desktopRow!.y + desktopRow!.height + 1);
+
+  await page.setViewportSize({ width: 390, height: 780 });
+  await expect(row.getByRole('button', { name: 'Visualizar DANFE' })).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Baixar XML' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.locator('#batch-zip')).toBeHidden();
   const reset = page.locator('#batch-reset');
   await expect(reset).toBeVisible();

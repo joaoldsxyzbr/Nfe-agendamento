@@ -45,6 +45,9 @@ describe('application shell', () => {
     expect(main).not.toContain('id="mode-single"');
     expect(main).not.toContain('id="mode-batch"');
     expect(batch).toContain('Visualizar DANFE');
+    expect(batch).toContain("preview.textContent = 'Visualizar'");
+    expect(batch).toContain("download.textContent = 'XML'");
+    expect(batch).toContain("information.append(details, key);");
     expect(batch).toContain("print.textContent = 'Imprimir'");
     expect(batch).toContain('row.preview.hidden = item.parsed === null');
     expect(batch).toContain('elements.list.hidden = !hasRun');
