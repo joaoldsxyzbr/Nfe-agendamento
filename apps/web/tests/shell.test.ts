@@ -31,11 +31,18 @@ describe('application shell', () => {
     const batch = readFileSync(fromWeb('src/batch/controller.ts'), 'utf8');
 
     expect(main).toContain('id="batch-keys"');
+    expect(main).toContain('id="batch-key-count"');
+    expect(main).toContain('rows="1"');
+    expect(main).toContain('id="batch-run-toolbar" hidden');
+    expect(main).toContain('id="batch-list" class="batch-list" aria-live="polite" hidden');
     expect(main).toContain('id="batch-start"');
     expect(main).toContain('id="batch-reset"');
     expect(main).not.toContain('id="mode-single"');
     expect(main).not.toContain('id="mode-batch"');
     expect(batch).toContain('Visualizar DANFE');
+    expect(batch).toContain("print.textContent = 'Imprimir'");
+    expect(batch).toContain('row.preview.hidden = item.parsed === null');
+    expect(batch).toContain('elements.list.hidden = !hasRun');
     expect(batch).toContain('Baixar XML');
     expect(batch).toContain('Importar XML');
     expect(main).toContain('Baixar XMLs (.zip)');

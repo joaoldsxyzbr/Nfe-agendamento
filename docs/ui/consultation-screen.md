@@ -22,16 +22,22 @@ Não existe diagnóstico de consulta direta, Bridge ou configuração de CNPJ do
 
 ## Consulta unificada
 
+O visual é compacto: título curto, campo de entrada, contador de caracteres ou quantidade de chaves, botão de consulta destacado e resultados abaixo. Mantém tema escuro e o mesmo cabeçalho antes, durante e depois da consulta.
+
 Existe um único campo de chaves.
 
+- a entrada é uma área de texto de uma linha que cresce com o conteúdo (até a altura máxima), sem alternar de tela;
 - uma chave usa o mesmo controller e a mesma máquina de estados do lote;
 - várias chaves são processadas sequencialmente;
 - não existe seletor visual “uma NF-e / lote”;
 - uma única janela do Portal pode ficar ativa;
 - hCaptcha continua manual;
 - cancelamento interrompe a sequência;
-- resultados concluídos liberam DANFE e XML;
-- múltiplos resultados concluídos liberam ZIP e impressão conjunta.
+- a lista de resultados e o progresso só aparecem após iniciar a consulta;
+- resultados concluídos liberam visualizar DANFE, imprimir DANFE e baixar XML por nota;
+- múltiplos resultados concluídos liberam ZIP e impressão conjunta;
+- estados sem XML não mostram ações desabilitadas de DANFE/XML;
+- o botão **Nova consulta** ocupa a mesma posição do botão principal ao concluir.
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
 
@@ -56,7 +62,7 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 - tema escuro;
 - controles e foco padronizados;
-- consulta como ação protagonista;
+- consulta como ação protagonista, destacada em verde;
 - geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;
 - `prefers-reduced-motion` respeitado no drawer;
