@@ -14,6 +14,8 @@ function harness(
   const portalStarts: string[] = [];
   const input = el({ value: '', disabled: false, focus: () => {} } as unknown as HTMLTextAreaElement);
   const route = el({ textContent: '' } as HTMLElement);
+  const toolbar = el({ hidden: true } as HTMLElement);
+  const list = el({ hidden: true } as HTMLElement);
   const zipButton = el({ disabled: true } as HTMLButtonElement);
   const printButton = el({ disabled: true } as HTMLButtonElement);
   const portal = {
@@ -42,6 +44,8 @@ function harness(
       printButton,
       progress: el({ textContent: '' } as HTMLElement),
       routeText: route,
+      toolbar,
+      list,
       resetButton: el({ hidden: true, disabled: false } as HTMLButtonElement),
     },
     portal: portal as never,
@@ -63,10 +67,27 @@ function harness(
     renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
   });
 
-  return { controller, input, route, zipButton, printButton, portalStarts, snapshots };
+  return { controller, input, route, toolbar, list, zipButton, printButton, portalStarts, snapshots };
 }
 
 describe('batch controller Portal-only', () => {
+  it('reveals progress and results after starting, retaining one input for batches', async () => {
+    const h = harness();
+    h.input.value = `${A}\n${B}`;
+    h.controller.syncDraft();
+    expect(h.toolbar.hidden).toBe(true);
+    expect(h.list.hidden).toBe(true);
+
+    await h.controller.start();
+    expect(h.toolbar.hidden).toBe(false);
+    expect(h.list.hidden).toBe(false);
+    expect(h.portalStarts).toEqual([A, B]);
+
+    h.controller.reset();
+    expect(h.toolbar.hidden).toBe(true);
+    expect(h.list.hidden).toBe(true);
+  });
+
   it('processes every item sequentially through the Portal', async () => {
     const h = harness();
     h.input.value = `${A}\n${B}`;

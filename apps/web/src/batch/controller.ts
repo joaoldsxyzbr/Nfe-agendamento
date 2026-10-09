@@ -41,6 +41,7 @@ type RenderedBatchRow = {
   badge: HTMLElement;
   source: HTMLElement;
   preview: HTMLButtonElement;
+  print: HTMLButtonElement;
   download: HTMLButtonElement;
   retry: HTMLButtonElement;
   importManual: HTMLButtonElement;
@@ -67,6 +68,7 @@ export type BatchControllerDependencies = Readonly<{
     progress: HTMLElement;
     routeText: HTMLElement;
     resetButton: HTMLButtonElement;
+    toolbar?: HTMLElement;
     list?: HTMLElement;
   }>;
   portal: ExtensionBatchClient;
@@ -98,6 +100,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
   const { elements } = deps;
   let items: MutableBatchItem[] = [];
   let running = false;
+  let hasRun = false;
   let preflighting = false;
   let manualActionBusy = false;
   let cancelled = false;
@@ -107,6 +110,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
 
   function syncDraft(): void {
     if (running || preflighting || manualActionBusy) return;
+    hasRun = false;
     const summary = parseBatchInput(elements.keysInput.value);
     const parts = [
       `${summary.validKeys.length} válida${summary.validKeys.length === 1 ? '' : 's'}`,
@@ -132,6 +136,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       return;
     }
 
+    hasRun = true;
     preflighting = true;
     setControlsLocked(true);
     renderState('Verificando extensão');
@@ -307,6 +312,8 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     const terminal = items.filter((item) => isTerminalStatus(item.status)).length;
     elements.progress.textContent = `${terminal} de ${items.length}`;
     elements.routeText.textContent = running ? `${label} · Portal Nacional` : label;
+    if (elements.toolbar) elements.toolbar.hidden = !hasRun;
+    if (elements.list) elements.list.hidden = !hasRun;
     refreshResultActions(changedItem, refreshAllRows);
   }
 
@@ -400,6 +407,17 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       if (current?.parsed) deps.openDanfe(current.parsed);
     });
 
+    const print = documentRef.createElement('button');
+    print.type = 'button';
+    print.className = 'batch-action';
+    print.textContent = 'Imprimir';
+    print.addEventListener('click', () => {
+      const current = items[index];
+      if (!current?.parsed) return;
+      deps.openDanfeDocuments([current.parsed], 'Imprimir DANFE');
+      deps.printWindow();
+    });
+
     const download = documentRef.createElement('button');
     download.type = 'button';
     download.className = 'batch-action batch-download';
@@ -421,7 +439,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     importManualButton.textContent = 'Importar XML';
     importManualButton.addEventListener('click', () => void importManual(index));
 
-    actions.append(preview, download, retry, importManualButton);
+    actions.append(preview, print, download, retry, importManualButton);
     root.append(order, information, status, actions);
 
     const rendered = {
@@ -431,6 +449,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       badge,
       source,
       preview,
+      print,
       download,
       retry,
       importManual: importManualButton,
@@ -458,7 +477,11 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     row.source.textContent = item.source ?? '';
     row.source.hidden = item.source === null;
     row.preview.disabled = item.parsed === null;
+    row.preview.hidden = item.parsed === null;
+    row.print.disabled = item.parsed === null;
+    row.print.hidden = item.parsed === null;
     row.download.disabled = item.parsed === null;
+    row.download.hidden = item.parsed === null;
     row.retry.hidden = item.status !== 'portal_error';
     row.retry.disabled = preflighting || running || manualActionBusy;
     row.importManual.hidden = item.status !== 'portal_error';
@@ -496,6 +519,8 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     const completed = completedItems();
     elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
     elements.printButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
+    elements.zipButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
+    elements.printButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
 
     if (refreshAllRows) {
       renderRows();
@@ -555,6 +580,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
   function reset(): void {
     if (preflighting || running || manualActionBusy) return;
     elements.keysInput.value = '';
+    hasRun = false;
     items = [];
     elements.startButton.hidden = false;
     elements.resetButton.hidden = true;

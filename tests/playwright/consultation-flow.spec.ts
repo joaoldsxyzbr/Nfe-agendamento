@@ -58,13 +58,19 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   }, { xmlPayload: xml });
 
   await page.goto('/');
+  await expect(page.locator('#batch-run-toolbar')).toBeHidden();
+  await expect(page.locator('#batch-list')).toBeHidden();
   await expect(page.locator('#integration-status-text')).toContainText('Extensão conectada');
   const input = page.locator('#batch-keys');
   const consult = page.locator('#batch-start');
   const cancel = page.locator('#batch-cancel');
   await input.fill(ACCESS_KEY);
+  await expect(page.locator('#batch-key-count')).toHaveText('Qtd. caracteres: 44');
+  await expect(page.locator('#batch-list')).toBeHidden();
   await expect(consult).toBeEnabled();
   await consult.click();
+  await expect(page.locator('#batch-run-toolbar')).toBeVisible();
+  await expect(page.locator('#batch-list')).toBeVisible();
   await expect(page.locator('#batch-route')).toContainText('Portal');
   await expect(cancel).toBeVisible();
   const row = page.locator('.batch-item[data-state="success"]');
@@ -72,10 +78,15 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await expect(cancel).toBeHidden();
   await expect(row.getByRole('button', { name: 'Visualizar DANFE' })).toBeEnabled();
   await expect(row.getByRole('button', { name: 'Baixar XML' })).toBeEnabled();
+  await expect(row.getByRole('button', { name: 'Imprimir', exact: true })).toBeEnabled();
+  await expect(page.locator('#batch-zip')).toBeHidden();
   const reset = page.locator('#batch-reset');
   await expect(reset).toBeVisible();
   await reset.click();
   await expect(input).toHaveValue('');
+  await expect(page.locator('#batch-key-count')).toHaveText('Qtd. caracteres: 0');
+  await expect(page.locator('#batch-run-toolbar')).toBeHidden();
+  await expect(page.locator('#batch-list')).toBeHidden();
 });
 
 

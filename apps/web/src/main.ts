@@ -1,4 +1,5 @@
 import { createBatchController } from './batch/controller';
+import { parseBatchInput } from './batch/input';
 import { createStoredZip } from './batch/zip';
 import { attachDanfeZoom, renderDanfe } from './danfe/render';
 import { createDanfeViewer } from './danfe/viewer';
@@ -37,38 +38,38 @@ app.innerHTML = `
 
     <section class="lookup-card" aria-labelledby="lookup-title">
       <div class="section-heading lookup-heading">
-        <div>
-          <p class="eyebrow">Consulta</p>
-          <h2 id="lookup-title">Chaves de acesso</h2>
-        </div>
-        <span class="key-hint">44 caracteres</span>
+        <h2 id="lookup-title">Consulta de NF-e</h2>
+        <span class="key-hint">Uma chave ou várias</span>
       </div>
 
       <div id="batch-consultation-panel">
         <form id="batch-form" novalidate>
-          <label for="batch-keys">Chaves das NF-e</label>
+          <div class="batch-input-label">
+            <label for="batch-keys">Digite a chave de acesso</label>
+            <span id="batch-key-count" aria-live="polite">Qtd. caracteres: 0</span>
+          </div>
           <textarea
             id="batch-keys"
-            rows="6"
+            rows="1"
             autocomplete="off"
-            autocapitalize="characters"
+            inputmode="numeric"
             spellcheck="false"
-            placeholder="Cole uma ou várias chaves, uma por linha"
-            aria-describedby="batch-help batch-input-summary"
+            placeholder="44 dígitos da chave de acesso"
+            aria-describedby="batch-help batch-input-summary batch-key-count"
           ></textarea>
           <div class="batch-form-footer">
             <div>
-              <p id="batch-input-summary" class="batch-summary" aria-live="polite">Nenhuma chave informada.</p>
-              <p id="batch-help" class="help-text">Todas as consultas usam o Portal Nacional. O lote processa uma NF-e por vez e o hCaptcha continua manual.</p>
+              <p id="batch-input-summary" class="batch-summary" aria-live="polite">Informe uma chave para consultar.</p>
+              <p id="batch-help" class="help-text">Para consultar em lote, cole várias chaves (uma por linha). O hCaptcha é resolvido no Portal Nacional.</p>
             </div>
             <div class="batch-actions" aria-label="Ações da consulta">
-              <button id="batch-start" type="submit" disabled>Consultar</button>
+              <button id="batch-start" type="submit" disabled>Consultar nota</button>
               <button id="batch-reset" class="lookup-reset batch-reset" type="button" hidden>Nova consulta</button>
             </div>
           </div>
         </form>
 
-        <div class="batch-run-toolbar" id="batch-run-toolbar">
+        <div class="batch-run-toolbar" id="batch-run-toolbar" hidden>
           <div class="batch-progress-copy" aria-live="polite">
             <strong id="batch-progress">0 de 0</strong>
             <span id="batch-route">Aguardando início</span>
@@ -80,12 +81,7 @@ app.innerHTML = `
           </div>
         </div>
 
-        <div id="batch-list" class="batch-list" aria-live="polite">
-          <div class="empty-state batch-empty">
-            <strong>Nenhuma NF-e carregada</strong>
-            <span>Cole uma ou mais chaves acima para iniciar.</span>
-          </div>
-        </div>
+        <div id="batch-list" class="batch-list" aria-live="polite" hidden></div>
       </div>
     </section>
   </div>
@@ -113,6 +109,8 @@ const integrationStatusText = requireElement<HTMLElement>('#integration-status-t
 const batchForm = requireElement<HTMLFormElement>('#batch-form');
 const batchKeysInput = requireElement<HTMLTextAreaElement>('#batch-keys');
 const batchInputSummary = requireElement<HTMLElement>('#batch-input-summary');
+const batchKeyCount = requireElement<HTMLElement>('#batch-key-count');
+const batchRunToolbar = requireElement<HTMLElement>('#batch-run-toolbar');
 const batchStart = requireElement<HTMLButtonElement>('#batch-start');
 const batchReset = requireElement<HTMLButtonElement>('#batch-reset');
 const batchProgress = requireElement<HTMLElement>('#batch-progress');
@@ -156,6 +154,7 @@ const batchController = createBatchController({
     printButton: batchPrint,
     progress: batchProgress,
     routeText: batchRouteText,
+    toolbar: batchRunToolbar,
     list: batchList,
   },
   portal: portalExtension,
@@ -174,8 +173,14 @@ batchForm.addEventListener('submit', (event) => {
   void batchController.start();
 });
 
-batchKeysInput.addEventListener('input', scheduleBatchDraftSync);
-batchReset.addEventListener('click', () => batchController.reset());
+batchKeysInput.addEventListener('input', () => {
+  updateKeyCount();
+  scheduleBatchDraftSync();
+});
+batchReset.addEventListener('click', () => {
+  batchController.reset();
+  updateKeyCount();
+});
 batchCancel.addEventListener('click', () => {
   void batchController.cancel();
 });
@@ -199,7 +204,17 @@ window.addEventListener('pagehide', () => {
 
 void refreshExtensionStatus();
 batchController.syncDraft();
+updateKeyCount();
 batchKeysInput.focus();
+
+function updateKeyCount(): void {
+  const value = batchKeysInput.value.trim();
+  const summary = parseBatchInput(value);
+  const digits = value.replace(/[^0-9]/g, '').length;
+  batchKeyCount.textContent = summary.totalCandidates > 1
+    ? `Qtd. chaves: ${summary.totalCandidates}`
+    : `Qtd. caracteres: ${digits}`;
+}
 
 function scheduleBatchDraftSync(): void {
   if (batchDraftTimer !== null) globalThis.clearTimeout(batchDraftTimer);
