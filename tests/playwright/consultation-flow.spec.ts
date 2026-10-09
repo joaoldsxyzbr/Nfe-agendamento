@@ -60,6 +60,9 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#batch-run-toolbar')).toBeHidden();
   await expect(page.locator('#batch-list')).toBeHidden();
+  await expect(page.locator('#batch-reset')).toBeVisible();
+  await expect(page.locator('.batch-actions')).toHaveCSS('display', 'grid');
+  await expect(page.locator('.batch-actions .action-icon')).toHaveCount(2);
   await expect(page.locator('#integration-status-text')).toContainText('Extensão conectada');
   const input = page.locator('#batch-keys');
   const consult = page.locator('#batch-start');
@@ -79,6 +82,9 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
   await expect(row.getByRole('button', { name: 'Visualizar DANFE' })).toBeEnabled();
   await expect(row.getByRole('button', { name: 'Baixar XML' })).toBeEnabled();
   await expect(row.getByRole('button', { name: 'Imprimir', exact: true })).toBeEnabled();
+  await expect(row.locator('.batch-item-actions')).toHaveCSS('display', 'grid');
+  await expect(row.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(3);
+  await expect(page.locator('#batch-list')).toHaveAttribute('data-count', '1');
   await expect(page.locator('#batch-zip')).toBeHidden();
   const reset = page.locator('#batch-reset');
   await expect(reset).toBeVisible();
@@ -165,6 +171,7 @@ test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ pag
   const failedRow = page.locator('.batch-item[data-state="portal_error"]');
   await expect(failedRow).toBeVisible();
   await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
+  await expect(failedRow.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(2);
 
   const chooserPromise = page.waitForEvent('filechooser');
   await failedRow.getByRole('button', { name: 'Importar XML' }).click();

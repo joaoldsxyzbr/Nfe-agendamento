@@ -432,6 +432,10 @@
     flex-direction: column;
   }
 
+  .batch-form-footer {
+    flex-direction: column-reverse;
+  }
+
   .batch-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -455,9 +459,15 @@
     width: 100%;
   }
 
-  .batch-item {
+  .batch-item,
+  .batch-list[data-count='1'] .batch-item {
     grid-template-columns: 30px minmax(0, 1fr);
     align-items: start;
+  }
+
+  .batch-list[data-count='1'] .batch-item-actions {
+    grid-column: 1 / -1;
+    grid-row: auto;
   }
 
   .batch-status,

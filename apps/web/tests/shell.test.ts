@@ -37,6 +37,11 @@ describe('application shell', () => {
     expect(main).toContain('id="batch-list" class="batch-list" aria-live="polite" hidden');
     expect(main).toContain('id="batch-start"');
     expect(main).toContain('id="batch-reset"');
+    expect(main).toContain("actionIconMarkup('new')");
+    expect(main).toContain("actionIconMarkup('consult')");
+    expect(batch).toContain("actionIconMarkup('view')");
+    expect(batch).toContain("actionIconMarkup('print')");
+    expect(batch).toContain("actionIconMarkup('download')");
     expect(main).not.toContain('id="mode-single"');
     expect(main).not.toContain('id="mode-batch"');
     expect(batch).toContain('Visualizar DANFE');
