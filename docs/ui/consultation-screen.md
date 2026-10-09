@@ -37,7 +37,11 @@ Existe um único campo de chaves.
 - resultados concluídos liberam visualizar DANFE, imprimir DANFE e baixar XML por nota;
 - múltiplos resultados concluídos liberam ZIP e impressão conjunta;
 - estados sem XML não mostram ações desabilitadas de DANFE/XML;
-- o botão **Nova consulta** ocupa a mesma posição do botão principal ao concluir.
+- os botões **Nova consulta** e **Consultar nota** permanecem lado a lado desde o início, com tamanho uniforme e ícones;
+- uma NF-e concluída mostra **Visualizar DANFE**, **Imprimir** e **Baixar XML** em três blocos horizontais, com ícone acima do texto;
+- o lote exibe as mesmas ações por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
+- botões de recuperação de erro seguem o mesmo padrão de ícones;
+- o padrão de botões toma apenas **layout/ícones/tipografia** como inspiração do FSist: mantém as cores próprias do sistema (verde já existente na ação principal, azul nos focos e superfícies escuras nas ações secundárias).
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
 
@@ -62,6 +66,7 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 - tema escuro;
 - controles e foco padronizados;
+- botões de cantos discretos, ícones locais em SVG e rótulos maiúsculos nos comandos de consulta e resultado;
 - consulta como ação protagonista, destacada em verde;
 - geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;

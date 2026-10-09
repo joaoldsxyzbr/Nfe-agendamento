@@ -1,4 +1,5 @@
 import { createBatchController } from './batch/controller';
+import { actionIconMarkup } from './ui/action-icons';
 import { parseBatchInput } from './batch/input';
 import { createStoredZip } from './batch/zip';
 import { attachDanfeZoom, renderDanfe } from './danfe/render';
@@ -63,8 +64,8 @@ app.innerHTML = `
               <p id="batch-help" class="help-text">Para consultar em lote, cole várias chaves (uma por linha). O hCaptcha é resolvido no Portal Nacional.</p>
             </div>
             <div class="batch-actions" aria-label="Ações da consulta">
-              <button id="batch-start" type="submit" disabled>Consultar nota</button>
-              <button id="batch-reset" class="lookup-reset batch-reset" type="button" hidden>Nova consulta</button>
+              <button id="batch-reset" class="lookup-reset batch-reset" type="button">${actionIconMarkup('new')}<span>Nova consulta</span></button>
+              <button id="batch-start" type="submit" disabled>${actionIconMarkup('consult')}<span>Consultar nota</span></button>
             </div>
           </div>
         </form>
@@ -75,9 +76,9 @@ app.innerHTML = `
             <span id="batch-route">Aguardando início</span>
           </div>
           <div class="batch-toolbar-actions">
-            <button id="batch-cancel" class="secondary-button" type="button" hidden>Cancelar consulta</button>
-            <button id="batch-zip" class="secondary-button" type="button" disabled>Baixar XMLs (.zip)</button>
-            <button id="batch-print" class="secondary-button" type="button" disabled>Imprimir DANFEs</button>
+            <button id="batch-cancel" class="secondary-button" type="button" hidden>${actionIconMarkup('cancel')}<span>Cancelar consulta</span></button>
+            <button id="batch-zip" class="secondary-button" type="button" disabled>${actionIconMarkup('zip')}<span>Baixar XMLs (.zip)</span></button>
+            <button id="batch-print" class="secondary-button" type="button" disabled>${actionIconMarkup('print')}<span>Imprimir DANFEs</span></button>
           </div>
         </div>
 

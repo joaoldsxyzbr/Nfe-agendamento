@@ -57,33 +57,58 @@
 }
 
 .batch-form-footer {
-  margin-top: 12px;
-}
-
-.batch-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 158px);
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  min-height: 46px;
-  margin-top: 0;
-}
-
-.batch-actions > button {
-  grid-column: 1;
-  grid-row: 1;
-  width: 100%;
-}
-
-.batch-actions .batch-reset {
-  min-height: 46px;
-  margin-bottom: 0;
-  padding: 0 18px;
+  flex-direction: column-reverse;
+  margin-top: 8px;
+  gap: 8px;
 }
 
 .batch-form-footer > div {
   min-width: 0;
+  width: 100%;
+}
+
+/* Referência FSist: duas ações lado a lado, sem copiar as cores do site. */
+.batch-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  width: 100%;
+}
+
+.batch-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  min-height: 54px;
+  padding: 9px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.batch-actions .batch-reset {
+  min-height: 54px;
+  margin: 0;
+  border-color: #3a495a;
+  background: #1a232d;
+  color: #dce5ee;
+}
+
+.batch-actions .batch-reset:hover:not(:disabled) {
+  border-color: #516275;
+  background: #222d39;
+}
+
+.batch-actions .action-icon {
+  width: 23px;
+  height: 23px;
+  flex: 0 0 auto;
 }
 
 .batch-form-footer .help-text {
@@ -140,12 +165,71 @@
   font-size: 12px;
 }
 
-.batch-toolbar-actions,
-.batch-item-actions {
+.batch-toolbar-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 7px;
+}
+
+.batch-item-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  min-width: 0;
+}
+
+.action-icon {
+  display: block;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+}
+
+.batch-toolbar-actions > button {
+  gap: 7px;
+}
+
+.batch-item-actions .batch-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 75px;
+  padding: 9px 5px;
+  border-radius: 3px;
+  background: #18212b;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.batch-item-actions .batch-action .action-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.batch-item[data-state='portal_error'] .batch-item-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Uma NF-e aproveita toda a largura para as três ações, sem outro modo de tela. */
+.batch-list[data-count='1'] .batch-list-header {
+  display: none;
+}
+
+.batch-list[data-count='1'] .batch-item {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+}
+
+.batch-list[data-count='1'] .batch-item-actions {
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
 
 .secondary-button,
@@ -348,15 +432,23 @@
     flex-direction: column;
   }
 
-  .batch-actions {
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr);
+  .batch-form-footer {
+    flex-direction: column-reverse;
   }
 
-  .batch-actions button {
-    width: 100%;
-    min-width: 0;
-    padding-inline: 12px;
+  .batch-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .batch-actions > button {
+    gap: 6px;
+    padding-inline: 6px;
+    font-size: 11px;
+  }
+
+  .batch-actions .action-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .batch-toolbar-actions {
@@ -367,9 +459,15 @@
     width: 100%;
   }
 
-  .batch-item {
+  .batch-item,
+  .batch-list[data-count='1'] .batch-item {
     grid-template-columns: 30px minmax(0, 1fr);
     align-items: start;
+  }
+
+  .batch-list[data-count='1'] .batch-item-actions {
+    grid-column: 1 / -1;
+    grid-row: auto;
   }
 
   .batch-status,
@@ -378,7 +476,12 @@
   }
 
   .batch-item-actions {
-    justify-content: stretch;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .batch-item[data-state='portal_error'] .batch-item-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .batch-item-actions button {
