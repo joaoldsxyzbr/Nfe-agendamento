@@ -387,7 +387,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     key.textContent = abbreviateAccessKey(item.accessKey);
     const details = documentRef.createElement('span');
     details.className = 'batch-details';
-    information.append(key, details);
+    information.append(details, key);
 
     const status = documentRef.createElement('div');
     status.className = 'batch-status';
@@ -403,7 +403,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     const preview = documentRef.createElement('button');
     preview.type = 'button';
     preview.className = 'batch-action';
-    preview.textContent = 'Visualizar DANFE';
+    preview.textContent = 'Visualizar';
+    preview.setAttribute('aria-label', 'Visualizar DANFE');
+    preview.title = 'Visualizar DANFE';
     preview.insertAdjacentHTML('afterbegin', actionIconMarkup('view'));
     preview.addEventListener('click', () => {
       const current = items[index];
@@ -425,7 +427,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     const download = documentRef.createElement('button');
     download.type = 'button';
     download.className = 'batch-action batch-download';
-    download.textContent = 'Baixar XML';
+    download.textContent = 'XML';
+    download.setAttribute('aria-label', 'Baixar XML');
+    download.title = 'Baixar XML';
     download.insertAdjacentHTML('afterbegin', actionIconMarkup('download'));
     download.addEventListener('click', () => {
       const current = items[index];
@@ -480,6 +484,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       row.details.textContent = item.message ?? statusLabel(item.status);
     }
 
+    row.details.title = row.details.textContent ?? '';
     row.badge.textContent = statusLabel(item.status);
     row.source.textContent = item.source ?? '';
     row.source.hidden = item.source === null;
