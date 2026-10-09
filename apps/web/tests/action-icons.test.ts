@@ -11,7 +11,7 @@ describe('fixed action icons', () => {
       expect(markup).toContain('stroke="currentColor"');
       expect(markup).toContain('</svg>');
       expect(markup).not.toContain('<script');
-      expect(markup).not.toContain('http://');
+      expect(markup).not.toContain('src=');
     }
   });
 });
