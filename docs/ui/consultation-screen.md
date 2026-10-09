@@ -22,7 +22,7 @@ Não existe diagnóstico de consulta direta, Bridge ou configuração de CNPJ do
 
 ## Consulta unificada
 
-O visual é compacto: título curto, campo de entrada, contador de caracteres ou quantidade de chaves, botão de consulta destacado e resultados abaixo. Mantém tema escuro e o mesmo cabeçalho antes, durante e depois da consulta.
+O visual é compacto: título curto, campo de entrada, contador de caracteres ou quantidade de chaves, botão de consulta destacado e resultados abaixo. Mantém tema escuro e o mesmo cabeçalho antes, durante e depois da consulta. O refinamento de outubro mantém a **mesma composição** em consulta individual ou lote, alterando apenas as linhas de resultados (não há tela nem modo separado).
 
 Existe um único campo de chaves.
 
@@ -38,8 +38,9 @@ Existe um único campo de chaves.
 - múltiplos resultados concluídos liberam ZIP e impressão conjunta;
 - estados sem XML não mostram ações desabilitadas de DANFE/XML;
 - os botões **Nova consulta** e **Consultar nota** permanecem lado a lado desde o início, com tamanho uniforme e ícones;
-- uma NF-e concluída mostra **Visualizar DANFE**, **Imprimir** e **Baixar XML** em três blocos horizontais, com ícone acima do texto;
-- o lote exibe as mesmas ações por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
+- uma NF-e concluída mostra **Visualizar**, **Imprimir** e **XML** em três botões baixos, com ícone ao lado do texto; os nomes acessíveis completos continuam **Visualizar DANFE** e **Baixar XML**;
+- o lote exibe as mesmas ações compactas por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
+- a nota individual não abre mais uma faixa extra de botões abaixo da linha; o cabeçalho da lista é omitido quando só há uma NF-e;
 - botões de recuperação de erro seguem o mesmo padrão de ícones;
 - o padrão de botões toma apenas **layout/ícones/tipografia** como inspiração do FSist: mantém as cores próprias do sistema (verde já existente na ação principal, azul nos focos e superfícies escuras nas ações secundárias).
 
@@ -66,7 +67,10 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 - tema escuro;
 - controles e foco padronizados;
-- botões de cantos discretos, ícones locais em SVG e rótulos maiúsculos nos comandos de consulta e resultado;
+- botões de cantos discretos e ícones locais em SVG; rótulos centrais nos comandos de consulta e rótulos curtos nas ações de cada NF-e;
+- cabeçalho reduzido, campo de uma linha que cresce com lote, barra de progresso compacta, informações prioritárias acima da chave abreviada;
+- tooltip nativo com informação completa em detalhes truncados, botões acessíveis por nome completo;
+- botões mantêm altura mínima confortável e layout responsivo (ícone acima do rótulo apenas até 420 px), sem criar rolagem horizontal;
 - consulta como ação protagonista, destacada em verde;
 - geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;

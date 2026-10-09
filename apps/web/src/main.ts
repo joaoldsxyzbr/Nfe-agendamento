@@ -55,13 +55,13 @@ app.innerHTML = `
             autocomplete="off"
             inputmode="numeric"
             spellcheck="false"
-            placeholder="44 dígitos da chave de acesso"
+            placeholder="Digite ou cole a chave de 44 dígitos"
             aria-describedby="batch-help batch-input-summary batch-key-count"
           ></textarea>
           <div class="batch-form-footer">
             <div>
               <p id="batch-input-summary" class="batch-summary" aria-live="polite">Informe uma chave para consultar.</p>
-              <p id="batch-help" class="help-text">Para consultar em lote, cole várias chaves (uma por linha). O hCaptcha é resolvido no Portal Nacional.</p>
+              <p id="batch-help" class="help-text">Lote: uma chave por linha. hCaptcha manual no Portal Nacional.</p>
             </div>
             <div class="batch-actions" aria-label="Ações da consulta">
               <button id="batch-reset" class="lookup-reset batch-reset" type="button">${actionIconMarkup('new')}<span>Nova consulta</span></button>

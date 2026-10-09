@@ -137,16 +137,16 @@ select:disabled {
 .app-shell {
   width: min(1040px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 26px 0 44px;
+  padding: 16px 0 26px;
 }
 
 .topbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 18px;
-  padding: 2px 0 4px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 0;
 }
 
 .topbar-controls {
@@ -186,8 +186,8 @@ h1 {
 
 h2 {
   margin-bottom: 0;
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 720;
   letter-spacing: -0.01em;
 }
 
@@ -204,8 +204,8 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 38px;
-  padding: 0 12px;
+  min-height: 34px;
+  padding: 0 10px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-control);
   background: var(--surface-2);
@@ -231,7 +231,7 @@ h2 {
 }
 
 .lookup-card {
-  padding: 24px;
+  padding: 18px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-card);
   background: #121920;
@@ -241,15 +241,15 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 13px;
 }
 
 .key-hint {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 0 9px;
+  min-height: 24px;
+  padding: 0 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   color: var(--muted);
@@ -394,12 +394,16 @@ label {
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 20px, 1040px);
-    padding-top: 18px;
+    padding-top: 12px;
   }
 
   .topbar {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
+  }
+
+  .lookup-card {
+    padding: 12px;
   }
 
   .topbar-controls {
@@ -411,6 +415,16 @@ label {
   .section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .lookup-heading {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .lookup-heading h2 {
+    font-size: 16px;
   }
 
   button {

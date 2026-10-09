@@ -1,17 +1,20 @@
 #batch-form textarea {
   width: 100%;
-  min-height: 48px;
-  max-height: 184px;
+  min-height: 42px;
+  max-height: 148px;
   field-sizing: content;
   resize: vertical;
-  padding: 12px 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #465669 #0e141b;
+  padding: 9px 12px;
   border: 1px solid #344252;
   border-radius: var(--radius-control);
   background: #0e141b;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.45;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -26,7 +29,7 @@
 #batch-form textarea::placeholder {
   color: #667686;
   font-family: var(--font-sans);
-  font-size: 13.5px;
+  font-size: 12.5px;
 }
 
 #batch-form textarea:disabled {
@@ -39,9 +42,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
-.batch-input-label label { margin: 0; }
+
+.batch-input-label label {
+  margin: 0;
+}
 .batch-input-label span {
   color: var(--muted);
   font-size: 11px;
@@ -58,11 +64,15 @@
 
 .batch-form-footer {
   flex-direction: column-reverse;
-  margin-top: 8px;
-  gap: 8px;
+  margin-top: 7px;
+  gap: 6px;
 }
 
-.batch-form-footer > div {
+.batch-form-footer > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 4px 14px;
+  flex-wrap: wrap;
   min-width: 0;
   width: 100%;
 }
@@ -71,7 +81,7 @@
 .batch-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 3px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -79,13 +89,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 7px;
   width: 100%;
   min-width: 0;
-  min-height: 54px;
-  padding: 9px 10px;
-  border-radius: 3px;
-  font-size: 12px;
+  min-height: 42px;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 11.5px;
   font-weight: 750;
   line-height: 1.2;
   text-align: center;
@@ -93,7 +103,7 @@
 }
 
 .batch-actions .batch-reset {
-  min-height: 54px;
+  min-height: 42px;
   margin: 0;
   border-color: #3a495a;
   background: #1a232d;
@@ -106,19 +116,21 @@
 }
 
 .batch-actions .action-icon {
-  width: 23px;
-  height: 23px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
 }
 
 .batch-form-footer .help-text {
-  margin-top: 5px;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
 }
 
 .batch-summary {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 19px;
   margin: 0;
   color: #c4d0dd;
   font-size: 12px;
@@ -144,20 +156,23 @@
 
 .batch-run-toolbar {
   align-items: center;
-  margin-top: 16px;
-  padding: 12px 14px;
+  margin-top: 11px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius-control);
   background: #10171f;
 }
 
 .batch-progress-copy {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 9px;
   min-width: 0;
 }
 
 .batch-progress-copy strong {
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .batch-progress-copy span {
@@ -169,67 +184,60 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 7px;
+  gap: 6px;
 }
 
 .batch-item-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
 .action-icon {
   display: block;
-  width: 21px;
-  height: 21px;
+  width: 17px;
+  height: 17px;
   flex: 0 0 auto;
 }
 
 .batch-toolbar-actions > button {
-  gap: 7px;
+  min-height: 32px;
+  gap: 6px;
+  padding-inline: 10px;
+  font-size: 11px;
 }
 
 .batch-item-actions .batch-action {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 4px;
   min-width: 0;
-  min-height: 75px;
-  padding: 9px 5px;
-  border-radius: 3px;
+  min-height: 34px;
+  padding: 6px 5px;
+  border-radius: 5px;
   background: #18212b;
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.2;
   text-align: center;
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .batch-item-actions .batch-action .action-icon {
-  width: 25px;
-  height: 25px;
+  width: 16px;
+  height: 16px;
 }
 
 .batch-item[data-state='portal_error'] .batch-item-actions {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-/* Uma NF-e aproveita toda a largura para as três ações, sem outro modo de tela. */
+/* A apresentação de uma NF-e usa a mesma linha do lote, sem faixa extra de ações. */
 .batch-list[data-count='1'] .batch-list-header {
   display: none;
-}
-
-.batch-list[data-count='1'] .batch-item {
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-}
-
-.batch-list[data-count='1'] .batch-item-actions {
-  grid-column: 1 / -1;
-  grid-row: 2;
 }
 
 .secondary-button,
@@ -238,8 +246,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 32px;
+  padding: 0 10px;
   border: 1px solid #3a495a;
   border-radius: var(--radius-control);
   background: transparent;
@@ -277,7 +285,7 @@
 .batch-list {
   display: grid;
   gap: 1px;
-  margin-top: 12px;
+  margin-top: 8px;
   overflow: hidden;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-control);
@@ -286,10 +294,10 @@
 
 .batch-list-header {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) 140px 290px;
+  grid-template-columns: 26px minmax(0, 1fr) 118px 280px;
   align-items: center;
-  gap: 11px;
-  padding: 8px 11px;
+  gap: 9px;
+  padding: 7px 10px;
   background: #0e141b;
   color: var(--muted-2);
   font-size: 9.5px;
@@ -306,11 +314,11 @@
 
 .batch-item {
   display: grid;
-  grid-template-columns: 32px minmax(220px, 1fr) 140px 290px;
+  grid-template-columns: 26px minmax(0, 1fr) 118px 280px;
   align-items: center;
-  gap: 11px;
+  gap: 9px;
   min-width: 0;
-  padding: 11px;
+  padding: 7px 10px;
   border: 0;
   border-radius: 0;
   background: #10171f;
@@ -332,9 +340,9 @@
 .batch-order {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-control);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   background: var(--surface-3);
   color: #cbd6e1;
   font-size: 11.5px;
@@ -343,23 +351,24 @@
 
 .batch-item-info {
   display: grid;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
 .batch-key {
   overflow: hidden;
-  color: #e2e9f0;
+  color: var(--muted-2);
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 10.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .batch-details {
   overflow: hidden;
-  color: var(--muted);
+  color: #e2e9f0;
   font-size: 12px;
+  font-weight: 600;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -377,13 +386,13 @@
 .batch-source {
   display: inline-flex;
   align-items: center;
-  min-height: 22px;
-  padding: 0 7px;
+  min-height: 20px;
+  padding: 0 6px;
   border: 1px solid #3a4857;
-  border-radius: 6px;
+  border-radius: 5px;
   color: #bdc9d5;
   font-size: 9.5px;
-  font-weight: 750;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -415,12 +424,13 @@
   }
 
   .batch-item {
-    grid-template-columns: 32px minmax(0, 1fr) auto;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
   }
 
   .batch-item-actions {
     grid-column: 2 / -1;
-    justify-content: flex-start;
+    width: min(100%, 360px);
+    justify-self: end;
   }
 }
 
@@ -447,11 +457,13 @@
   }
 
   .batch-actions .action-icon {
-    width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
   }
 
   .batch-toolbar-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: stretch;
   }
 
@@ -459,15 +471,13 @@
     width: 100%;
   }
 
-  .batch-item,
-  .batch-list[data-count='1'] .batch-item {
-    grid-template-columns: 30px minmax(0, 1fr);
-    align-items: start;
+  #batch-cancel {
+    grid-column: 1 / -1;
   }
 
-  .batch-list[data-count='1'] .batch-item-actions {
-    grid-column: 1 / -1;
-    grid-row: auto;
+  .batch-item {
+    grid-template-columns: 26px minmax(0, 1fr);
+    align-items: center;
   }
 
   .batch-status,
@@ -478,6 +488,18 @@
   .batch-item-actions {
     width: 100%;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-self: stretch;
+  }
+
+  .batch-item-actions .batch-action {
+    gap: 4px;
+    padding-inline: 4px;
+    font-size: 10px;
+  }
+
+  .batch-item-actions .batch-action .action-icon {
+    width: 15px;
+    height: 15px;
   }
 
   .batch-item[data-state='portal_error'] .batch-item-actions {
@@ -490,5 +512,20 @@
 
   .batch-details {
     white-space: normal;
+  }
+}
+
+@media (max-width: 420px) {
+  .batch-item-actions .batch-action {
+    flex-direction: column;
+    gap: 2px;
+    min-height: 44px;
+    padding: 4px 2px;
+    font-size: 9.5px;
+  }
+
+  .batch-item-actions .batch-action .action-icon {
+    width: 14px;
+    height: 14px;
   }
 }
