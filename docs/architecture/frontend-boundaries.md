@@ -72,3 +72,10 @@ Responsável por servir o site. Não é intermediário da consulta fiscal atual.
 - hCaptcha é manual;
 - XML deve corresponder à chave consultada;
 - falhas não disparam outra rota escondida.
+
+## Limites e recuperação de estados (v0.0.38)
+
+- A requisição XML no contexto da página oficial tem deadline de 45 segundos e leitura por stream com limite de 10 MiB; a validação final de chave e estrutura permanece obrigatória antes do handoff.
+- Eventos DOM recebidos durante uma verificação assíncrona são reconciliados após essa verificação, sem polling periódico.
+- Se o usuário cancelar enquanto a janela ainda está sendo criada, o controller solicita o encerramento assim que o ID da operação estiver disponível; o lote não prossegue.
+- Falha ou timeout explícito não devem ativar uma rota fiscal alternativa. O usuário pode reconsultar ou importar XML validado localmente.

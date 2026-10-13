@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createBatchController, type BatchItemView } from '../src/batch/controller';
 
 const A = '42260912345678000195550010000000011123456786';
@@ -244,5 +244,36 @@ describe('batch preflight action guards', () => {
     expect(source).toContain('let renderedRows: RenderedBatchRow[] = [];');
     expect(source).toContain('const canReuseRows =');
     expect(source).toContain('updateRenderedRow(changedItem);');
+  });
+});
+
+describe('cancel and preflight resilience', () => {
+  it('closes a popup whose creation finishes after cancelling a batch', async () => {
+    let finishStart!: (operationId: string) => void;
+    const cancelled: string[] = [];
+    const h = harness({
+      start: () => new Promise<string>((resolve) => { finishStart = resolve; }),
+      cancel: async (operationId: string) => { cancelled.push(operationId); },
+    });
+
+    h.input.value = A;
+    h.controller.syncDraft();
+    const running = h.controller.start();
+    await vi.waitFor(() => expect(finishStart).toBeTypeOf('function'));
+    await h.controller.cancel();
+    finishStart('operation-opened-after-cancel');
+    await running;
+
+    expect(cancelled).toEqual(['operation-opened-after-cancel']);
+    expect(h.snapshots.at(-1)?.[0]?.status).toBe('cancelled');
+  });
+
+  it('shows an actionable error when extension preflight throws', async () => {
+    const h = harness({ getInfo: async () => { throw new Error('handshake failure'); } });
+    h.input.value = A;
+    h.controller.syncDraft();
+    await expect(h.controller.start()).resolves.toBeUndefined();
+    expect(h.route.textContent).toContain('Falha ao verificar a extensão');
+    expect(h.controller.isBusy()).toBe(false);
   });
 });

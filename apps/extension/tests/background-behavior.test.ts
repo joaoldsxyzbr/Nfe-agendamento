@@ -269,7 +269,7 @@ describe('extension background behavior', () => {
     await fake.flush();
 
     const replayExecutions = fake.scriptExecutions.filter((input: any) =>
-      Array.isArray(input.args) && input.args.length === 1
+      Array.isArray(input.args) && input.args.length === 3
     );
     const terminalEvents = fake.sentSiteEvents.filter((entry: any) =>
       ['completed', 'failed', 'cancelled'].includes(entry?.message?.event?.type)
@@ -324,4 +324,49 @@ describe('extension background behavior', () => {
     });
     expect(fake.sessionState.has('activePortalOperation')).toBe(false);
   });
+  it.each(['portal_xml_too_large', 'portal_xml_timeout'] as const)(
+    'closes and reports a captured XML failure: %s',
+    async (errorCode) => {
+      const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?id=test';
+      const fake = await loadBackground({
+        executeScriptResults: [
+          [],
+          [{
+            result: {
+              ok: false,
+              status: 0,
+              redirected: false,
+              url: responseUrl,
+              payload: '',
+              networkError: 'Falha na captura do XML pelo Portal.',
+              errorCode,
+            },
+          }],
+        ],
+      });
+      const { operation } = await startToWaitingResult(fake);
+
+      await fake.emitBeforeRequest({
+        url: responseUrl,
+        method: 'GET',
+        initiator: 'https://www.nfe.fazenda.gov.br',
+        tabId: operation.portalTabId,
+      });
+      await fake.waitForWindowRemoval(operation.portalWindowId);
+      await fake.flush();
+
+      expect(fake.sentSiteEvents).toContainEqual({
+        tabId: operation.siteTabId,
+        message: {
+          source: 'background',
+          event: expect.objectContaining({
+            type: 'failed',
+            code: errorCode,
+            operationId: operation.operationId,
+          }),
+        },
+      });
+      expect(fake.sessionState.has('activePortalOperation')).toBe(false);
+    },
+  );
 });

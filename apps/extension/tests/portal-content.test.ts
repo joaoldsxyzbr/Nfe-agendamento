@@ -12,7 +12,7 @@ describe('Portal content script invariants', () => {
     expect(source).toContain("window.addEventListener('focus', scheduleTick)");
     expect(source).toContain("window.addEventListener('pageshow', scheduleTick)");
     expect(source).toContain("document.addEventListener('visibilitychange'");
-    expect(source).toContain('queueMicrotask');
+    expect(source).toContain('createEventDrivenScheduler(tick)');
     expect(source).not.toContain('setInterval');
   });
 

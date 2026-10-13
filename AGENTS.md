@@ -9,12 +9,12 @@
 
 ## Assistente e skills
 
-- Use o **@Assistente Geral** como hub principal para todas as tarefas.
-- Conhecimento operacional e skills reutilizáveis devem ser centralizados no Assistente Geral.
+- Use o plugin **Assistente** como hub principal, selecionando automaticamente o especialista adequado para cada tarefa e combinando especialidades apenas quando necessário.
+- Conhecimento operacional e skills reutilizáveis devem ser centralizados no Assistente.
 - Quando surgir uma skill externa ou de outro plugin claramente melhor, avalie segurança, compatibilidade, licença, manutenção e sobreposição antes de incorporar.
-- Prefira melhorar uma skill existente do Assistente Geral a criar outra equivalente.
+- Prefira melhorar uma skill existente do Assistente a criar outra equivalente.
 - Não copie skills inteiras por conveniência: incorpore apenas os ganhos úteis, seguros e compatíveis.
-- Mantenha separado somente o que exigir isolamento real por credenciais, fonte de dados exclusiva, segurança, runtime ou integração. Mesmo nesses casos, centralize no Assistente Geral o roteamento e as regras comuns.
+- Mantenha separado somente o que exigir isolamento real por credenciais, fonte de dados exclusiva, segurança, runtime ou integração. Mesmo nesses casos, centralize no Assistente o roteamento e as regras comuns.
 
 ## Arquitetura e implementação
 

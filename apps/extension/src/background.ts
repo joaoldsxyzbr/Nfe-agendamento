@@ -1,5 +1,6 @@
 import {
   PORTAL_ORIGIN,
+  MAX_XML_BYTES,
   SITE_ORIGIN,
   type ExtensionEvent,
   type PortalExtensionState,
@@ -7,6 +8,7 @@ import {
   validateXmlPayload,
 } from './protocol';
 import { isLikelyHtmlDocument, isOfficialDownloadUrl } from './portal-dom';
+import { capturePortalXmlPage, type PortalPageFetchResult } from './portal-fetch';
 import {
   buildPageReplayRequest,
   shouldCapturePortalRequest,
@@ -515,13 +517,7 @@ async function handlePortalDownload(details: PortalWebRequestDetails): Promise<v
   }
 }
 
-type PortalPageFetchResult = Readonly<{
-  ok: boolean;
-  status: number;
-  redirected: boolean;
-  url: string;
-  payload: string;
-}>;
+const PORTAL_PAGE_FETCH_TIMEOUT_MS = 45_000;
 
 async function fetchPortalXmlInPage(
   tabId: number,
@@ -532,49 +528,8 @@ async function fetchPortalXmlInPage(
     injection = await chrome.scripting.executeScript({
       target: { tabId },
       world: 'MAIN',
-      args: [request],
-      func: async (input: PageReplayRequest) => {
-        try {
-          let body: BodyInit | undefined;
-          if (input.body?.encoding === 'text') {
-            body = input.body.value;
-          } else if (input.body?.encoding === 'base64') {
-            const binary = atob(input.body.value);
-            const bytes = new Uint8Array(binary.length);
-            for (let index = 0; index < binary.length; index += 1) {
-              bytes[index] = binary.charCodeAt(index);
-            }
-            body = bytes;
-          }
-
-          const response = await fetch(input.url, {
-            method: input.method,
-            headers: input.headers,
-            body,
-            credentials: 'include',
-            redirect: 'follow',
-            cache: 'no-store',
-          });
-
-          return {
-            ok: response.ok,
-            status: response.status,
-            redirected: response.redirected,
-            url: response.url,
-            payload: await response.text(),
-            networkError: null,
-          };
-        } catch (error) {
-          return {
-            ok: false,
-            status: 0,
-            redirected: false,
-            url: input.url,
-            payload: '',
-            networkError: error instanceof Error ? error.message : 'Falha de rede no Portal.',
-          };
-        }
-      },
+      args: [request, MAX_XML_BYTES, PORTAL_PAGE_FETCH_TIMEOUT_MS],
+      func: capturePortalXmlPage,
     });
   } catch {
     throw new ExtensionFailure(
@@ -597,6 +552,15 @@ async function fetchPortalXmlInPage(
     );
   }
 
+  if (result.errorCode === 'portal_xml_too_large') {
+    throw new ExtensionFailure('portal_xml_too_large', 'XML excede 10 MiB.');
+  }
+  if (result.errorCode === 'portal_xml_timeout') {
+    throw new ExtensionFailure(
+      'portal_xml_timeout',
+      'A transferência do XML não terminou dentro do tempo esperado.',
+    );
+  }
   if (typeof result.networkError === 'string' && result.networkError) {
     throw new ExtensionFailure(
       'portal_xml_capture_unavailable',
@@ -610,6 +574,8 @@ async function fetchPortalXmlInPage(
     redirected: Boolean(result.redirected),
     url: result.url,
     payload: result.payload,
+    networkError: null,
+    errorCode: null,
   };
 }
 

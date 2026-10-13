@@ -8,10 +8,10 @@ export default defineConfig({
       reporter: ['text', 'json-summary'],
       reportsDirectory: '../../coverage/web',
       thresholds: {
-        statements: 48,
-        branches: 48,
-        functions: 50,
-        lines: 50,
+        statements: 53,
+        branches: 51,
+        functions: 53,
+        lines: 55,
         'src/portal/extension-client.ts': {
           statements: 55,
           branches: 40,
@@ -19,10 +19,10 @@ export default defineConfig({
           lines: 60,
         },
         'src/batch/controller.ts': {
-          statements: 38,
-          branches: 35,
-          functions: 40,
-          lines: 40,
+          statements: 43,
+          branches: 47,
+          functions: 45,
+          lines: 45,
         },
         'src/nfe/xml.ts': {
           statements: 95,

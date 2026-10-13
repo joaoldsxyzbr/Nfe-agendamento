@@ -7,6 +7,7 @@ import {
   isOfficialDownloadUrl,
 } from './portal-dom';
 import { PORTAL_ORIGIN, type PortalExtensionState } from './protocol';
+import { createEventDrivenScheduler } from './portal-scheduler';
 
 declare const chrome: any;
 
@@ -25,10 +26,10 @@ let submittedAt: number | null = null;
 let downloadRequestedAt: number | null = null;
 let resultTimeoutReported = false;
 let downloadTimeoutReported = false;
-let tickRunning = false;
-let tickScheduled = false;
 let resultTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 let downloadTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+
+const scheduleTick = createEventDrivenScheduler(tick);
 
 void initialize();
 
@@ -80,27 +81,6 @@ function installDomWatchers(): void {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') scheduleTick();
   });
-}
-
-function scheduleTick(): void {
-  if (tickScheduled) return;
-  tickScheduled = true;
-
-  queueMicrotask(() => {
-    tickScheduled = false;
-    void runTick();
-  });
-}
-
-async function runTick(): Promise<void> {
-  if (tickRunning) return;
-  tickRunning = true;
-
-  try {
-    await tick();
-  } finally {
-    tickRunning = false;
-  }
 }
 
 async function tick(): Promise<void> {
