@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const backgroundUrl = new URL('../src/background.ts', import.meta.url);
 const portalContentUrl = new URL('../src/portal-content.ts', import.meta.url);
+const portalFetchUrl = new URL('../src/portal-fetch.ts', import.meta.url);
 
 describe('extension background contract', () => {
   it('uses only the Portal popup, session storage and host-scoped non-blocking webRequest', () => {
@@ -19,7 +20,11 @@ describe('extension background contract', () => {
     expect(source).toContain('invalidateSupplierConfigCache');
     expect(source).toContain('fetchPortalXmlInPage');
     expect(source).toContain("world: 'MAIN'");
-    expect(source).toContain("credentials: 'include'");
+    const capture = readFileSync(portalFetchUrl, 'utf8');
+    expect(source).toContain('func: capturePortalXmlPage');
+    expect(capture).toContain("credentials: 'include'");
+    expect(capture).toContain('response.body.getReader()');
+    expect(capture).toContain('controller.abort()');
     expect(source).not.toContain('direct_lookup');
     expect(source).not.toContain('runDirectLookupInPage');
     expect(source).not.toContain('checkFiscalUsage');

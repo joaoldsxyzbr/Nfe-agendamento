@@ -269,7 +269,7 @@ describe('extension background behavior', () => {
     await fake.flush();
 
     const replayExecutions = fake.scriptExecutions.filter((input: any) =>
-      Array.isArray(input.args) && input.args.length === 1
+      Array.isArray(input.args) && input.args.length === 3
     );
     const terminalEvents = fake.sentSiteEvents.filter((entry: any) =>
       ['completed', 'failed', 'cancelled'].includes(entry?.message?.event?.type)
