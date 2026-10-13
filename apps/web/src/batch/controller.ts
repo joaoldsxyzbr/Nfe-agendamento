@@ -156,6 +156,11 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
           'Atualize a extensão para usar a consulta pelo Portal Nacional.';
         return;
       }
+    } catch {
+      renderState('Não foi possível verificar a extensão');
+      elements.routeText.textContent =
+        'Falha ao verificar a extensão. Confira se está ativa e tente novamente.';
+      return;
     } finally {
       preflighting = false;
       setControlsLocked(false);
@@ -201,6 +206,14 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     try {
       const operationId = await deps.portal.start(item.accessKey, signal);
       activePortalOperationId = operationId;
+      if (cancelled || signal?.aborted) {
+        // The Portal may finish opening after the user has already cancelled.
+        // Close that late popup before allowing a new batch.
+        await deps.portal.cancel(operationId).catch(() => {});
+        item.status = 'cancelled';
+        item.message = 'Consulta pelo Portal cancelada pelo usuário.';
+        return;
+      }
       item.status = 'portal_waiting_user';
       item.message = 'Resolva o hCaptcha na janela do Portal.';
       renderState('Resolva o hCaptcha', item);
