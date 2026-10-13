@@ -8,10 +8,22 @@ export default defineConfig({
       reporter: ['text', 'json-summary'],
       reportsDirectory: '../../coverage/extension',
       thresholds: {
-        statements: 50,
-        branches: 40,
-        functions: 50,
-        lines: 50,
+        statements: 65,
+        branches: 57,
+        functions: 61,
+        lines: 67,
+        'src/portal-content.ts': {
+          statements: 65,
+          branches: 50,
+          functions: 60,
+          lines: 67,
+        },
+        'src/portal-fetch.ts': {
+          statements: 90,
+          branches: 65,
+          functions: 70,
+          lines: 90,
+        },
         'src/background.ts': {
           statements: 60,
           branches: 55,

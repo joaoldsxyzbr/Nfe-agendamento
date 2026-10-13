@@ -109,3 +109,17 @@ O lote de atualização mantém a compatibilidade das ferramentas sem alterar o 
 - PRs #66 (Vite 8.3.2) e #68 (Wrangler 4.147.0): atualização consolidada numa única branch a partir da `main`, para resolver conflitos cruzados no `package-lock.json`. As dependências resolvidas dessas PRs do Dependabot foram aplicadas ao lockfile vigente, preservando as versões de Vitest/cobertura e tipos Node já integradas.
 
 Critérios de entrega: `npm ci`, auditoria npm, gates `web`, `extension`, `danfe-print` e build de prévia Cloudflare aprovados no mesmo SHA antes do merge. A publicação e o CI da `main` serão verificados depois. Não atualizar releases/versões de extensão nem marcar a aceitação física Chrome/Edge como executada nesta manutenção.
+
+## Auditoria técnica 13/10/2026 — cobertura
+
+A PR #78 adicionou regressões comportamentais para captura XML, agendamento de eventos, content script do Portal e cancelamento tardio. As métricas **medidas no CI de PR** (SHA `6825664`, antes da elevação dos thresholds) foram:
+
+| Área | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| Extensão, global | 69,18% | 62,47% | 66,92% | 71,60% |
+| `portal-content.ts` | 70,58% | 54,44% | 65,21% | 72,85% |
+| `portal-fetch.ts` | 97,05% | 71,42% | 75,00% | 96,77% |
+| Web, global | 55,90% | 54,42% | 55,70% | 58,49% |
+| `batch/controller.ts` | 45,45% | 50,71% | 47,82% | 47,02% |
+
+Os gates mínimos foram ajustados para ficarem abaixo da cobertura efetiva medida, com margem para pequenas alterações. Esses números medem código exercitado por testes automatizados, **não** substituem o gate físico Chrome/Edge do Portal.
