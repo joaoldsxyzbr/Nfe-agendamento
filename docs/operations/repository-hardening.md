@@ -85,7 +85,7 @@ A extensão é recompilada com `npm ci` e empacotada no próprio workflow de rel
 
 A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 
-A release vigente é **v0.0.37 / extensão 0.2.13**. O registro físico correspondente permanece em `docs/testing/acceptance-results/v0.0.37.md`.
+A release vigente é **v0.0.38 / extensão 0.2.14**. O registro físico correspondente permanece **PENDENTE** em `docs/testing/acceptance-results/v0.0.38.md`. O histórico da v0.0.37 não deve ser marcado como aprovado automaticamente.
 
 ## Distribuição da extensão
 
