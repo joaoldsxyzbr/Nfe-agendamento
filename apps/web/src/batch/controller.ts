@@ -192,7 +192,11 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       setControlsRunning(false);
       elements.startButton.hidden = false;
       elements.resetButton.hidden = false;
-      const doneLabel = items.length === 1 ? 'Consulta concluída' : 'Lote concluído';
+      const successCount = items.filter((item) => item.status === 'success').length;
+      const failureCount = items.filter((item) => item.status === 'portal_error').length;
+      const doneLabel = items.length === 1
+        ? (failureCount ? 'Consulta com erro' : 'Consulta concluída')
+        : `Lote finalizado · ${successCount} concluída(s) · ${failureCount} com erro`;
       const cancelledLabel = items.length === 1 ? 'Consulta cancelada' : 'Lote cancelado';
       renderState(cancelled ? cancelledLabel : finalFailureMessage ?? doneLabel, undefined, true);
     }
