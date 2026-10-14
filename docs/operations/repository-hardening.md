@@ -85,7 +85,7 @@ A extensão é recompilada com `npm ci` e empacotada no próprio workflow de rel
 
 A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 
-A correção mais recente é **v0.0.39 / extensão 0.2.15**, proposta para o erro de leitura do XML visto na 0.2.14. O resultado da captura `ISOLATED` no Portal real continua **PENDENTE** em `docs/testing/acceptance-results/v0.0.39.md`; CI verde não é aceitação física. A v0.0.38 tem falha de handoff XML reportada e registrada; não inferir resultados do Chrome/Edge não identificados.
+A correção mais recente é **v0.0.40 / extensão 0.2.16**: restaura a leitura textual e `MAIN` world usados pela extensão funcional 0.2.13, revertendo a mudança de streaming e timeout que coincidiu com o problema nas versões 0.2.14 e 0.2.15. O limite de 10 MiB passa a ser verificado após a leitura: essa opção troca limitação de memória durante a transferência pela compatibilidade do fluxo confirmado. O aceite físico da 0.2.16 ainda está **PENDENTE** em `docs/testing/acceptance-results/v0.0.40.md`. O fluxo real de XML foi reportado com falha na 0.2.15. CI verde não comprova a correção no Portal real. A v0.0.38 tem falha de handoff XML reportada e registrada; não inferir resultados do Chrome/Edge não identificados.
 
 ## Distribuição da extensão
 

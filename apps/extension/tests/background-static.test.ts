@@ -19,13 +19,14 @@ describe('extension background contract', () => {
     expect(source).toContain('chrome.storage.onChanged.addListener');
     expect(source).toContain('invalidateSupplierConfigCache');
     expect(source).toContain('fetchPortalXmlInPage');
-    expect(source).toContain("world: 'ISOLATED'");
     expect(source).toContain("world: 'MAIN'");
     const capture = readFileSync(portalFetchUrl, 'utf8');
     expect(source).toContain('func: capturePortalXmlPage');
     expect(capture).toContain("credentials: 'include'");
-    expect(capture).toContain('response.body.getReader()');
-    expect(capture).toContain('controller.abort()');
+    expect(capture).toContain('await response.text()');
+    expect(capture).toContain('new TextEncoder().encode(payload).byteLength');
+    expect(capture).not.toContain('response.body.getReader()');
+    expect(capture).not.toContain('signal: controller.signal');
     expect(source).not.toContain('direct_lookup');
     expect(source).not.toContain('runDirectLookupInPage');
     expect(source).not.toContain('checkFiscalUsage');

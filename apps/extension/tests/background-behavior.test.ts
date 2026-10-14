@@ -269,15 +269,15 @@ describe('extension background behavior', () => {
     await fake.flush();
 
     const replayExecutions = fake.scriptExecutions.filter((input: any) =>
-      Array.isArray(input.args) && input.args.length === 3
+      Array.isArray(input.args) && input.args.length === 2
     );
     const terminalEvents = fake.sentSiteEvents.filter((entry: any) =>
       ['completed', 'failed', 'cancelled'].includes(entry?.message?.event?.type)
     );
 
     expect(replayExecutions).toHaveLength(1);
-    // O download usa a sessão da aba, mas não o ambiente JS/CSP do Portal.
-    expect((replayExecutions[0] as any).world).toBe('ISOLATED');
+    // A leitura volta ao MAIN world, como na versão 0.2.13 confirmada no Portal real.
+    expect((replayExecutions[0] as any).world).toBe('MAIN');
     // A confirmação oficial continua no MAIN world para interceptar só o diálogo esperado.
     expect((fake.scriptExecutions[0] as any).world).toBe('MAIN');
     expect(terminalEvents).toHaveLength(1);

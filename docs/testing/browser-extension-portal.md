@@ -53,7 +53,7 @@ Se o Portal exigir certificado digital durante o download, Chrome/Edge e Windows
 - lifecycle em `chrome.storage.session`;
 - uma operação ativa;
 - captura única do download;
-- replay do request dentro da própria aba autenticada no mundo `ISOLATED` (mesma sessão, sem depender do JavaScript/CSP do `MAIN` world do Portal);
+- replay da requisição oficial dentro da própria aba autenticada no mundo `MAIN`, como na versão 0.2.13 funcional; leitura de `response.text()` e verificação de tamanho antes do retorno ao site;
 - XML máximo de 10 MiB;
 - DTD proibido;
 - chave do XML deve coincidir com a chave consultada;

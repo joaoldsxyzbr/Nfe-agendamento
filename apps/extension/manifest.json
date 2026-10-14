@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NFe Agendamento",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "Consulta NF-e pelo Portal Nacional e devolve o XML ao site NFe Agendamento.",
   "minimum_chrome_version": "120",
   "permissions": [
