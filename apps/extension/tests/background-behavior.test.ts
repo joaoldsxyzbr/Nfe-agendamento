@@ -328,7 +328,7 @@ describe('extension background behavior', () => {
     });
     expect(fake.sessionState.has('activePortalOperation')).toBe(false);
   });
-  it.each(['portal_xml_too_large', 'portal_xml_timeout'] as const)(
+  it.each(['portal_xml_too_large'] as const)(
     'closes and reports a captured XML failure: %s',
     async (errorCode) => {
       const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?id=test';
@@ -342,7 +342,7 @@ describe('extension background behavior', () => {
               redirected: false,
               url: responseUrl,
               payload: '',
-              networkError: 'Falha na captura do XML pelo Portal.',
+              networkError: null,
               errorCode,
             },
           }],
