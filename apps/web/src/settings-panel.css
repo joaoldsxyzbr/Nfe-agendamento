@@ -72,7 +72,7 @@ body.settings-open {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .settings-panel-header {
@@ -109,7 +109,7 @@ body.settings-open {
 }
 
 .diagnostics-row {
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .diagnostics-row + .diagnostics-row {
@@ -159,4 +159,16 @@ body.settings-open {
   .settings-panel[open] {
     animation: none;
   }
+}
+
+/* Keep diagnostics readable on narrow viewports without changing the app layout. */
+.diagnostics-row strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.topbar-icon-action:focus-visible,
+.settings-panel button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
