@@ -52,3 +52,7 @@ A revisão em maior profundidade identificou falhas de critérios e testes nas P
 ### Política de publicação
 
 Correção na `main`, CI aprovado, release publicada e aceitação física são marcos distintos. Não aumentar `manifest.json` nem declarar sucesso do Portal real sem teste legítimo; manter o registro de v0.0.40 e a issue #60 com contexto histórico.
+
+## Empacotamento e disponibilização — v0.0.41 (14/10/2026)
+
+A atualização de site pós-v0.0.40 e a correção da auditoria #86 foram agrupadas para a release **v0.0.41**. A extensão **permanece 0.2.16** porque a captura XML, permissões e manifest não tiveram alteração de produção. O workflow publica o ZIP compilado a partir do commit validado apenas quando o CI da main está verde e o assunto do commit é `release: v0.0.41`. As notas e o registro físico estão em `docs/releases/v0.0.41.md` e `docs/testing/acceptance-results/v0.0.41.md`. Verificar a execução de release e o pacote publicado antes de considerar disponível; merge e CI isoladamente não comprovam publicação. A validação física real continua pendente e independente da release.
