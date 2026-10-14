@@ -34,6 +34,7 @@ type MutableBatchItem = {
   message: string | null;
   parsed: ParsedNfe | null;
   source: BatchSource | null;
+  errorCode: string | null;
 };
 
 type RenderedBatchRow = {
@@ -93,6 +94,7 @@ export type BatchController = Readonly<{
   downloadZip(): void;
   printDanfes(): void;
   importManual(index: number): Promise<void>;
+  retryPortal(index: number): Promise<void>;
   reset(): void;
   isBusy(): boolean;
   dispose(): void;
@@ -193,17 +195,14 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       setControlsRunning(false);
       elements.startButton.hidden = false;
       elements.resetButton.hidden = false;
-      const successCount = items.filter((item) => item.status === 'success').length;
-      const failureCount = items.filter((item) => item.status === 'portal_error').length;
-      const doneLabel = items.length === 1
-        ? (failureCount ? 'Consulta com erro' : 'Consulta concluída')
-        : `Lote finalizado · ${successCount} concluída(s) · ${failureCount} com erro`;
+      const doneLabel = outcomeLabel();
       const cancelledLabel = items.length === 1 ? 'Consulta cancelada' : 'Lote cancelado';
       renderState(cancelled ? cancelledLabel : finalFailureMessage ?? doneLabel, undefined, true);
     }
   }
 
   async function processPortalItem(item: MutableBatchItem, signal?: AbortSignal): Promise<void> {
+    item.errorCode = null;
     item.status = 'portal_queued';
     item.message = 'Abrindo Portal Nacional…';
     renderState('Abrindo Portal Nacional', item);
@@ -234,6 +233,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
         return;
       }
       item.status = 'portal_error';
+      item.errorCode = status.code ?? null;
       item.message = status.message ?? 'O Portal não retornou o XML desta NF-e.';
     } catch (error) {
       if (isAbortError(error) && cancelled) {
@@ -242,6 +242,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
         return;
       }
       item.status = 'portal_error';
+      item.errorCode = null;
       item.message = error instanceof Error ? error.message : 'Não foi possível concluir a consulta pelo Portal.';
     } finally {
       activePortalOperationId = null;
@@ -260,10 +261,12 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       }
       item.parsed = { ...parsed, supplierRuleId };
       item.source = 'Portal';
+      item.errorCode = null;
       item.status = 'success';
       item.message = 'XML validado via Portal.';
     } catch (error) {
       item.status = 'portal_error';
+      item.errorCode = 'invalid_xml';
       item.message = error instanceof Error ? error.message : 'O XML retornado não pôde ser validado.';
     }
   }
@@ -286,7 +289,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     finally {
       manualActionBusy = false;
       setControlsLocked(false);
-      renderState('Reconsulta pelo Portal concluída', item);
+      renderState(outcomeLabel(), item);
     }
   }
 
@@ -309,18 +312,27 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
 
       item.parsed = { ...parsed, supplierRuleId };
       item.source = 'XML manual';
+      item.errorCode = null;
       item.status = 'success';
       item.message = 'XML importado e validado manualmente.';
     } catch (error) {
       item.status = 'portal_error';
+      item.errorCode = 'invalid_xml';
       item.message = error instanceof Error
         ? error.message
         : 'Não foi possível validar o XML selecionado.';
     } finally {
       manualActionBusy = false;
       setControlsLocked(false);
-      renderState(item.status === 'success' ? 'XML importado' : 'Aguardando ação', item);
+      renderState(outcomeLabel(), item);
     }
+  }
+
+  function outcomeLabel(): string {
+    const successCount = items.filter((item) => item.status === 'success').length;
+    const failureCount = items.filter((item) => item.status === 'portal_error').length;
+    if (items.length === 1) return failureCount ? 'Consulta com erro' : successCount ? 'Consulta concluída' : 'Consulta interrompida';
+    return `Lote finalizado · ${successCount} concluída(s) · ${failureCount} com erro`;
   }
 
   function renderState(
@@ -500,7 +512,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
       row.details.textContent = `${invoice}${series}${issuer}${value}`;
     } else {
       row.details.textContent = item.status === 'portal_error'
-        ? portalErrorGuidance(item.message)
+        ? portalErrorGuidance(item.message, item.errorCode)
         : item.message ?? statusLabel(item.status);
     }
 
@@ -634,6 +646,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
     downloadZip,
     printDanfes,
     importManual,
+    retryPortal,
     reset,
     isBusy: () => preflighting || running || manualActionBusy,
     dispose,
@@ -641,7 +654,7 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
 }
 
 function createBatchItem(accessKey: string): MutableBatchItem {
-  return { accessKey, status: 'queued', message: 'Aguardando processamento.', parsed: null, source: null };
+  return { accessKey, status: 'queued', message: 'Aguardando processamento.', parsed: null, source: null, errorCode: null };
 }
 
 function isTerminalStatus(status: BatchItemStatus): boolean {

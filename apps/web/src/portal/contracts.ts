@@ -13,4 +13,6 @@ export type PortalOperationStatus = Readonly<{
   state: PortalOperationState;
   message: string | null;
   xml: string | null;
+  /** Stable extension error code, if provided. Never contains invoice data. */
+  code?: string | null;
 }>;

@@ -359,6 +359,7 @@ function parseTerminalEvent(value: unknown, operationId: string): PortalOperatio
       state: 'failed',
       message: typeof value.message === 'string' ? value.message : 'A extensão não concluiu a consulta.',
       xml: null,
+      code: typeof value.code === 'string' ? value.code : null,
     };
   }
   if (value.type === 'cancelled') {
