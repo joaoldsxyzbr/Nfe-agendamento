@@ -1,4 +1,5 @@
 import { BrowserPortalExtensionClient } from './portal/extension-client';
+import { assessExtensionCompatibility } from './portal/compatibility';
 import './settings-panel.css';
 
 const client = new BrowserPortalExtensionClient();
@@ -54,12 +55,14 @@ function initializeSettingsPanel(): void {
   const integrationState = diagnosticRow('Integração', 'Verificando…');
   const extensionState = diagnosticRow('Extensão', 'Verificando…');
   const versionState = diagnosticRow('Versão', '—');
+  const compatibilityState = diagnosticRow('Compatibilidade', 'Verificando…');
   const portalState = diagnosticRow('Portal Nacional', 'Verificando…');
   const supplierState = diagnosticRow('Regras de fornecedor', 'Verificando…');
   diagnostics.append(
     integrationState.row,
     extensionState.row,
     versionState.row,
+    compatibilityState.row,
     portalState.row,
     supplierState.row,
   );
@@ -111,7 +114,9 @@ function initializeSettingsPanel(): void {
     refresh.disabled = true;
     const info = force ? await client.refreshInfo() : await client.getInfo();
     if (info) {
+      const compatibility = assessExtensionCompatibility(info.version);
       const ready =
+        compatibility !== 'outdated' &&
         info.capabilities.openOptions &&
         info.capabilities.portalLookup &&
         info.capabilities.supplierResolution;
@@ -120,6 +125,7 @@ function initializeSettingsPanel(): void {
         ? `Extensão conectada · v${info.version}`
         : `Extensão conectada · v${info.version} · integração parcial`;
       integrationState.value.textContent = ready ? 'Pronta' : 'Parcial';
+      compatibilityState.value.textContent = compatibility === 'outdated' ? 'Atualização recomendada' : compatibility === 'unknown' ? 'Não verificada' : 'Compatível';
       extensionState.value.textContent = 'Conectada';
       versionState.value.textContent = info.version;
       portalState.value.textContent = info.capabilities.portalLookup ? 'Disponível' : 'Indisponível';
@@ -130,6 +136,7 @@ function initializeSettingsPanel(): void {
       integrationState.value.textContent = 'Indisponível';
       extensionState.value.textContent = 'Não conectada';
       versionState.value.textContent = '—';
+      compatibilityState.value.textContent = 'Não verificada';
       portalState.value.textContent = 'Indisponível';
       supplierState.value.textContent = 'Indisponíveis';
     }
