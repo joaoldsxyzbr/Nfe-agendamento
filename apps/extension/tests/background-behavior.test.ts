@@ -276,6 +276,10 @@ describe('extension background behavior', () => {
     );
 
     expect(replayExecutions).toHaveLength(1);
+    // O download usa a sessão da aba, mas não o ambiente JS/CSP do Portal.
+    expect((replayExecutions[0] as any).world).toBe('ISOLATED');
+    // A confirmação oficial continua no MAIN world para interceptar só o diálogo esperado.
+    expect((fake.scriptExecutions[0] as any).world).toBe('MAIN');
     expect(terminalEvents).toHaveLength(1);
     expect((terminalEvents[0] as any).message.event).toMatchObject({
       type: 'completed',

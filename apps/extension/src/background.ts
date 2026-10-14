@@ -527,7 +527,9 @@ async function fetchPortalXmlInPage(
   try {
     injection = await chrome.scripting.executeScript({
       target: { tabId },
-      world: 'MAIN',
+      // O mundo isolado preserva cookies/certificado desta aba sem herdar
+      // monkey-patches nem a CSP de scripts da página oficial.
+      world: 'ISOLATED',
       args: [request, MAX_XML_BYTES, PORTAL_PAGE_FETCH_TIMEOUT_MS],
       func: capturePortalXmlPage,
     });

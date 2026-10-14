@@ -66,7 +66,7 @@ Clicar no ícone da extensão abre essa configuração.
 
 ## Extensão
 
-Versão na `main`: **0.2.14**.
+Versão na `main`: **0.2.15**.
 
 Permissões:
 
@@ -116,6 +116,8 @@ O código e as releases ficam no repositório privado `joaoldsxyzbr/Nfe-agendame
 
 ## Releases
 
+A **v0.0.39 / extensão 0.2.15** altera a captura do XML para o mundo `ISOLATED` da própria aba do Portal, mantendo os cookies e a autenticação do navegador sem depender do JavaScript e das políticas de execução do `MAIN` world do site externo. É uma correção de compatibilidade proposta após falha real reportada na extensão 0.2.14; a confirmação de recuperação no Chrome/Edge permanece **PENDENTE**. Não há retry extra, permissões novas ou mudanças de hCaptcha/certificado.
+
 A **v0.0.38 / extensão 0.2.14** limita a captura do XML a 10 MiB durante o streaming, impõe timeout de transferência, preserva sinais assíncronos do Portal e corrige cancelamento feito enquanto uma janela ainda está abrindo. Os testes automatizados incluem cenários de falha; a aceitação física continua pendente.
 
 A **v0.0.37 / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.
@@ -136,4 +138,4 @@ Checklist: `docs/testing/acceptance.md`.
 
 Cada release registra o resultado físico em `docs/testing/acceptance-results/vX.Y.Z.md`. A publicação depende do CI automatizado; Chrome e Edge são validados separadamente e o registro permanece `PENDENTE` até o teste real.
 
-A `v0.0.38 / extensão 0.2.14` está registrada em `docs/testing/acceptance-results/v0.0.38.md` como **PENDENTE** até execução física real. A `v0.0.37 / extensão 0.2.13` permanece com evidência histórica pendente. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.
+A `v0.0.39 / extensão 0.2.15` está registrada em `docs/testing/acceptance-results/v0.0.39.md` como **PENDENTE** até execução física real. A `v0.0.38 / extensão 0.2.14` tem falha real de handoff XML relatada em 14/10, documentada em seu registro. A `v0.0.37 / extensão 0.2.13` permanece com evidência histórica pendente. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.
