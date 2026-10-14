@@ -3,6 +3,7 @@ import type { PortalExtensionInfo } from '../portal/extension-client';
 import type { ParsedNfe } from '../nfe/xml';
 import { MAX_BATCH_ITEMS, parseBatchInput } from './input';
 import { actionIconMarkup } from '../ui/action-icons';
+import { portalErrorGuidance } from '../portal/error-guidance';
 
 export type BatchItemStatus =
   | 'queued'
@@ -498,7 +499,9 @@ export function createBatchController(deps: BatchControllerDependencies): BatchC
         : '';
       row.details.textContent = `${invoice}${series}${issuer}${value}`;
     } else {
-      row.details.textContent = item.message ?? statusLabel(item.status);
+      row.details.textContent = item.status === 'portal_error'
+        ? portalErrorGuidance(item.message)
+        : item.message ?? statusLabel(item.status);
     }
 
     row.details.title = row.details.textContent ?? '';
