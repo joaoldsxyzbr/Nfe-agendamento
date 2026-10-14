@@ -181,6 +181,7 @@ test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ pag
 
   const failedRow = page.locator('.batch-item[data-state="portal_error"]');
   await expect(failedRow).toBeVisible();
+  await expect(failedRow.locator('.batch-details')).toContainText('Código: portal_download_not_found');
   await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
   await expect(failedRow.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(2);
 

@@ -4,6 +4,7 @@ import { createBatchController, type BatchItemView } from '../src/batch/controll
 
 const A = '42260912345678000195550010000000011123456786';
 const B = '35260812345678000195550010000000011000000018';
+const C = '42260812345678000123550010000012341000012342';
 const el = <T extends object>(value: T): T => value;
 
 function harness(
@@ -213,6 +214,60 @@ describe('batch controller Portal-only', () => {
     expect(h.snapshots.at(-1)?.[0]?.status).toBe('success');
     expect(h.snapshots.at(-1)?.[0]?.source).toBe('XML manual');
     expect(h.snapshots.at(-1)?.[0]?.parsed).not.toBeNull();
+  });
+
+
+  it('recomputes actual batch outcomes after failed and successful explicit retries', async () => {
+    const h = harness({
+      waitForResult: async (operationId: string) => ({
+        operationId,
+        state: operationId === 'op-3' || operationId === 'op-4' ? 'failed' as const : 'completed' as const,
+        message: operationId === 'op-3' || operationId === 'op-4' ? 'Portal indisponível' : null,
+        code: operationId === 'op-3' || operationId === 'op-4' ? 'portal_session_lost' : null,
+        xml: operationId === 'op-3' || operationId === 'op-4' ? null : '<xml />',
+      }),
+    });
+    h.input.value = `${A}\n${B}\n${C}`;
+    h.controller.syncDraft();
+    await h.controller.start();
+    expect(h.portalStarts).toEqual([A, B, C]);
+    expect(h.route.textContent).toContain('2 concluída(s) · 1 com erro');
+    expect(h.snapshots.at(-1)?.map((item) => item.status)).toEqual(['success', 'success', 'portal_error']);
+
+    await h.controller.retryPortal(2);
+    expect(h.route.textContent).toContain('2 concluída(s) · 1 com erro');
+    expect(h.snapshots.at(-1)?.[2]?.status).toBe('portal_error');
+    expect(h.route.textContent).not.toContain('Reconsulta pelo Portal concluída');
+
+    await h.controller.retryPortal(2);
+    expect(h.route.textContent).toContain('3 concluída(s) · 0 com erro');
+    expect(h.snapshots.at(-1)?.map((item) => item.status)).toEqual(['success', 'success', 'success']);
+    expect(h.portalStarts).toEqual([A, B, C, C, C]);
+    expect(h.zipButton.disabled).toBe(false);
+    expect(h.printButton.disabled).toBe(false);
+  });
+
+  it('updates the outcome after recovering an error from a local validated XML', async () => {
+    const parsed = {
+      accessKey: A,
+      originalXml: '<xml />',
+      issuer: { taxId: '12345678000195', name: 'Emitente' },
+      totals: { invoice: 10 },
+      number: '1',
+      series: '1',
+    } as never;
+    const h = harness({
+      waitForResult: async (operationId: string) => ({
+        operationId, state: 'failed' as const, message: 'Portal indisponível', xml: null,
+      }),
+    }, async () => parsed);
+    h.input.value = A;
+    h.controller.syncDraft();
+    await h.controller.start();
+    expect(h.route.textContent).toBe('Consulta com erro');
+    await h.controller.importManual(0);
+    expect(h.route.textContent).toBe('Consulta concluída');
+    expect(h.snapshots.at(-1)?.[0]?.source).toBe('XML manual');
   });
 
   it('resets the unified consultation state', () => {

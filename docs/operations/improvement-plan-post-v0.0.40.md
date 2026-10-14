@@ -26,3 +26,29 @@ Site estático + extensão Chromium MV3, Portal Nacional com hCaptcha manual, ce
 
 ## Status
 **IMPLEMENTAÇÃO INCREMENTAL INTEGRADA À MAIN.** Aceitação física das mudanças e eventual release seguem pendentes; não declarar versão de produção atualizada sem confirmação.
+
+## Auditoria e correções pós-implementação — issue #86
+
+A revisão em maior profundidade identificou falhas de critérios e testes nas PRs #81–#85. A correção subsequente preserva o método de captura XML da extensão 0.2.16 e tem este escopo:
+
+- **Compatibilidade:** versão reconhecida exclusivamente quando validada (0.2.16). Versões futuras ficam **não verificadas**, sem serem presumidas compatíveis; versões anteriores geram aviso consultivo. Conexão/prontidão deriva apenas das capacidades anunciadas e não é reduzida por aviso de versão.
+- **Erros:** códigos estáveis da extensão, quando presentes, chegam ao lote. As orientações são por código/etapa reconhecida; mensagens brutas com chaves, XML ou cookies não são reproduzidas. Erros HTTP mostram no máximo o status numérico seguro.
+- **Lote:** teste comportamental cobre conclusão parcial, falha repetida, sucesso após retry e atualização da contagem; retry individual e importação manual atualizam o resumo com resultado efetivo. Nunca consultar concluídas novamente automaticamente.
+- **Visual/teste:** o Playwright simulado verifica código de erro apresentado; segue existindo validação de tela compacta desktop/mobile, mas **não** cobre visualmente todos os estados. Nenhum redesenho foi feito.
+
+### Matriz de critérios originais e comprovação
+
+| Critério original | Evidência | Status |
+| --- | --- | --- |
+| Proteção de captura textual autenticada, limite UTF-8 e resposta HTTP | PR #81 + testes existentes | Parcial: sem aceite físico completo |
+| Comunicação, segundo uso, popup e cancelamento | Testes existentes em extension/web + fluxo simulado | Parcial: não foi criada suíte end-to-end real do Portal |
+| Lote sequencial, preservação de concluídas, ZIP/DANFE | Testes existentes e comportamento novo na correção #86 | Coberto automaticamente; físico pendente |
+| Reconsulta de falhas e contagem após retry | Teste comportamental novo #86 | Coberto automaticamente; físico pendente |
+| Handshake de versões/capabilities | Testes unitários #86 | Coberto para versões explicitamente conhecidas; protocolo versionado futuro pendente |
+| Mensagens de erro por causa conhecida sem dados fiscais | Testes unitários e code propagation #86 | Coberto para códigos conhecidos; erros não mapeados são genéricos |
+| Visual estável antes/depois, desktop e mobile | Playwright existente + casos novos de erro | Parcial: aceitações visuais humanas pendentes |
+| Chrome e Edge, hCaptcha e certificado | `docs/testing/acceptance-results/v0.0.40.md` | PENDENTE, sem inferir aprovação pelo CI |
+
+### Política de publicação
+
+Correção na `main`, CI aprovado, release publicada e aceitação física são marcos distintos. Não aumentar `manifest.json` nem declarar sucesso do Portal real sem teste legítimo; manter o registro de v0.0.40 e a issue #60 com contexto histórico.

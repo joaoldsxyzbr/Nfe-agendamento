@@ -10,6 +10,8 @@ describe('settings panel extension-only', () => {
     expect(settings).toContain("extensionState.value.textContent = 'Conectada'");
     expect(settings).toContain("integrationState.value.textContent = ready ? 'Pronta' : 'Parcial'");
     expect(settings).toContain('client.refreshInfo()');
+    expect(settings).toContain('hasRequiredExtensionCapabilities(info.capabilities)');
+    expect(settings).not.toContain("compatibility !== 'outdated'");
     expect(settings).toContain("diagnosticRow('Portal Nacional'");
     expect(settings).toContain("diagnosticRow('Regras de fornecedor'");
     expect(settings).not.toContain('Consulta direta');

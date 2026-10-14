@@ -57,6 +57,33 @@ describe('BrowserPortalExtensionClient', () => {
     expect(result.xml).toContain('nfeProc');
   });
 
+
+  it('preserves the stable failure code from extension events for safe diagnostics', async () => {
+    const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+    const subscribers = new Set<(event: unknown) => void>();
+    const client = new BrowserPortalExtensionClient({
+      request: async (command: { type: string }) => {
+        if (command.type !== 'status') throw new Error('unexpected');
+        return { type: 'operation_status', operationId: 'op-failed', active: true, state: 'waiting_user' };
+      },
+      subscribe: (listener: (event: unknown) => void) => {
+        subscribers.add(listener);
+        return () => { subscribers.delete(listener); };
+      },
+    } as never);
+    const resultPromise = client.waitForResult('op-failed');
+    for (const listener of subscribers) {
+      listener({
+        type: 'failed', operationId: 'op-failed', code: 'portal_session_lost',
+        message: 'Sessão expirada', xml: null,
+      });
+    }
+    const result = await resultPromise;
+    expect(result).toMatchObject({
+      state: 'failed', code: 'portal_session_lost', message: 'Sessão expirada', xml: null,
+    });
+  });
+
   it('keeps open_options compatibility with 0.2.8+', async () => {
     const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
     const client = new BrowserPortalExtensionClient({
