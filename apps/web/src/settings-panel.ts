@@ -1,5 +1,5 @@
 import { BrowserPortalExtensionClient } from './portal/extension-client';
-import { assessExtensionCompatibility } from './portal/compatibility';
+import { assessExtensionCompatibility, hasRequiredExtensionCapabilities } from './portal/compatibility';
 import './settings-panel.css';
 
 const client = new BrowserPortalExtensionClient();
@@ -115,17 +115,13 @@ function initializeSettingsPanel(): void {
     const info = force ? await client.refreshInfo() : await client.getInfo();
     if (info) {
       const compatibility = assessExtensionCompatibility(info.version);
-      const ready =
-        compatibility !== 'outdated' &&
-        info.capabilities.openOptions &&
-        info.capabilities.portalLookup &&
-        info.capabilities.supplierResolution;
+      const ready = hasRequiredExtensionCapabilities(info.capabilities);
       statusElement.dataset.state = ready ? 'connected' : 'partial';
       statusTextElement.textContent = ready
         ? `Extensão conectada · v${info.version}`
         : `Extensão conectada · v${info.version} · integração parcial`;
       integrationState.value.textContent = ready ? 'Pronta' : 'Parcial';
-      compatibilityState.value.textContent = compatibility === 'outdated' ? 'Atualização recomendada' : compatibility === 'unknown' ? 'Não verificada' : 'Compatível';
+      compatibilityState.value.textContent = compatibility === 'outdated' ? 'Atualização recomendada' : compatibility === 'unknown' ? 'Não verificada' : 'Versão reconhecida';
       extensionState.value.textContent = 'Conectada';
       versionState.value.textContent = info.version;
       portalState.value.textContent = info.capabilities.portalLookup ? 'Disponível' : 'Indisponível';
