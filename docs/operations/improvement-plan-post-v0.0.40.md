@@ -1,51 +1,28 @@
 # Plano de evolução pós-v0.0.40
 
-Data: 2026-10-14. Base: aplicação v0.0.40, extensão 0.2.16.
+Data: 2026-10-14. Base de referência: site v0.0.40 e extensão 0.2.16.
 
-## Objetivo e restrições
-Evoluir confiabilidade, lote, compatibilidade, diagnósticos e interface sem alterar a captura XML do Portal validada pelo usuário. Preservar arquitetura site estático + extensão Chromium MV3, hCaptcha manual, certificado sob controle do navegador, processamento sequencial (um popup), privacidade de dados fiscais e downloads ZIP/DANFE/XML. Não introduzir SEFAZ direta, bypass de captcha, permissões extras ou polling.
+## Restrições preservadas
+Site estático + extensão Chromium MV3, Portal Nacional com hCaptcha manual, certificado controlado pelo navegador, lote sequencial, exportação XML/ZIP/DANFE. Nenhuma mudança no mecanismo de captura XML ou nas permissões da extensão.
 
-## Ordem de execução e critérios de aceite
+## Entregas integradas na main
+- **PR #81 / ad018f8 — regressão Portal:** testes adicionais de limites UTF-8, HTTP e redirecionamento. CI web, extension, danfe-print e Workers Builds aprovado.
+- **PR #82 / 2f34a7e — compatibilidade:** aviso consultivo para versão da extensão anterior à 0.2.16 no painel de configurações, sem bloquear o handshake. Testes unitários. Quatro checks aprovados.
+- **PR #83 / 9d94a5f — lote:** resumo compacto de concluídas e com erro ao finalizar; preservada a reconsulta individual de falhas já existente. Quatro checks aprovados.
+- **PR #84 / e3f2942 — diagnósticos e interface:** orientações genéricas de recuperação para erros do Portal, sem ecoar chaves fiscais; espaçamentos compactos e foco visível no painel. Quatro checks aprovados.
 
-### 1. Testes de regressão Portal → extensão → site (P0)
-- Mapear contratos e testes existentes antes de adicionar casos; reutilizar fixtures sem dados fiscais reais.
-- Cobrir captura textual autenticada compatível com 0.2.16, XML válido/inválido, chave divergente, erro HTTP, timeout, cancelamento e segunda consulta.
-- Cobrir comunicação entre contextos, limpeza de popup e resultado enviado uma única vez.
-- Aceite: testes novos falham em simulação controlada de regressão e passam na implementação atual; CI web/extension/danfe-print verde. Não mudar a lógica de captura nesta etapa.
+## Cobertura e limites de validação
+- **Confirmado:** alterações de código e testes integrados, CI de cada PR aprovado.
+- **Não confirmado:** aceitação física dessas alterações no Portal com hCaptcha/certificado em Chrome e Edge; validação visual humana em dispositivos reais; publicação de nova release da extensão. CI não substitui esses testes.
+- **Não realizado:** teste de mutação formal, cobertura integral de todos os cenários inicialmente propostos e protocolo de compatibilidade independente de número de versão. O aviso de compatibilidade é consultivo.
+- **Reaproveitado:** retry individual, serialização, exportação e fluxo de cancelamento existentes. Nenhuma duplicação de funcionalidades.
 
-### 2. Lote e retomada manual (P1)
-- Auditar estados existentes e fluxo de reconsulta; evitar duplicação de funcionalidade.
-- Exibir estados e progresso compactos, permitir reconsultar apenas falhas explicitamente, preservar concluídos e origem Portal.
-- Manter estrita serialização, cancelamento sem iniciar próximo item e ZIP/impressão apenas de concluídos.
-- Aceite: testes de lote misto, reconsulta, cancelamento e exportação; layout não salta após resultado.
-
-### 3. Compatibilidade site/extensão (P1)
-- Inventariar handshake atual e versões expostas, sem divulgar dados privados.
-- Definir versão mínima de protocolo compatível (não depender apenas do número de release); distinguir extensão ausente, desatualizada e compatível.
-- Exibir aviso discreto e link para releases privadas do GitHub, sem atualização automática nem novas permissões.
-- Aceite: testes para pares compatíveis/incompatíveis e falha de handshake.
-
-### 4. Diagnóstico de erros (P2)
-- Inventariar códigos existentes; mapear causas conhecidas (Portal, timeout, cancelamento, certificado quando detectável, XML inválido, comunicação).
-- Mensagens curtas e acionáveis; não afirmar causa que não pode ser observada, especialmente certificado.
-- Logs locais minimizados sem XML, chaves completas, CPF/CNPJ ou credenciais.
-- Aceite: testes de mapeamento de erro e ausência de dados sensíveis.
-
-### 5. Refinamento visual (P2)
-- Revisar componentes e CSS existentes; mudanças pequenas, sem redesenho.
-- Compactar espaçamentos, padronizar ações e estados, evitar mudanças de layout entre consulta unitária e lote.
-- Aceite: Playwright com estados inicial/carregando/concluído/erro, responsividade, navegação por teclado e ausência de regressão em ZIP/DANFE.
-
-## Estratégia de entrega
-1. Criar branch de trabalho por etapa, mudanças pequenas e PR com diff revisado.
-2. Rodar testes focados e CI existente; só integrar após aprovação.
-3. Não alterar diretamente produção nem publicar release automaticamente durante o planejamento.
-4. Atualizar README e documentos de teste quando comportamento mudar; registrar riscos e decisões.
-5. Teste físico em Chrome e Edge, com hCaptcha manual, XML/DANFE, segunda consulta, lote e cancelamento, permanece responsabilidade de execução real; registrar como PENDENTE até observação, conforme docs/testing/acceptance.md.
-6. Interromper avanço se houver regressão no fluxo Portal validado na v0.0.40.
-
-## Fora do escopo
-Troca de stack, backend fiscal, automação de captcha, armazenamento de certificado, acesso amplo a hosts, consulta direta à SEFAZ e redesenho integral.
+## Aceite físico recomendado
+1. Extensão 0.2.16: verificar conexão e indicador de compatibilidade.
+2. Consultar uma NF-e no Portal com hCaptcha manual; confirmar XML e DANFE.
+3. Repetir consulta e testar lote com uma falha; conferir resumo e retry individual.
+4. Testar cancelamento e exportações ZIP/DANFE.
+5. Verificar mensagens de erro e painel compacto em desktop e mobile.
 
 ## Status
-PLANEJADO. Nenhuma alteração funcional executada.
+**IMPLEMENTAÇÃO INCREMENTAL INTEGRADA À MAIN.** Aceitação física das mudanças e eventual release seguem pendentes; não declarar versão de produção atualizada sem confirmação.
