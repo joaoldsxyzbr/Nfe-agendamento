@@ -19,6 +19,7 @@ describe('extension background contract', () => {
     expect(source).toContain('chrome.storage.onChanged.addListener');
     expect(source).toContain('invalidateSupplierConfigCache');
     expect(source).toContain('fetchPortalXmlInPage');
+    expect(source).toContain("world: 'ISOLATED'");
     expect(source).toContain("world: 'MAIN'");
     const capture = readFileSync(portalFetchUrl, 'utf8');
     expect(source).toContain('func: capturePortalXmlPage');

@@ -85,7 +85,7 @@ A extensão é recompilada com `npm ci` e empacotada no próprio workflow de rel
 
 A aceitação física em Chrome e Edge permanece separada do CI. Ela nunca é inferida automaticamente.
 
-A release vigente é **v0.0.38 / extensão 0.2.14**. O registro físico correspondente permanece **PENDENTE** em `docs/testing/acceptance-results/v0.0.38.md`. O histórico da v0.0.37 não deve ser marcado como aprovado automaticamente.
+A correção mais recente é **v0.0.39 / extensão 0.2.15**, proposta para o erro de leitura do XML visto na 0.2.14. O resultado da captura `ISOLATED` no Portal real continua **PENDENTE** em `docs/testing/acceptance-results/v0.0.39.md`; CI verde não é aceitação física. A v0.0.38 tem falha de handoff XML reportada e registrada; não inferir resultados do Chrome/Edge não identificados.
 
 ## Distribuição da extensão
 

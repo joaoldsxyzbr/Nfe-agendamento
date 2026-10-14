@@ -11,7 +11,7 @@ export type PortalPageFetchResult = Readonly<{
 }>;
 
 /**
- * Runs in the Portal tab's MAIN world using chrome.scripting.executeScript.
+ * Runs in the Portal tab's ISOLATED world using chrome.scripting.executeScript.
  * Keep all runtime dependencies inside this function: injected functions do not
  * retain module closures or imported values.
  */
