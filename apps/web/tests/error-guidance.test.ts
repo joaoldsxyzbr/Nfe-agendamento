@@ -34,5 +34,7 @@ describe('actionable privacy-safe Portal error guidance', () => {
     expect(result).not.toContain('422609');
     expect(result).not.toContain('12345678900');
     expect(result).not.toContain('<script>');
+    expect(portalErrorGuidance('Sem detalhes', `portal_${'1'.repeat(44)}`)).not.toContain('Código:');
+    expect(portalErrorGuidance('Timeout ao baixar XML')).toContain('demorou');
   });
 });

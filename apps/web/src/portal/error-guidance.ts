@@ -25,24 +25,24 @@ const KNOWN_GUIDANCE: Readonly<Record<string, string>> = {
 };
 
 export function portalErrorGuidance(message: string | null, code: string | null = null): string {
-  const safeCode = code && /^[a-z][a-z0-9_]{1,63}$/.test(code) ? code : null;
+  const safeCode = code && Object.prototype.hasOwnProperty.call(KNOWN_GUIDANCE, code) ? code : null;
   const known = safeCode ? KNOWN_GUIDANCE[safeCode] : null;
   const normalized = (message ?? '').toLocaleLowerCase('pt-BR');
   let guidance = known;
 
   if (!guidance && /cancelad|cancelled|canceled/.test(normalized)) {
     guidance = 'Consulta interrompida. Você pode tentar novamente.';
-  } else if (!guidance && /xml|nfeproc|doctype|dtd/.test(normalized)) {
-    guidance = 'O XML não pôde ser validado. Confira a chave ou importe o XML manualmente.';
   } else if (!guidance && /tempo|timeout|expir|demor|não respondeu/.test(normalized)) {
     guidance = 'A consulta demorou além do esperado. Confira o Portal e tente novamente.';
+  } else if (!guidance && /xml inválido|xml não.*valid|não.*validar.*xml|nfeproc|doctype|dtd/.test(normalized)) {
+    guidance = 'O XML não pôde ser validado. Confira a chave ou importe o XML manualmente.';
   } else if (!guidance && /extens|conex|comunica|network|fetch|rede/.test(normalized)) {
     guidance = 'Não foi possível comunicar com a extensão ou o Portal. Confira a conexão.';
   }
 
   guidance ??= 'A consulta não foi concluída. Verifique a janela do Portal e tente novamente ou importe o XML manualmente.';
 
-  // Only stable, restricted codes and three-digit HTTP statuses may be shown.
+  // Only explicitly known codes and three-digit HTTP statuses may be shown.
   // The original error message can carry fiscal identifiers and is never repeated.
   const status = safeCode === 'portal_download_http_error'
     ? /\bHTTP\s+([1-5]\d\d)\b/i.exec(message ?? '')?.[1]
