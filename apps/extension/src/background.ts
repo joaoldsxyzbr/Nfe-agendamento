@@ -517,8 +517,6 @@ async function handlePortalDownload(details: PortalWebRequestDetails): Promise<v
   }
 }
 
-const PORTAL_PAGE_FETCH_TIMEOUT_MS = 45_000;
-
 async function fetchPortalXmlInPage(
   tabId: number,
   request: PageReplayRequest,
@@ -527,10 +525,9 @@ async function fetchPortalXmlInPage(
   try {
     injection = await chrome.scripting.executeScript({
       target: { tabId },
-      // O mundo isolado preserva cookies/certificado desta aba sem herdar
-      // monkey-patches nem a CSP de scripts da página oficial.
-      world: 'ISOLATED',
-      args: [request, MAX_XML_BYTES, PORTAL_PAGE_FETCH_TIMEOUT_MS],
+      // Mesmo MAIN world e fetch/resposta textual usados na extensão 0.2.13 funcional.
+      world: 'MAIN',
+      args: [request, MAX_XML_BYTES],
       func: capturePortalXmlPage,
     });
   } catch {
@@ -556,12 +553,6 @@ async function fetchPortalXmlInPage(
 
   if (result.errorCode === 'portal_xml_too_large') {
     throw new ExtensionFailure('portal_xml_too_large', 'XML excede 10 MiB.');
-  }
-  if (result.errorCode === 'portal_xml_timeout') {
-    throw new ExtensionFailure(
-      'portal_xml_timeout',
-      'A transferência do XML não terminou dentro do tempo esperado.',
-    );
   }
   if (typeof result.networkError === 'string' && result.networkError) {
     throw new ExtensionFailure(

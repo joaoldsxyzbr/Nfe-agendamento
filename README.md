@@ -36,7 +36,7 @@ Fluxo nominal:
 8. o XML é limitado, validado contra a chave e devolvido ao site;
 9. o site gera DANFE e libera o download do XML.
 
-Não existe solver/bypass de captcha. O acompanhamento da página do Portal é orientado a eventos (`MutationObserver`, eventos de formulário/navegação e mensagens da página), sem `setInterval` periódico. Eventos ocorridos durante uma verificação assíncrona ficam pendentes para uma nova verificação após a atual. A captura do XML usa timeout de 45 segundos e leitura incremental com limite de 10 MiB.
+Não existe solver/bypass de captcha. O acompanhamento da página do Portal é orientado a eventos (`MutationObserver`, eventos de formulário/navegação e mensagens da página), sem `setInterval` periódico. Eventos ocorridos durante uma verificação assíncrona ficam pendentes para uma nova verificação após a atual. A captura do XML usa a resposta textual autenticada do Portal, conforme a extensão 0.2.13 confirmada funcional. O limite de 10 MiB é validado após a leitura, antes de retornar o payload ao site. Os timeouts de espera do resultado/download seguem ativos.
 
 ## Consulta unificada
 
@@ -66,7 +66,7 @@ Clicar no ícone da extensão abre essa configuração.
 
 ## Extensão
 
-Versão na `main`: **0.2.15**.
+Versão na `main`: **0.2.16**.
 
 Permissões:
 
@@ -116,6 +116,8 @@ O código e as releases ficam no repositório privado `joaoldsxyzbr/Nfe-agendame
 
 ## Releases
 
+A **v0.0.40 / extensão 0.2.16** restaura a captura textual `response.text()` no `MAIN` world do Portal, compatível com o fluxo funcional da 0.2.13. A regressão da 0.2.14/0.2.15 coincide com a introdução do streaming/AbortController; não há evidência de qual das mudanças isoladas causou a falha. A validação de tamanho ocorre após a leitura e antes do envio ao site. O teste real em Chrome/Edge da 0.2.16 permanece **PENDENTE**.
+
 A **v0.0.39 / extensão 0.2.15** altera a captura do XML para o mundo `ISOLATED` da própria aba do Portal, mantendo os cookies e a autenticação do navegador sem depender do JavaScript e das políticas de execução do `MAIN` world do site externo. É uma correção de compatibilidade proposta após falha real reportada na extensão 0.2.14; a confirmação de recuperação no Chrome/Edge permanece **PENDENTE**. Não há retry extra, permissões novas ou mudanças de hCaptcha/certificado.
 
 A **v0.0.38 / extensão 0.2.14** limita a captura do XML a 10 MiB durante o streaming, impõe timeout de transferência, preserva sinais assíncronos do Portal e corrige cancelamento feito enquanto uma janela ainda está abrindo. Os testes automatizados incluem cenários de falha; a aceitação física continua pendente.
@@ -138,4 +140,4 @@ Checklist: `docs/testing/acceptance.md`.
 
 Cada release registra o resultado físico em `docs/testing/acceptance-results/vX.Y.Z.md`. A publicação depende do CI automatizado; Chrome e Edge são validados separadamente e o registro permanece `PENDENTE` até o teste real.
 
-A `v0.0.39 / extensão 0.2.15` está registrada em `docs/testing/acceptance-results/v0.0.39.md` como **PENDENTE** até execução física real. A `v0.0.38 / extensão 0.2.14` tem falha real de handoff XML relatada em 14/10, documentada em seu registro. A `v0.0.37 / extensão 0.2.13` permanece com evidência histórica pendente. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.
+A `v0.0.40 / extensão 0.2.16` está registrada em `docs/testing/acceptance-results/v0.0.40.md` como **PENDENTE** até execução física real. A `v0.0.39 / extensão 0.2.15` foi reportada com a mesma falha de captura de XML e seu registro não deve ser interpretado como aprovação. A `v0.0.38 / extensão 0.2.14` tem falha real de handoff XML relatada em 14/10, documentada em seu registro. A `v0.0.37 / extensão 0.2.13` permanece com evidência histórica pendente. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.
