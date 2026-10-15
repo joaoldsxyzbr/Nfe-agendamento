@@ -1,7 +1,7 @@
 import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import { transform } from 'esbuild';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 let converted = 0;
@@ -20,21 +20,15 @@ async function convert(path) {
     return;
   }
   const source = await readFile(absolute, 'utf8');
-  const result = ts.transpileModule(source, {
-    fileName: path,
-    reportDiagnostics: true,
-    compilerOptions: {
-      target: ts.ScriptTarget.ES2022,
-      module: ts.ModuleKind.ESNext,
-      moduleResolution: ts.ModuleResolutionKind.Bundler,
-      removeComments: false,
-    },
+  const result = await transform(source, {
+    loader: 'ts',
+    target: 'es2022',
+    format: 'esm',
+    legalComments: 'inline',
   });
-  const errors = (result.diagnostics || []).filter((d) => d.category === ts.DiagnosticCategory.Error);
-  if (errors.length) throw new Error('TypeScript inválido no arquivo ' + path + ': ' + errors.map((e) => ts.flattenDiagnosticMessageText(e.messageText, '\n')).join('; '));
   const destination = absolute.slice(0, -3) + '.js';
   // Renomeia referências textuais de imports e arquivos utilizados por testes.
-  await writeFile(destination, result.outputText.replace(/\.ts\b/g, '.js'), 'utf8');
+  await writeFile(destination, result.code.replace(/\.ts\b/g, '.js'), 'utf8');
   await rm(absolute);
   converted++;
 }
