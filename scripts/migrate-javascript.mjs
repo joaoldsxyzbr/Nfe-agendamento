@@ -58,6 +58,15 @@ for (const path of [
   'apps/extension/vitest.config.ts',
 ]) await convert(path);
 
+// Atualiza assertions estruturais para inspecionar JavaScript, não tipos TS apagados.
+await update('apps/web/tests/batch-controller.test.js', (value) => value.replace(
+  'let renderedRows: RenderedBatchRow[] = [];',
+  'let renderedRows = [];',
+));
+await update('apps/web/tests/danfe.test.js', (value) => value
+  .replaceAll('querySelector<HTMLElement>', 'querySelector')
+  .replaceAll('querySelector<HTMLTableRowElement>', 'querySelector'));
+
 await rm(join(root, 'apps/web/tsconfig.json'));
 await rm(join(root, 'apps/extension/tsconfig.json'));
 
