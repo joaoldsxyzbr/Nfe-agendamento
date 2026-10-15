@@ -20,4 +20,11 @@ describe('Portal DOM policy', () => {
         expect(isLikelyHtmlDocument('<?xml version="1.0"?><html><body>login</body></html>')).toBe(true);
         expect(isLikelyHtmlDocument('<?xml version="1.0"?><nfeProc><NFe/></nfeProc>')).toBe(false);
     });
+    it('rejects malformed URLs and non-textual Portal responses safely', async () => {
+        const { isOfficialConsultUrl, isOfficialDownloadUrl, isLikelyHtmlDocument } = await import('../src/portal-dom');
+        expect(isOfficialConsultUrl('://invalid-url')).toBe(false);
+        expect(isOfficialDownloadUrl('not-a-url')).toBe(false);
+        expect(isLikelyHtmlDocument(null)).toBe(false);
+    });
+
 });

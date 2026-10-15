@@ -205,4 +205,31 @@ describe('BrowserPortalExtensionClient', () => {
         });
         await expect(client.waitForResult('ext-op-missing')).rejects.toThrow('A operação do Portal não está mais ativa');
     });
+    it('reports cancellation without treating the operation as successful', async () => {
+        const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+        const subscribers = new Set();
+        const client = new BrowserPortalExtensionClient({
+            request: async (command) => ({
+                type: 'operation_status',
+                operationId: command.operationId,
+                active: true,
+                state: 'waiting_user',
+            }),
+            subscribe: (listener) => {
+                subscribers.add(listener);
+                return () => subscribers.delete(listener);
+            },
+        });
+        const pending = client.waitForResult('op-cancelled');
+        for (const listener of subscribers) {
+            listener({ type: 'cancelled', operationId: 'op-cancelled' });
+        }
+        await expect(pending).resolves.toMatchObject({
+            operationId: 'op-cancelled',
+            state: 'cancelled',
+            message: 'Consulta pelo Portal cancelada.',
+            xml: null,
+        });
+    });
+
 });

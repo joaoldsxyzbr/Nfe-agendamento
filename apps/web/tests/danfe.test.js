@@ -227,6 +227,57 @@ describe('DANFE approved behavior', () => {
         expect(css).not.toContain('.danfe-measuring');
         expect(css).not.toContain('tbody tr:last-child td { height: 100%; }');
     });
+    it('keeps a readable DANFE when optional fiscal data is absent or irregular', async () => {
+        const { renderDanfeHtml } = await import('../src/danfe/render');
+        const original = parseNfeXml(fullXml, KEY);
+        const withoutOptionalData = {
+            ...original,
+            recipient: null,
+            issuer: { ...original.issuer, taxId: '12345678901', address: null },
+            invoiceType: '0',
+            number: 'SN',
+            series: 'S',
+            issuedAt: '2026-09-15',
+            exitedAt: 'data-invalida',
+            protocol: null,
+            billing: { invoice: null, duplicates: [] },
+            payments: [{ methodCode: '', methodName: '', value: 0 }],
+            transport: null,
+            products: [{
+                ...original.products[0],
+                unit: 'CX',
+                tributaryUnit: 'UN',
+                quantity: 0,
+                tributaryQuantity: 5,
+            }],
+        };
+        const html = renderDanfeHtml(withoutOptionalData);
+        expect(html).toContain('123.456.789-01');
+        expect(html).toContain('15/09/2026');
+        expect(html).toContain('data-invalida');
+        expect(html).toContain('Não informado');
+        expect(html).not.toContain('Fone/Fax:');
+        expect(html).not.toContain('CX C/');
+
+        const invalidPackage = {
+            ...withoutOptionalData,
+            issuedAt: 'data-invalida',
+            exitedAt: null,
+            payments: [],
+            products: [{
+                ...original.products[0],
+                unit: 'CX',
+                tributaryUnit: 'UN',
+                quantity: 2,
+                tributaryQuantity: 3,
+            }],
+        };
+        const secondHtml = renderDanfeHtml(invalidPackage);
+        expect(secondHtml).toContain('data-invalida');
+        expect(secondHtml).not.toContain('CX C/');
+        expect(secondHtml).toContain('DANFE');
+    });
+
 });
 function countOccurrences(value, needle) {
     return value.split(needle).length - 1;
