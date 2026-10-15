@@ -1,0 +1,45 @@
+name: Temporary no-Vite site migration
+on:
+  push:
+    branches: [refactor/web-sem-vite-2026-10-15]
+    paths: [scripts/migrate-no-vite.mjs]
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/migrate-no-vite.mjs
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - run: npm ci
+      - run: npm run format:web
+      - run: npm run lint:web
+      - run: npm run format:check:web
+      - run: npm run test:web
+      - run: npm run coverage:web
+      - run: npm run test:extension
+      - run: npm run coverage:extension
+      - run: npm run build:web
+      - run: npm run build:extension
+      - run: npm ci --prefix tests/playwright
+      - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+      - run: npm test --prefix tests/playwright
+      - run: ./node_modules/.bin/wrangler deploy --dry-run
+      - name: Commit only after validation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "refactor: serve plain HTML CSS JS without Vite"
+          git push origin HEAD:refactor/web-sem-vite-2026-10-15
