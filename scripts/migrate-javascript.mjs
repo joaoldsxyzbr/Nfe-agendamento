@@ -49,7 +49,6 @@ for (const path of [
 for (const path of [
   'apps/web/vite.config.ts', 'apps/web/vitest.config.ts',
   'apps/extension/vitest.config.ts',
-  'tests/playwright/playwright.config.ts',
 ]) await convert(path);
 
 await rm(join(root, 'apps/web/tsconfig.json'));
