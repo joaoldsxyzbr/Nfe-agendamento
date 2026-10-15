@@ -1,10 +1,11 @@
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const webRoot = join(repoRoot, 'apps', 'web');
-const roots = [join(webRoot, 'src'), join(webRoot, 'tests'), join(webRoot, 'vite.config.ts')];
+const roots = [join(webRoot, 'src'), join(webRoot, 'tests'), join(webRoot, 'vite.config.js'), join(webRoot, 'vitest.config.js'), join(repoRoot, 'apps', 'extension', 'src'), join(repoRoot, 'apps', 'extension', 'tests'), join(repoRoot, 'apps', 'extension', 'scripts'), join(repoRoot, 'apps', 'extension', 'vitest.config.js')];
 
 const rules = [
   { name: 'debugger', pattern: /\bdebugger\s*;/g },
@@ -17,11 +18,12 @@ const rules = [
 
 const files = [];
 for (const root of roots) {
-  await collectTypeScript(root, files);
+  await collectJavaScript(root, files);
 }
 
 const violations = [];
 for (const file of files.sort()) {
+  execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
   const source = await readFile(file, 'utf8');
   for (const rule of rules) {
     rule.pattern.lastIndex = 0;
@@ -37,11 +39,11 @@ if (violations.length > 0) {
   for (const violation of violations) console.error(`- ${violation}`);
   process.exitCode = 1;
 } else {
-  console.info(`Lint adicional: ${files.length} arquivo(s) TypeScript verificados.`);
+  console.info(`Lint adicional: ${files.length} arquivo(s) JavaScript do site e da extensão verificados.`);
 }
 
-async function collectTypeScript(path, output) {
-  if (extname(path) === '.ts') {
+async function collectJavaScript(path, output) {
+  if (['.js', '.mjs'].includes(extname(path))) {
     output.push(path);
     return;
   }
@@ -49,7 +51,7 @@ async function collectTypeScript(path, output) {
   const entries = await readdir(path, { withFileTypes: true });
   for (const entry of entries) {
     const child = join(path, entry.name);
-    if (entry.isDirectory()) await collectTypeScript(child, output);
-    else if (entry.isFile() && extname(entry.name) === '.ts') output.push(child);
+    if (entry.isDirectory()) await collectJavaScript(child, output);
+    else if (entry.isFile() && ['.js', '.mjs'].includes(extname(entry.name))) output.push(child);
   }
 }

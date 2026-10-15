@@ -6,9 +6,9 @@
   "scripts": {
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "dev": "vite",
-    "lint": "tsc --noEmit && node ../../scripts/lint-web.mjs",
+    "lint": "node ../../scripts/lint-web.mjs",
     "format": "node ../../scripts/format-web.mjs --write",
     "format:check": "node ../../scripts/format-web.mjs --check"
   },
@@ -16,9 +16,7 @@
     "@xmldom/xmldom": "0.9.12"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
     "@vitest/coverage-v8": "^5.0.3",
-    "typescript": "7.0.2",
     "vite": "8.3.2",
     "vitest": "5.0.3",
     "wrangler": "4.147.0"
