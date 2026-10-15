@@ -1,6 +1,6 @@
-import { resolveSupplierProduct } from '../nfe/product-mapping';
-import { paginateDanfeForPrint } from './pagination';
-import { resolveSupplierInternalQuantity } from '../nfe/supplier-quantity';
+import { resolveSupplierProduct } from '../nfe/product-mapping.js';
+import { paginateDanfeForPrint } from './pagination.js';
+import { resolveSupplierInternalQuantity } from '../nfe/supplier-quantity.js';
 const DANFE_ZOOM_MIN = 0.6;
 const DANFE_ZOOM_MAX = 2;
 const DANFE_ZOOM_STEP = 0.1;

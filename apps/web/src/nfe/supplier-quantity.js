@@ -1,4 +1,4 @@
-import { normalizeSupplierName, resolveSupplierRuleForPresentation, } from './supplier-rules';
+import { normalizeSupplierName, resolveSupplierRuleForPresentation, } from './supplier-rules.js';
 const INTEGER_TOLERANCE = 1e-6;
 export { normalizeSupplierName };
 export function isSouzaCruzEmitter(emitterName) {

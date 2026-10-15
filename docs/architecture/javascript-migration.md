@@ -23,3 +23,7 @@ Nenhum backend, D1, Bridge, consulta SEFAZ direta, acesso a certificado privado 
 - A main deve continuar intacta até aprovação da branch de migração.
 
 O histórico Git preserva integralmente o código anterior para reversão.
+
+## Evolução: site sem Vite
+
+A decisão original preservava Vite. O site passou a usar módulos JavaScript nativos, CSS linkado pelo HTML e build de cópia. A extensão mantém esbuild apenas para empacotamento de scripts Manifest V3. Veja docs/architecture/site-estatico-sem-vite.md.

@@ -13,7 +13,7 @@ Para entender o sistema atual, leia nesta ordem:
 7. `docs/testing/acceptance.md`;
 8. `docs/operations/repository-hardening.md`.
 
-Decisão de stack: docs/architecture/javascript-migration.md.
+Decisão de stack: docs/architecture/javascript-migration.md e docs/architecture/site-estatico-sem-vite.md.
 
 A arquitetura vigente é **site + extensão Chromium MV3 + Portal Nacional**, sem Bridge/EXE e sem consulta direta à SEFAZ.
 

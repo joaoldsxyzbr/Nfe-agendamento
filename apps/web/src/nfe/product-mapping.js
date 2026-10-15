@@ -1,4 +1,4 @@
-import { GREEN_SUPPLIER_CATALOG, resolveSupplierRuleForPresentation, } from './supplier-rules';
+import { GREEN_SUPPLIER_CATALOG, resolveSupplierRuleForPresentation, } from './supplier-rules.js';
 export const SUPPLIER_PRODUCT_CATALOG = GREEN_SUPPLIER_CATALOG;
 export function normalizeSupplierProductName(value) {
     const normalized = String(value ?? '')

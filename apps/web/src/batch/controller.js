@@ -1,6 +1,6 @@
-import { MAX_BATCH_ITEMS, parseBatchInput } from './input';
-import { actionIconMarkup } from '../ui/action-icons';
-import { portalErrorGuidance } from '../portal/error-guidance';
+import { MAX_BATCH_ITEMS, parseBatchInput } from './input.js';
+import { actionIconMarkup } from '../ui/action-icons.js';
+import { portalErrorGuidance } from '../portal/error-guidance.js';
 const BRL_CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',

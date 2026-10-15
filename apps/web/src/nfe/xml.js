@@ -1,4 +1,3 @@
-import { DOMParser } from '@xmldom/xmldom';
 const NFE_NAMESPACE = 'http://www.portalfiscal.inf.br/nfe';
 export function parseNfeXml(xml, expectedAccessKey) {
     const parseErrors = [];
@@ -14,7 +13,7 @@ export function parseNfeXml(xml, expectedAccessKey) {
     catch {
         throw new Error('XML da NF-e inválido.');
     }
-    if (!document || parseErrors.length > 0) {
+    if (!document || parseErrors.length > 0 || document.getElementsByTagName('parsererror').length > 0) {
         throw new Error('XML da NF-e inválido.');
     }
     const infNFe = first(document, 'infNFe');

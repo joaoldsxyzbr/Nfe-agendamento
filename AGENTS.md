@@ -26,7 +26,8 @@
 ## Linguagens permitidas
 
 - O código próprio deve utilizar JavaScript, Python ou C# quando necessário; HTML, CSS e SQL também são permitidos.
-- A aplicação atual utiliza JavaScript ES Modules, HTML e CSS. Evite reintroduzir TypeScript ou outra linguagem de código.
+- A aplicação atual utiliza JavaScript ES Modules, HTML e CSS puros, sem Vite, React ou bundler de site. Evite reintroduzir TypeScript ou outra linguagem de código.
+- Scripts Node.js são permitidos para copiar arquivos e empacotar a extensão; não introduzir frameworks do frontend sem autorização.
 - Preserve a arquitetura site + extensão Chromium + Portal, sem introduzir serviços adicionais sem necessidade.
 
 ## Validação

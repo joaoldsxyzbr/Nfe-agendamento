@@ -6,12 +6,16 @@ const legacyWorkerUrl = new URL('../../../worker/index.js', import.meta.url);
 const legacyGlobalJsonUrl = new URL('../../../global.json', import.meta.url);
 const headersUrl = new URL('../public/_headers', import.meta.url);
 const ciUrl = new URL('../../../.github/workflows/ci.yml', import.meta.url);
+const buildScriptUrl = new URL('../../../scripts/build-web.mjs', import.meta.url);
 describe('Cloudflare deploy configuration', () => {
     it('serves only the built web assets directly through Workers Static Assets', async () => {
         const config = JSON.parse(await readFile(rootWranglerUrl, 'utf8'));
         expect(config.name).toBe('nfe-agendamento-2-0');
         expect(config.build?.command).toBe('npm run build:web');
         expect(config.assets?.directory).toBe('./apps/web/dist');
+        const staticBuild = await readFile(buildScriptUrl, 'utf8');
+        expect(staticBuild).toContain("new URL('src/', web)");
+        await expect(access(new URL('../vite.config.js', import.meta.url))).rejects.toBeDefined();
         expect(config.main).toBeUndefined();
         expect(config.assets?.binding).toBeUndefined();
         expect(config.assets?.run_worker_first).toBeUndefined();

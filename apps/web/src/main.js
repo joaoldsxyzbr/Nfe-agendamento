@@ -1,15 +1,15 @@
-import { createBatchController } from './batch/controller';
-import { actionIconMarkup } from './ui/action-icons';
-import { parseBatchInput } from './batch/input';
-import { createStoredZip } from './batch/zip';
-import { attachDanfeZoom, renderDanfe } from './danfe/render';
-import { createDanfeViewer } from './danfe/viewer';
-import { validateManualNfeXml } from './nfe/manual-xml-import';
-import { parseNfeXml } from './nfe/xml';
-import { BrowserPortalExtensionClient } from './portal/extension-client';
-import './styles.css';
-import './batch.css';
-import './danfe/styles.css';
+import { createBatchController } from './batch/controller.js';
+import { actionIconMarkup } from './ui/action-icons.js';
+import { parseBatchInput } from './batch/input.js';
+import { createStoredZip } from './batch/zip.js';
+import { attachDanfeZoom, renderDanfe } from './danfe/render.js';
+import { createDanfeViewer } from './danfe/viewer.js';
+import { validateManualNfeXml } from './nfe/manual-xml-import.js';
+import { parseNfeXml } from './nfe/xml.js';
+import { BrowserPortalExtensionClient } from './portal/extension-client.js';
+
+
+
 const BATCH_DRAFT_DEBOUNCE_MS = 120;
 const app = document.querySelector('#app');
 if (!app) {

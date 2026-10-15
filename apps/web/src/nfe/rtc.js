@@ -1,5 +1,4 @@
-import { DOMParser } from '@xmldom/xmldom';
-import { parseNfeXml } from './xml';
+import { parseNfeXml } from './xml.js';
 const NFE_NAMESPACE = 'http://www.portalfiscal.inf.br/nfe';
 const EXTENDED_RTC_GROUPS = Object.freeze([
     'gIBSCBSMono',
@@ -90,7 +89,7 @@ function parseDocument(xml) {
     catch {
         throw new Error('XML da NF-e inválido.');
     }
-    if (!document || parseErrors.length > 0) {
+    if (!document || parseErrors.length > 0 || document.getElementsByTagName('parsererror').length > 0) {
         throw new Error('XML da NF-e inválido.');
     }
     return document;

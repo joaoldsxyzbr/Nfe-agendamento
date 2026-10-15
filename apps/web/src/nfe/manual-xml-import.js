@@ -1,4 +1,4 @@
-import { parseNfeXml } from './xml';
+import { parseNfeXml } from './xml.js';
 export const MAX_XML_BYTES = 10 * 1024 * 1024;
 export async function validateManualNfeXml(file, expectedAccessKey) {
     if (!file)
