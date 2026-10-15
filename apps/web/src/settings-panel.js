@@ -1,6 +1,6 @@
-import { BrowserPortalExtensionClient } from './portal/extension-client';
-import { assessExtensionCompatibility, hasRequiredExtensionCapabilities } from './portal/compatibility';
-import './settings-panel.css';
+import { BrowserPortalExtensionClient } from './portal/extension-client.js';
+import { assessExtensionCompatibility, hasRequiredExtensionCapabilities } from './portal/compatibility.js';
+
 const client = new BrowserPortalExtensionClient();
 window.addEventListener('DOMContentLoaded', initializeSettingsPanel, { once: true });
 function initializeSettingsPanel() {

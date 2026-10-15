@@ -1,6 +1,6 @@
-import { BrowserPortalExtensionClient, } from './portal/extension-client';
-import { validateAccessKey } from './nfe/access-key';
-import { parseNfeXml } from './nfe/xml';
+import { BrowserPortalExtensionClient, } from './portal/extension-client.js';
+import { validateAccessKey } from './nfe/access-key.js';
+import { parseNfeXml } from './nfe/xml.js';
 export async function runExtensionOnlySmoke(accessKey, extension) {
     const validation = validateAccessKey(accessKey);
     if (!validation.valid)

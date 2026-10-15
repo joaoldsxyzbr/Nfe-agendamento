@@ -1,4 +1,4 @@
-import { validateAccessKey } from '../nfe/access-key';
+import { validateAccessKey } from '../nfe/access-key.js';
 // Limite operacional para impedir crescimento ilimitado de memória no navegador.
 export const MAX_BATCH_ITEMS = 100;
 const ACCESS_KEY_IN_TEXT = /(?<![A-Z0-9])[0-9]{6}[A-Z0-9]{12}[0-9]{26}(?![A-Z0-9])/gi;
