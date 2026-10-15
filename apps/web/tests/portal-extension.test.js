@@ -232,4 +232,38 @@ describe('BrowserPortalExtensionClient', () => {
         });
     });
 
+    it('ignores invalid bridge notifications and refreshes extension info after a valid ready event', async () => {
+        const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+        const listeners = new Set();
+        let pings = 0;
+        const versions = [];
+        const client = new BrowserPortalExtensionClient({
+            request: async (command) => {
+                if (command.type !== 'ping') throw new Error('unexpected command');
+                pings += 1;
+                return {
+                    type: 'ready',
+                    version: '0.2.16',
+                    capabilities: { openOptions: true, portalLookup: true, supplierResolution: true },
+                };
+            },
+            subscribe: (listener) => {
+                listeners.add(listener);
+                return () => listeners.delete(listener);
+            },
+        });
+        await client.getInfo();
+        await client.getInfo();
+        expect(pings).toBe(1);
+        const unsubscribe = client.onReadyHint((version) => versions.push(version));
+        for (const listener of listeners) {
+            listener({ type: 'bridge_ready', version: null });
+            listener({ type: 'bridge_ready', version: '0.2.16' });
+        }
+        expect(versions).toEqual(['0.2.16']);
+        await client.getInfo();
+        expect(pings).toBe(2);
+        unsubscribe();
+    });
+
 });
