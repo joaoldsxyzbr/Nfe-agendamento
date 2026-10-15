@@ -67,6 +67,11 @@ await update('apps/web/tests/danfe.test.js', (value) => value
   .replaceAll('querySelector<HTMLElement>', 'querySelector')
   .replaceAll('querySelector<HTMLTableRowElement>', 'querySelector'));
 
+await update('apps/extension/tests/portal-content.test.js', (value) => value.replace(
+  "expect(source).toContain('if (!armed?.armed) return;');",
+  "expect(source).toMatch(/if\\s*\\(!armed\\?\\.armed\\)\\s*return;/);"
+));
+
 await rm(join(root, 'apps/web/tsconfig.json'));
 await rm(join(root, 'apps/extension/tsconfig.json'));
 
