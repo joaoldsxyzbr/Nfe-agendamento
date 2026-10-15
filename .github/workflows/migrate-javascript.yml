@@ -20,6 +20,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: npm install --prefix "$RUNNER_TEMP/typescript5" --no-save --package-lock=false --ignore-scripts --no-audit typescript@5.9.3
       - run: node scripts/migrate-javascript.mjs
       - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - run: npm ci
