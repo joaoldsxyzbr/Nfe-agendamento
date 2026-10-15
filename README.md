@@ -89,6 +89,14 @@ O site é publicado como **Workers Static Assets**, sem Worker script intermedi�
 
 XML, certificado e regras privadas não são enviados à Cloudflare pelo fluxo de consulta.
 
+## Linguagens e ferramentas
+
+O site, a extensão e os testes usam JavaScript (ES Modules), HTML e CSS.
+TypeScript foi removido do código próprio e das dependências diretas.
+Vite, Vitest, Playwright, esbuild e Wrangler continuam como ferramentas de build e testes.
+Python, C# e SQL não são necessários para esta arquitetura sem backend ou banco.
+Detalhes: docs/architecture/javascript-migration.md.
+
 ## Desenvolvimento e validação
 
 ```bash

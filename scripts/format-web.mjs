@@ -11,7 +11,7 @@ if (mode !== '--check' && mode !== '--write') {
   process.exit(2);
 }
 
-const supportedExtensions = new Set(['.css', '.html', '.json', '.jsonc', '.ts']);
+const supportedExtensions = new Set(['.css', '.html', '.json', '.jsonc', '.js', '.mjs']);
 const files = [];
 await collectTextFiles(webRoot, files);
 

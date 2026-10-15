@@ -23,6 +23,12 @@
 - **Não implemente polling.** Prefira eventos, sinais nativos da plataforma, listeners, callbacks, mensagens ou outros fluxos orientados a eventos.
 - Faça mudanças pequenas, coerentes e completas. Evite código morto, duplicação desnecessária e soluções temporárias sem registro.
 
+## Linguagens permitidas
+
+- O código próprio deve utilizar JavaScript, Python ou C# quando necessário; HTML, CSS e SQL também são permitidos.
+- A aplicação atual utiliza JavaScript ES Modules, HTML e CSS. Evite reintroduzir TypeScript ou outra linguagem de código.
+- Preserve a arquitetura site + extensão Chromium + Portal, sem introduzir serviços adicionais sem necessidade.
+
 ## Validação
 
 - Não declare uma tarefa concluída sem evidência.

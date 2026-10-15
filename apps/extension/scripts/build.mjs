@@ -6,7 +6,7 @@ await rm(outdir, { recursive: true, force: true });
 await mkdir(outdir, { recursive: true });
 
 await build({
-  entryPoints: [new URL('../src/background.ts', import.meta.url).pathname],
+  entryPoints: [new URL('../src/background.js', import.meta.url).pathname],
   outfile: new URL('background.js', outdir).pathname,
   bundle: true,
   format: 'esm',
@@ -17,9 +17,9 @@ await build({
 });
 
 for (const [entry, output] of [
-  ['site-bridge.ts', 'site-bridge.js'],
-  ['portal-content.ts', 'portal-content.js'],
-  ['options.ts', 'options.js'],
+  ['site-bridge.js', 'site-bridge.js'],
+  ['portal-content.js', 'portal-content.js'],
+  ['options.js', 'options.js'],
 ]) {
   await build({
     entryPoints: [new URL(`../src/${entry}`, import.meta.url).pathname],
