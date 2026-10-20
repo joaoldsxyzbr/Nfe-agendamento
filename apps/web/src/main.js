@@ -78,7 +78,7 @@ app.innerHTML = `
           </div>
           <div class="batch-toolbar-actions">
             <button id="batch-cancel" class="secondary-button" type="button" hidden>${actionIconMarkup('cancel')}<span>Cancelar consulta</span></button>
-            <button id="batch-csv" class="secondary-button" type="button" disabled title="Baixar relatório CSV">📊<span>Relatório CSV</span></button>
+            <button id="batch-csv" class="secondary-button" type="button" disabled title="Baixar relatório CSV">${actionIconMarkup("csv")}<span>Relatório CSV</span></button>
             <button id="batch-zip" class="secondary-button" type="button" disabled>${actionIconMarkup('zip')}<span>Baixar XMLs (.zip)</span></button>
             <button id="batch-print" class="secondary-button" type="button" disabled>${actionIconMarkup('print')}<span>Imprimir DANFEs</span></button>
           </div>
