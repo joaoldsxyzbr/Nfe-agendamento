@@ -1,0 +1,135 @@
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-2: #f0f3f7;
+  --surface-3: #e8edf3;
+  --line: #d1d9e2;
+  --line-soft: #e0e6ed;
+  --text: #1a2332;
+  --muted: #5a6b7d;
+  --muted-2: #7a8b9d;
+  --blue: #2563eb;
+  --blue-strong: #1d4ed8;
+  --yellow: #b8860b;
+  --yellow-soft: #d4a017;
+  --green: #059669;
+  --danger: #dc2626;
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+[data-theme='light'] html {
+  background: var(--bg);
+}
+
+[data-theme='light'] body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme='light'] .brand-title span:first-child {
+  color: #0f172a;
+}
+
+[data-theme='light'] .brand-title span:last-child {
+  color: #475569;
+}
+
+[data-theme='light'] button {
+  background: var(--blue-strong);
+  border-color: var(--blue-strong);
+  color: #fff;
+}
+
+[data-theme='light'] button:hover:not(:disabled) {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+[data-theme='light'] .secondary-button {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+[data-theme='light'] .secondary-button:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--muted-2);
+}
+
+[data-theme='light'] input,
+[data-theme='light'] textarea {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+[data-theme='light'] input:focus,
+[data-theme='light'] textarea:focus {
+  border-color: var(--blue);
+  box-shadow: var(--focus-ring);
+}
+
+[data-theme='light'] .integration-pill {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .lookup-card {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .batch-list-header {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+[data-theme='light'] .batch-row {
+  background: var(--surface);
+  border-color: var(--line-soft);
+}
+
+[data-theme='light'] .batch-row:hover {
+  background: var(--surface-2);
+}
+
+[data-theme='light'] .danfe-modal {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .danfe-toolbar {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .danfe-content {
+  background: #fff;
+}
+
+[data-theme='light'] .settings-panel {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .settings-panel-header {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .diagnostics-card {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .theme-toggle {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+[data-theme='light'] .theme-toggle:hover {
+  background: var(--surface-3);
+}

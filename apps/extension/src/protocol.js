@@ -1,9 +1,10 @@
 import { normalizeTaxId } from './supplier-store';
+import { ACCESS_KEY_PATTERN } from './shared/access-key.js';
+import { MAX_XML_BYTES } from './shared/constants.js';
 export const SITE_ORIGIN = 'https://nfeagendamento.joaolds.xyz.br';
 export const PORTAL_ORIGIN = 'https://www.nfe.fazenda.gov.br';
 export const PAGE_CHANNEL = 'nfe-agendamento:portal-extension';
-export const MAX_XML_BYTES = 10 * 1024 * 1024;
-export const ACCESS_KEY_PATTERN = /^[0-9]{6}[A-Z0-9]{12}[0-9]{26}$/;
+export { ACCESS_KEY_PATTERN, MAX_XML_BYTES };
 export function parseSiteCommand(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error('Comando inválido.');
