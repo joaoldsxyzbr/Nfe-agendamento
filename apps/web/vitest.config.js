@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
     test: {
-        setupFiles: ['../../scripts/setup-dom-parser.mjs'],
+        setupFiles: ['../../scripts/setup-test-env.mjs'],
         coverage: {
             provider: 'v8',
             include: ['src/**/*.js'],

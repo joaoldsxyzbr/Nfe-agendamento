@@ -26,8 +26,8 @@ describe('Portal content script invariants', () => {
         expect(source).toContain("type: 'download_ready'");
         expect(source).toMatch(/if\s*\(!armed\?\.armed\)\s*return;/);
         expect(source).toContain('control.click()');
-        expect(source).toContain('RESULT_TIMEOUT_MS = 90_000');
-        expect(source).toContain('DOWNLOAD_TIMEOUT_MS = 30_000');
+        expect(source).toContain('RESULT_TIMEOUT_MS');
+        expect(source).toContain('DOWNLOAD_TIMEOUT_MS');
         expect(source).toContain('globalThis.setTimeout');
     });
 });

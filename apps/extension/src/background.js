@@ -3,6 +3,8 @@ import { isLikelyHtmlDocument, isOfficialDownloadUrl } from './portal-dom';
 import { capturePortalXmlPage } from './portal-fetch';
 import { buildPageReplayRequest, shouldCapturePortalRequest, } from './portal-request';
 import { SUPPLIER_CONFIG_KEY, invalidateSupplierConfigCache, loadSupplierConfig, resolveSupplierFromConfig, } from './supplier-store';
+import { PORTAL_POPUP_WIDTH, PORTAL_POPUP_HEIGHT } from './shared/constants.js';
+import { logger } from './shared/logger.js';
 const ACTIVE_OPERATION_KEY = 'activePortalOperation';
 const PORTAL_URL = 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&tipoConteudo=7PhJ+gAVw2g%3D';
 const PORTAL_DOWNLOAD_FILTER = {
@@ -157,8 +159,8 @@ async function handleSiteCommand(commandValue, sender) {
                     url: 'about:blank',
                     type: 'popup',
                     focused: true,
-                    width: 1100,
-                    height: 800,
+                    width: PORTAL_POPUP_WIDTH,
+                    height: PORTAL_POPUP_HEIGHT,
                 });
             }
             catch {

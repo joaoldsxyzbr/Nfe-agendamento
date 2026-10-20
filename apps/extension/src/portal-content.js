@@ -1,12 +1,7 @@
 import { accessKeySelector, consultButtonSelector, isCaptchaResponseReady, isDownloadLabel, isOfficialConsultUrl, isOfficialDownloadUrl, } from './portal-dom';
 import { PORTAL_ORIGIN } from './protocol';
 import { createEventDrivenScheduler } from './portal-scheduler';
-const READY_ATTEMPTS = 4;
-const READY_RETRY_DELAY_MS = 250;
-const MESSAGE_ATTEMPTS = 2;
-const MESSAGE_RETRY_DELAY_MS = 200;
-const RESULT_TIMEOUT_MS = 90_000;
-const DOWNLOAD_TIMEOUT_MS = 30_000;
+import { READY_ATTEMPTS, READY_RETRY_DELAY_MS, MESSAGE_ATTEMPTS, MESSAGE_RETRY_DELAY_MS, RESULT_TIMEOUT_MS, DOWNLOAD_TIMEOUT_MS } from './shared/constants.js';
 let accessKey = '';
 let portalState = '';
 let consultTriggered = false;
