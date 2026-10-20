@@ -37,16 +37,16 @@ Para evitar releitura e revalidação a cada NF-e, o service worker mantém a co
 
 ## Apresentação
 
-As regras públicas de apresentação continuam em `apps/web/src/nfe/supplier-rules.ts`. Elas podem definir catálogo, aliases e conversões visuais, sem alterar o XML original.
+As regras públicas de apresentação continuam em `apps/web/src/nfe/supplier-rules.js`. Elas podem definir catálogo, aliases e conversões visuais, sem alterar o XML original.
 
 ## Testes
 
-- `apps/extension/tests/supplier-store.test.ts`;
-- `apps/extension/tests/options.test.ts`;
-- `apps/web/tests/supplier-rules.test.ts`;
-- `apps/web/tests/product-mapping.test.ts`;
-- `apps/web/tests/supplier-quantity.test.ts`;
-- `apps/web/tests/supplier-quantity-render.test.ts`;
-- `apps/web/tests/batch-controller.test.ts`.
+- `apps/extension/tests/supplier-store.test.js`;
+- `apps/extension/tests/options.test.js`;
+- `apps/web/tests/supplier-rules.test.js`;
+- `apps/web/tests/product-mapping.test.js`;
+- `apps/web/tests/supplier-quantity.test.js`;
+- `apps/web/tests/supplier-quantity-render.test.js`;
+- `apps/web/tests/batch-controller.test.js`.
 
 Testes usam somente identificadores sintéticos.

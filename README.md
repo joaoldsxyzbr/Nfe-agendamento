@@ -89,6 +89,14 @@ O site é publicado como **Workers Static Assets**, sem Worker script intermedi�
 
 XML, certificado e regras privadas não são enviados à Cloudflare pelo fluxo de consulta.
 
+## Linguagens e ferramentas
+
+O site, a extensão e os testes usam JavaScript (ES Modules), HTML e CSS.
+TypeScript foi removido do código próprio e das dependências diretas.
+O site usa módulos JavaScript nativos, com CSS carregado pelo HTML, sem Vite nem bundler frontend. Um script Node.js apenas copia arquivos para apps/web/dist. Vitest e Playwright testam; esbuild empacota somente a extensão Chromium; Wrangler publica o site.
+Python, C# e SQL não são necessários para esta arquitetura sem backend ou banco.
+Detalhes: docs/architecture/javascript-migration.md e docs/architecture/site-estatico-sem-vite.md.
+
 ## Desenvolvimento e validação
 
 ```bash
@@ -99,6 +107,7 @@ npm run format:check:web
 npm run test:web
 npm run coverage:web
 npm run build:web
+npm --workspace @nfe-agendamento/web run dev
 npm run test:extension
 npm run coverage:extension
 npm run build:extension
@@ -106,7 +115,7 @@ npm test --prefix tests/playwright
 ./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, typecheck/lint, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler. O CI não envia mais artefatos temporários ao Actions: a release recompila e empacota a extensão a partir do commit validado pelo CI. Consulte `docs/operations/repository-hardening.md`.
+CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, lint/sintaxe, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler. O CI não envia mais artefatos temporários ao Actions: a release recompila e empacota a extensão a partir do commit validado pelo CI. Consulte `docs/operations/repository-hardening.md`.
 
 O repositório é privado. No plano GitHub atual, CodeQL/code scanning para repositórios privados não está disponível; por isso o workflow CodeQL não faz parte do gate vigente.
 

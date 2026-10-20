@@ -1,19 +1,38 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#4c8dff" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="stylesheet" href="/src/brand.css" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/batch.css" />
+    <link rel="stylesheet" href="/src/danfe/styles.css" />
+    <link rel="stylesheet" href="/src/settings-panel.css" />
+    <link rel="stylesheet" href="/src/theme-light.css" />
     <title>NFe Agendamento</title>
     <meta name="description" content="Consulta de NF-e pelo Portal Nacional com extensão do navegador, download de XML e visualização de DANFE." />
     <meta property="og:title" content="NFe Agendamento" />
     <meta property="og:description" content="Consulta de NF-e pelo Portal Nacional com extensão do navegador, download de XML e visualização de DANFE." />
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('nfe-theme') || 'dark';
+          if (theme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <main id="app"></main>
-    <script type="module" src="/src/main.ts"></script>
-    <script type="module" src="/src/settings-panel.ts"></script>
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/settings-panel.js"></script>
   </body>
 </html>

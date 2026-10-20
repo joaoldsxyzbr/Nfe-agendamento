@@ -5,14 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "build": "npm run typecheck && node scripts/build.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "node scripts/build.mjs",
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "esbuild": "0.28.2",
     "vitest": "5.0.3",
-    "typescript": "7.0.2",
     "@vitest/coverage-v8": "^5.0.3"
   }
 }
