@@ -73,9 +73,9 @@ Responsável por servir o site. Não é intermediário da consulta fiscal atual.
 - XML deve corresponder à chave consultada;
 - falhas não disparam outra rota escondida.
 
-## Limites e recuperação de estados (v0.0.38)
+## Limites e recuperação de estados (v0.0.42)
 
-- A requisição XML no contexto da página oficial tem deadline de 45 segundos e leitura por stream com limite de 10 MiB; a validação final de chave e estrutura permanece obrigatória antes do handoff.
+- A requisição XML no contexto da página oficial usa a captura textual `response.text()` no `MAIN` world (extensão 0.2.16, compatível com a 0.2.13 confirmada funcional), sem stream e sem AbortController no caminho padrão. O limite de 10 MiB é validado após a leitura, antes do handoff; os timeouts de espera de resultado e de download seguem ativos (90 s e 30 s); a validação final de chave e estrutura permanece obrigatória antes do handoff. O stream e o deadline de 45 s da v0.0.38 foram introduzidos na 0.2.14, coincidiram com a regressão de captura e não foram reintroduzidos.
 - Eventos DOM recebidos durante uma verificação assíncrona são reconciliados após essa verificação, sem polling periódico.
 - Se o usuário cancelar enquanto a janela ainda está sendo criada, o controller solicita o encerramento assim que o ID da operação estiver disponível; o lote não prossegue.
 - Falha ou timeout explícito não devem ativar uma rota fiscal alternativa. O usuário pode reconsultar ou importar XML validado localmente.
