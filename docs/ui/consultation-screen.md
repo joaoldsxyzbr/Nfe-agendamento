@@ -4,7 +4,7 @@
 
 À esquerda: logo, nome e descrição compacta. À direita: status da extensão, atalho para Releases e configurações.
 
-Como o repositório é privado, o atalho da extensão abre a release mais recente no GitHub em vez de depender de um download público anônimo.
+Como o repositório é público, o atalho da extensão abre a release mais recente no GitHub, sem exigir sessão autenticada.
 
 ## Diagnóstico
 
@@ -22,7 +22,7 @@ Não existe diagnóstico de consulta direta, Bridge ou configuração de CNPJ do
 
 ## Consulta unificada
 
-O visual é compacto: título curto, campo de entrada, contador de caracteres ou quantidade de chaves, botão de consulta destacado e resultados abaixo. Mantém tema escuro e o mesmo cabeçalho antes, durante e depois da consulta. O refinamento de outubro mantém a **mesma composição** em consulta individual ou lote, alterando apenas as linhas de resultados (não há tela nem modo separado).
+O visual é compacto: título curto, campo de entrada, contador de caracteres ou quantidade de chaves, botão de consulta destacado e resultados abaixo. Mantém o tema vigente (escuro, claro ou do sistema) e o mesmo cabeçalho antes, durante e depois da consulta. O refinamento de outubro mantém a **mesma composição** em consulta individual ou lote, alterando apenas as linhas de resultados (não há tela nem modo separado).
 
 Existe um único campo de chaves.
 
@@ -46,6 +46,29 @@ Existe um único campo de chaves.
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
 
+## Tema
+
+O tema padrão é escuro. `Ctrl+Shift+T` percorre escuro → claro → sistema; a escolha persiste em `localStorage` e o tema do sistema segue `prefers-color-scheme`. Um aviso rápido confirma a troca. A definição inicial ocorre antes da renderização, sem flash de tema incorreto.
+
+## Atalhos de teclado
+
+- `Ctrl+Enter`: consultar;
+- `Ctrl+N`: nova consulta;
+- `Ctrl+P`: imprimir DANFE(s);
+- `Ctrl+D`: baixar ZIP;
+- `Ctrl+Shift+T`: alternar tema;
+- `Escape`: cancelar consulta ou fechar o visualizador de DANFE.
+
+Dentro do campo de entrada, os atalhos se limitam a consultar e nova consulta, para não interceptar digitação.
+
+## Relatório CSV
+
+Com itens na lista, o botão **Relatório CSV** exporta chave, número, série, modelo, emitente, destinatário, data de emissão, valor total, status, origem e mensagem em CSV com BOM UTF-8 e formatação BRL. O relatório reflete o estado atual de cada item, sem reconsultar o Portal. Valores de texto são escapados conforme RFC 4180.
+
+## Depuração
+
+O parâmetro `?nfe-debug` na URL ativa registro detalhado no console do site. Mensagens não incluem chave fiscal completa, XML, CNPJ/CPF ou certificado.
+
 ## Recuperação por XML
 
 Se um item terminar em erro do Portal, ficam disponíveis duas ações explícitas:
@@ -65,7 +88,7 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 ## Direção visual
 
-- tema escuro;
+- tema escuro padrão, com tema claro e do sistema disponíveis;
 - controles e foco padronizados;
 - botões de cantos discretos e ícones locais em SVG; rótulos centrais nos comandos de consulta e rótulos curtos nas ações de cada NF-e;
 - cabeçalho reduzido, campo de uma linha que cresce com lote, barra de progresso compacta, informações prioritárias acima da chave abreviada;

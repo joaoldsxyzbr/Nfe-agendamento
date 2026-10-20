@@ -52,6 +52,15 @@ A tela usa um único fluxo para uma ou várias chaves:
 
 Não existem limite/cooldown de consulta direta, porque o projeto não chama `NFeDistribuicaoDFe`.
 
+### Recursos de interface (20/10/2026)
+
+- atalhos de teclado: `Ctrl+Enter` consulta, `Ctrl+N` nova consulta, `Ctrl+P` imprime DANFE(s), `Ctrl+D` baixa ZIP, `Ctrl+Shift+T` alterna tema e `Escape` cancela/fecha;
+- tema escuro (padrão), claro e do sistema, persistido em `localStorage`, com aviso rápido ao alternar;
+- botão **Relatório CSV** do lote: chave, número, série, modelo, emitente, destinatário, data de emissão, valor total, status, origem e mensagem, com formatação BRL e BOM UTF-8; reflete o estado atual dos itens sem reconsultar o Portal;
+- validação completa da chave de acesso: UF válida (27 UFs), dígito verificador e modelos 55 (NF-e) e 65 (NFC-e);
+- log de depuração opcional via `?nfe-debug` na URL, sem dados fiscais nas mensagens;
+- módulos compartilhados em `apps/web/src/shared` e `apps/extension/src/shared` (constantes, validação de chave, logger e métricas), sem duplicação entre site e extensão.
+
 ## Certificado digital
 
 A extensão não lê, importa, exporta nem armazena PFX/P12, senha ou chave privada.
@@ -117,11 +126,11 @@ npm test --prefix tests/playwright
 
 CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, lint/sintaxe, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler. O CI não envia mais artefatos temporários ao Actions: a release recompila e empacota a extensão a partir do commit validado pelo CI. Consulte `docs/operations/repository-hardening.md`.
 
-O repositório é privado. No plano GitHub atual, CodeQL/code scanning para repositórios privados não está disponível; por isso o workflow CodeQL não faz parte do gate vigente.
+O repositório é público. Os rulesets do GitHub exigem os checks `web`, `extension` e `danfe-print` aprovados para mesclar PRs na `main`.
 
-## Repositório privado
+## Repositório público
 
-O código e as releases ficam no repositório privado `joaoldsxyzbr/Nfe-agendamento-2.0`. O site continua público via Cloudflare Static Assets, mas não depende do GitHub para consultar NF-e. O GitHub é usado como fonte de verdade, histórico e distribuição manual da extensão para o próprio proprietário.
+O código e as releases ficam no repositório público `joaoldsxyzbr/Nfe-agendamento-2.0`. O site também é público via Cloudflare Static Assets e não depende do GitHub para consultar NF-e. O GitHub é usado como fonte de verdade, histórico e distribuição da extensão.
 
 ## Releases
 
@@ -129,7 +138,7 @@ A **v0.0.41 / extensão 0.2.16** consolida as melhorias de site e testes feitas 
 
 A **v0.0.40 / extensão 0.2.16** restaura a captura textual `response.text()` no `MAIN` world do Portal, compatível com o fluxo funcional da 0.2.13. A regressão da 0.2.14/0.2.15 coincide com a introdução do streaming/AbortController; não há evidência de qual das mudanças isoladas causou a falha. A validação de tamanho ocorre após a leitura e antes do envio ao site. O teste real em Chrome/Edge da 0.2.16 permanece **PENDENTE**.
 
-A **v0.0.39 / extensão 0.2.15** altera a captura do XML para o mundo `ISOLATED` da própria aba do Portal, mantendo os cookies e a autenticação do navegador sem depender do JavaScript e das políticas de execução do `MAIN` world do site externo. É uma correção de compatibilidade proposta após falha real reportada na extensão 0.2.14; a confirmação de recuperação no Chrome/Edge permanece **PENDENTE**. Não há retry extra, permissões novas ou mudanças de hCaptcha/certificado.
+A **v0.0.39 / extensão 0.2.15** altera a captura do XML para o mundo `ISOLATED` da própria aba do Portal, mantendo os cookies e a autenticação do navegador sem depender do JavaScript e das políticas de execução do `MAIN` world do site externo. É uma correção de compatibilidade proposta após falha real reportada na extensão 0.2.14; a confirmação de recuperação no Chrome/Edge permanece **PENDENTE**. Não há retry extra, permissões novas ou mudança de hCaptcha/certificado.
 
 A **v0.0.38 / extensão 0.2.14** limita a captura do XML a 10 MiB durante o streaming, impõe timeout de transferência, preserva sinais assíncronos do Portal e corrige cancelamento feito enquanto uma janela ainda está abrindo. Os testes automatizados incluem cenários de falha; a aceitação física continua pendente.
 
@@ -141,7 +150,7 @@ A **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste ha
 
 A v0.0.34/extensão 0.2.11 consolidou a arquitetura Portal-only e permanece como base funcional anterior a esta otimização.
 
-O atalho do site abre a release mais recente no GitHub. Como o repositório é privado e de uso pessoal, o download da extensão exige a sessão GitHub autorizada do proprietário.
+O atalho do site abre a release mais recente no GitHub. Com o repositório público, o download da extensão não exige sessão GitHub autenticada.
 
 ## Aceitação física
 
