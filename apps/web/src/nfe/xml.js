@@ -157,7 +157,10 @@ function parseTotals(total) {
 }
 function parseProduct(det) {
     const product = first(det, 'prod');
-    const itemNumber = Number(det.getAttribute('nItem') ?? '0');
+    const rawItemNumber = det.getAttribute('nItem') ?? '';
+    const itemNumber = rawItemNumber ? Number(rawItemNumber) : 0;
+    if (!Number.isFinite(itemNumber))
+        throw new Error('Valor numérico inválido em nItem.');
     const ean = nullableText(product, 'cEAN');
     return {
         itemNumber,
@@ -317,5 +320,7 @@ function number(root, localName) {
     if (!value)
         return 0;
     const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
+    if (!Number.isFinite(parsed))
+        throw new Error(`Valor numérico inválido em <${localName}>.`);
+    return parsed;
 }
