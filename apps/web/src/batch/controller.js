@@ -1,6 +1,7 @@
 import { MAX_BATCH_ITEMS, parseBatchInput } from './input.js';
 import { actionIconMarkup } from '../ui/action-icons.js';
 import { portalErrorGuidance } from '../portal/error-guidance.js';
+import { logger } from '../shared/logger.js';
 const BRL_CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -119,7 +120,9 @@ export function createBatchController(deps) {
             if (cancelled || signal?.aborted) {
                 // The Portal may finish opening after the user has already cancelled.
                 // Close that late popup before allowing a new batch.
-                await deps.portal.cancel(operationId).catch(() => { });
+                await deps.portal.cancel(operationId).catch((error) => {
+                    logger.warn('Falha ao cancelar operação tardia do Portal', { operationId, error: error?.message });
+                });
                 item.status = 'cancelled';
                 item.message = 'Consulta pelo Portal cancelada pelo usuário.';
                 return;
@@ -189,7 +192,9 @@ export function createBatchController(deps) {
         try {
             await deps.portal.cancel(operationId);
         }
-        catch { }
+        catch (error) {
+            logger.warn('Falha ao cancelar operação do Portal', { operationId, error: error?.message });
+        }
     }
     async function retryPortal(index) {
         const item = items[index];
@@ -444,10 +449,15 @@ export function createBatchController(deps) {
     }
     function refreshResultActions(changedItem, refreshAllRows = false) {
         const completed = completedItems();
+        const hasItems = items.length > 0;
         elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
         elements.printButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
         elements.zipButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
         elements.printButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
+        if (elements.csvButton) {
+            elements.csvButton.disabled = !hasItems || preflighting || running || manualActionBusy;
+            elements.csvButton.hidden = !hasItems || preflighting || running;
+        }
         if (refreshAllRows) {
             renderRows();
         }
@@ -467,6 +477,12 @@ export function createBatchController(deps) {
             content: item.parsed.originalXml,
         })));
         deps.downloadBlob(blob, `nfe-lote-${new Date().toISOString().slice(0, 10)}.zip`);
+    }
+    function downloadCsvReport() {
+        if (items.length === 0 || !deps.downloadCsv)
+            return;
+        logger.info('Gerando relatório CSV', { items: items.length });
+        deps.downloadCsv(items);
     }
     function printDanfes() {
         const parsed = completedItems()
@@ -517,13 +533,16 @@ export function createBatchController(deps) {
         const operationId = activePortalOperationId;
         activePortalOperationId = null;
         if (operationId)
-            void deps.portal.cancel(operationId).catch(() => { });
+            void deps.portal.cancel(operationId).catch((error) => {
+                logger.warn('Falha ao cancelar operação no dispose', { operationId, error: error?.message });
+            });
     }
     return {
         syncDraft,
         start,
         cancel,
         downloadZip,
+        downloadCsvReport,
         printDanfes,
         importManual,
         retryPortal,

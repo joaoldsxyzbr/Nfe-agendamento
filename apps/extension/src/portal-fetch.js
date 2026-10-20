@@ -5,8 +5,11 @@
  * Keep the official fetch without AbortController/ReadableStream overrides:
  * these were added in v0.2.14 and coincide with the live regression.
  * The 10 MiB check still runs before the payload leaves the Portal tab.
+ *
+ * Optional AbortSignal support: only applied when explicitly provided.
+ * The default path (no signal) preserves the v0.2.13 behavior exactly.
  */
-export async function capturePortalXmlPage(input, maxBytes) {
+export async function capturePortalXmlPage(input, maxBytes, signal = null) {
     try {
         let body;
         if (input.body?.encoding === 'text') {
@@ -20,14 +23,18 @@ export async function capturePortalXmlPage(input, maxBytes) {
             }
             body = bytes;
         }
-        const response = await fetch(input.url, {
+        const fetchOptions = {
             method: input.method,
             headers: input.headers,
             body,
             credentials: 'include',
             redirect: 'follow',
             cache: 'no-store',
-        });
+        };
+        if (signal) {
+            fetchOptions.signal = signal;
+        }
+        const response = await fetch(input.url, fetchOptions);
         const payload = await response.text();
         if (new TextEncoder().encode(payload).byteLength > maxBytes) {
             return {
