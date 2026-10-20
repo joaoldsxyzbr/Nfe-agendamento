@@ -10,7 +10,7 @@ import { BrowserPortalExtensionClient } from './portal/extension-client.js';
 import { BATCH_DRAFT_DEBOUNCE_MS, ZIP_DOWNLOAD_DELAY_MS } from './shared/constants.js';
 import { logger } from './shared/logger.js';
 import { metrics } from './shared/metrics.js';
-import { initTheme, cycleTheme, THEMES } from './shared/theme.js';
+import { initTheme, cycleTheme } from './shared/theme.js';
 import { createKeyboardShortcuts } from './shared/keyboard-shortcuts.js';
 import { downloadCsv } from './shared/csv-report.js';
 
