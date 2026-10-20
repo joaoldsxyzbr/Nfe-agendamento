@@ -186,3 +186,32 @@ describe('parseNfeXml', () => {
         });
     });
 });
+
+describe('parseNfeXml - integridade numérica fiscal', () => {
+    it('fails explicitly when a numeric field contains an invalid value', async () => {
+        const invalidTotal = fixture.replace('<vNF>25.00</vNF>', '<vNF>abc</vNF>');
+        await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(invalidTotal, VALID_KEY))).rejects.toThrow('Valor numérico inválido em <vNF>.');
+    });
+    it('fails explicitly when a product item number is invalid', async () => {
+        const invalidItem = fixture.replace('nItem="1"', 'nItem="x"');
+        await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(invalidItem, VALID_KEY))).rejects.toThrow('Valor numérico inválido em nItem.');
+    });
+    it('keeps an absent optional numeric field as zero', async () => {
+        const withoutDiscount = fixture.replace('<vDesc>1.00</vDesc>', '');
+        await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(withoutDiscount, VALID_KEY))).resolves.toMatchObject({
+            totals: { discount: 0, invoice: 25 },
+        });
+    });
+    it('keeps an empty optional numeric tag as zero', async () => {
+        const emptyDiscount = fixture.replace('<vDesc>1.00</vDesc>', '<vDesc></vDesc>');
+        await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(emptyDiscount, VALID_KEY))).resolves.toMatchObject({
+            totals: { discount: 0 },
+        });
+    });
+    it('preserves a legitimate zero distinct from absent or invalid', async () => {
+        const zeroDiscount = fixture.replace('<vDesc>1.00</vDesc>', '<vDesc>0.00</vDesc>');
+        await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(zeroDiscount, VALID_KEY))).resolves.toMatchObject({
+            totals: { discount: 0, invoice: 25 },
+        });
+    });
+});
