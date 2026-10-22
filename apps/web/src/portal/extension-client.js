@@ -1,67 +1,9 @@
-const PAGE_CHANNEL = 'nfe-agendamento:portal-extension';
-const DEFAULT_HANDSHAKE_TIMEOUT_MS = 1_200;
 const INFO_CACHE_TTL_MS = 2_000;
 const HANDSHAKE_ATTEMPTS = 3;
 const HANDSHAKE_RETRY_DELAY_MS = 200;
 const START_ATTEMPTS = 2;
 const OPERATION_STATUS_ATTEMPTS = 2;
 const COMMAND_RETRY_DELAY_MS = 150;
-export class WindowPortalExtensionTransport {
-    windowRef;
-    timeoutMs;
-    origin;
-    constructor(windowRef = window, timeoutMs = DEFAULT_HANDSHAKE_TIMEOUT_MS) {
-        this.windowRef = windowRef;
-        this.timeoutMs = timeoutMs;
-        this.origin = windowRef.location.origin;
-    }
-    request(command, signal, timeoutMs = this.timeoutMs) {
-        signal?.throwIfAborted();
-        return new Promise((resolve, reject) => {
-            const timeout = globalThis.setTimeout(() => finish(() => reject(new Error('Extensão do NFe Agendamento não respondeu.'))), timeoutMs);
-            const onAbort = () => finish(() => reject(signal?.reason ?? new DOMException('Aborted', 'AbortError')));
-            const onMessage = (event) => {
-                if (event.source !== this.windowRef || event.origin !== this.origin)
-                    return;
-                const envelope = event.data;
-                if (!envelope ||
-                    envelope.channel !== PAGE_CHANNEL ||
-                    envelope.direction !== 'response' ||
-                    envelope.requestId !== command.requestId) {
-                    return;
-                }
-                finish(() => resolve(envelope.response));
-            };
-            const finish = (complete) => {
-                globalThis.clearTimeout(timeout);
-                signal?.removeEventListener('abort', onAbort);
-                this.windowRef.removeEventListener('message', onMessage);
-                complete();
-            };
-            signal?.addEventListener('abort', onAbort, { once: true });
-            this.windowRef.addEventListener('message', onMessage);
-            this.windowRef.postMessage({
-                channel: PAGE_CHANNEL,
-                direction: 'request',
-                requestId: command.requestId,
-                command,
-            }, this.origin);
-        });
-    }
-    subscribe(listener) {
-        const onMessage = (event) => {
-            if (event.source !== this.windowRef || event.origin !== this.origin)
-                return;
-            const envelope = event.data;
-            if (!envelope || envelope.channel !== PAGE_CHANNEL || envelope.direction !== 'event')
-                return;
-            listener(envelope.event);
-        };
-        this.windowRef.addEventListener('message', onMessage);
-        return () => this.windowRef.removeEventListener('message', onMessage);
-    }
-}
-// Transporte de página interna MV3; não depende de host, content bridge ou window.postMessage.
 export class ExtensionPageTransport {
     api;
     tabId;
@@ -72,7 +14,7 @@ export class ExtensionPageTransport {
     async request(command, signal) {
         signal?.throwIfAborted();
         const appTabId = await this.tabId;
-        if (!Number.isInteger(appTabId)) throw new Error('A página da extensão precisa estar aberta em uma aba.');
+        if (!Number.isInteger(appTabId)) throw new Error('O NFe Agendamento precisa estar aberto em uma janela da extensão.');
         const response = await this.api.runtime.sendMessage({ source: 'app', appTabId, command });
         signal?.throwIfAborted();
         return response;
@@ -95,9 +37,7 @@ export class BrowserPortalExtensionClient {
     transport;
     cachedInfo = null;
     pendingInfoRequest = null;
-    constructor(transport = globalThis.location?.protocol === 'chrome-extension:' && globalThis.chrome?.runtime?.id
-        ? new ExtensionPageTransport()
-        : new WindowPortalExtensionTransport()) {
+    constructor(transport = new ExtensionPageTransport()) {
         this.transport = transport;
     }
     async getInfo(signal) {
