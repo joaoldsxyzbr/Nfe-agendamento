@@ -64,6 +64,9 @@ export function createFakeChrome(options = {}) {
     };
     const chrome = {
         runtime: {
+            id: 'test-extension-id',
+            getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
+            sendMessage: vi.fn(async () => undefined),
             onMessage: runtimeMessage,
             onInstalled: runtimeInstalled,
             onStartup: runtimeStartup,
@@ -93,6 +96,12 @@ export function createFakeChrome(options = {}) {
                 createdWindows.push(record);
                 return record;
             }),
+            update: vi.fn(async (windowId, changes) => {
+                const window = windows.get(windowId);
+                if (!window) throw new Error('Window not found.');
+                Object.assign(window, changes);
+                return window;
+            }),
             get: vi.fn(async (windowId) => {
                 const window = windows.get(windowId);
                 if (!window)
@@ -115,6 +124,12 @@ export function createFakeChrome(options = {}) {
         },
         tabs: {
             onRemoved: tabRemoved,
+            create: vi.fn(async ({ url }) => {
+                const id = nextTabId++;
+                const tab = { id, windowId: 1, url };
+                tabs.set(id, tab);
+                return tab;
+            }),
             query: vi.fn(async (query) => {
                 if (Number.isInteger(query.windowId)) {
                     return [...tabs.values()].filter((tab) => tab.windowId === query.windowId);

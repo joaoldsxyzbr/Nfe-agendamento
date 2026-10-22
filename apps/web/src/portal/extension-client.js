@@ -71,7 +71,9 @@ export class ExtensionPageTransport {
     }
     async request(command, signal) {
         signal?.throwIfAborted();
-        const response = await this.api.runtime.sendMessage({ source: 'app', command });
+        const appTabId = await this.tabId;
+        if (!Number.isInteger(appTabId)) throw new Error('A página da extensão precisa estar aberta em uma aba.');
+        const response = await this.api.runtime.sendMessage({ source: 'app', appTabId, command });
         signal?.throwIfAborted();
         return response;
     }
