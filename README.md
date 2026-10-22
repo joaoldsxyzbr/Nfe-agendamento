@@ -28,12 +28,15 @@ O bundle gerado em **apps/extension/dist/** contém manifest.json, app.html, src
 
 No Chrome/Edge: Extensões → Modo do desenvolvedor → Carregar sem compactação → escolher a pasta **apps/extension/dist**. Clique no ícone para abrir a interface.
 
-### Download do ZIP de teste (sem compilar no seu PC)
+### Pré-lançamento do piloto no GitHub Releases
 
-Abra [GitHub Actions — CI da branch nfe-agendamento](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/workflows/ci.yml?query=branch%3Anfe-agendamento). Entre na execução mais recente e, no final da página, abra **Artifacts → NFeAgendamento-Piloto-v0.3.0**. O arquivo baixado é um ZIP com o **conteúdo já compilado** da extensão; extraia numa pasta e, em `chrome://extensions` ou `edge://extensions`, escolha **Carregar sem compactação** apontando para a pasta extraída que contém `manifest.json`.
+O projeto dispõe de um fluxo separado em `.github/workflows/release-extension-pilot.yml` para gerar um ZIP da versão experimental a partir da branch `nfe-agendamento` e publicá-lo como **pré-lançamento**, sem marcar como Latest e sem alterar a `main`. A publicação depende do sucesso do build e dos testes desse fluxo.
 
-O artifact do GitHub tem validade de sete dias; é apenas um **piloto para testes** e pode estar disponível mesmo se outro job do CI (por exemplo, `security-audit`) falhar. Confira o resultado da execução antes de instalar; não considere uma aprovação de produção. A branch `main` e a release oficial não mudam.
+- [Pré-lançamento v0.3.0-pilot.1](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/tag/v0.3.0-pilot.1)
+- Baixe o asset `NFeAgendamento-Extension-Piloto-v0.3.0.zip` e extraia em uma pasta.
+- Use **Carregar sem compactação** apontando para a pasta que contém `manifest.json`.
 
+O pré-lançamento não é versão estável nem substitui o teste físico e a auditoria integral. Se o link não existir, consulte a execução do workflow de publicação: a release não deve ser considerada publicada sem confirmação do GitHub.
 
 **Usar perfil separado para este piloto.** Não substituir a versão corrente nem instalar no mesmo perfil durante uma consulta ativa. Não há release oficial 0.3.0 nesta etapa.
 
