@@ -8,8 +8,10 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 
 - [ ] npm ci, npm audit, lint, formatação, testes web/extensão, build e CI aprovados.
 - [ ] ZIP/dir MV3 contém app.html, módulos JS, CSS, marca, opções, service worker, content script.
-- [ ] Chrome instala sem erro e abre/foca a aba interna pelo ícone.
-- [ ] Edge instala sem erro e abre/foca a aba interna pelo ícone.
+- [ ] Chrome instala sem erro e abre/foca janela popup centralizada (metade da largura de referência), sem criar uma nova aba.
+- [ ] Edge instala sem erro e abre/foca janela popup centralizada (metade da largura de referência), sem criar uma nova aba.
+- [ ] O segundo clique no ícone apenas foca o popup existente e mantém os dados preenchidos.
+- [ ] Em tela menor ou janela do navegador não maximizada, o popup permanece utilizável e redimensionável.
 - [ ] A interface funciona sem acesso ao domínio Cloudflare do site antigo.
 - [ ] Configurações e regras privadas do fornecedor funcionam.
 - [ ] Tema, acessibilidade, CSS, marca, navegação e diagnósticos corretos.
@@ -26,7 +28,7 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 - [ ] Duas chaves em lote seguem em ordem, sem duas consultas simultâneas.
 - [ ] Cancelar/fechar janela impede avançar no lote.
 - [ ] Falha do Portal permite recuperação manual por XML validado.
-- [ ] Fechar/reabrir aba ou reiniciar navegador não duplica operação e expõe erros.
+- [ ] Fechar/reabrir popup ou reiniciar navegador não duplica operação e expõe erros.
 - [ ] Fluxo não usa Workers Cloudflare, D1 nem outro backend próprio.
 
 | Navegador | Status | Observações |

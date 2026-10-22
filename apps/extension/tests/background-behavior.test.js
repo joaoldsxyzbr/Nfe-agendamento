@@ -313,15 +313,48 @@ describe('standalone app page', () => {
     });
     const appCommand = (command, tabId = 10) => ({ source: 'app', appTabId: tabId, command });
 
-    it('opens the bundled UI when the extension icon is clicked', async () => {
+    it('opens a centered application popup instead of a browser tab', async () => {
         const fake = await loadBackground();
         fake.chrome.action.onClicked.listeners[0]();
         await fake.flush();
-        expect(fake.chrome.tabs.create).toHaveBeenCalledWith({ url: APP_URL });
+        expect(fake.chrome.windows.getLastFocused).toHaveBeenCalledWith({ windowTypes: ['normal'] });
+        expect(fake.chrome.windows.create).toHaveBeenCalledWith({
+            url: APP_URL, type: 'popup', focused: true,
+            width: 800, height: 765, left: 400, top: 67,
+        });
+        expect(fake.chrome.tabs.create).not.toHaveBeenCalled();
         expect(fake.chrome.runtime.openOptionsPage).not.toHaveBeenCalled();
+    });
+    it('focuses the existing app popup rather than opening a duplicate', async () => {
+        const fake = await loadBackground();
         fake.chrome.action.onClicked.listeners[0]();
         await fake.flush();
-        expect(fake.chrome.tabs.create).toHaveBeenCalledTimes(1);
+        fake.chrome.action.onClicked.listeners[0]();
+        await fake.flush();
+        expect(fake.chrome.windows.create).toHaveBeenCalledTimes(1);
+        expect(fake.chrome.windows.update).toHaveBeenCalledWith(100, { focused: true });
+        expect(fake.chrome.tabs.create).not.toHaveBeenCalled();
+    });
+    it('clamps the popup to the available window on small screens', async () => {
+        const fake = await loadBackground({
+            lastFocusedWindow: { id: 1, type: 'normal', left: 50, top: 30, width: 620, height: 560 },
+        });
+        fake.chrome.action.onClicked.listeners[0]();
+        await fake.flush();
+        expect(fake.chrome.windows.create).toHaveBeenCalledWith({
+            url: APP_URL, type: 'popup', focused: true,
+            width: 620, height: 560, left: 50, top: 30,
+        });
+    });
+    it('does not reuse the old app tab in a normal browser window', async () => {
+        const fake = await loadBackground({
+            windows: [{ id: 5, type: 'normal' }],
+            tabs: [{ id: 50, windowId: 5, url: APP_URL }],
+        });
+        fake.chrome.action.onClicked.listeners[0]();
+        await fake.flush();
+        expect(fake.chrome.windows.create).toHaveBeenCalledTimes(1);
+        expect(fake.chrome.tabs.update).not.toHaveBeenCalled();
     });
     it('allows only the own app.html tab to issue commands', async () => {
         const fake = await loadBackground();

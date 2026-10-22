@@ -6,9 +6,9 @@ Esta branch incorpora a interface completa do NFe Agendamento numa extensão do 
 
 ## Arquitetura
 
-Aba local da extensão (app.html) → mensagens internas MV3 → service worker da extensão → janela oficial do Portal NF-e → hCaptcha manual e certificado pelo navegador quando exigido → XML oficial validado → DANFE, impressão/PDF, XML, CSV e ZIP na aba local.
+Janela independente da extensão (app.html) → mensagens internas MV3 → service worker da extensão → janela oficial do Portal NF-e → hCaptcha manual e certificado pelo navegador quando exigido → XML oficial validado → DANFE, impressão/PDF, XML, CSV e ZIP na aba local.
 
-O clique no ícone abre ou foca uma aba interna. As regras privadas de fornecedores continuam em chrome.storage.local. Nenhuma chave privada, PFX ou XML deve ser salvo no GitHub ou enviado ao Cloudflare.
+O clique no ícone abre ou foca uma janela independente do tipo popup, centralizada, com aproximadamente metade da largura da janela do navegador e 85% da altura. Em telas pequenas ela se ajusta aos limites disponíveis; não cria uma aba adicional. As regras privadas de fornecedores continuam em chrome.storage.local. Nenhuma chave privada, PFX ou XML deve ser salvo no GitHub ou enviado ao Cloudflare.
 
 ## Compilar e instalar piloto
 

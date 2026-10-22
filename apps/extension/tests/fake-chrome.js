@@ -83,6 +83,9 @@ export function createFakeChrome(options = {}) {
         },
         windows: {
             onRemoved: windowRemoved,
+            getLastFocused: vi.fn(async () => options.lastFocusedWindow ?? {
+                id: 1, type: 'normal', left: 0, top: 0, width: 1600, height: 900,
+            }),
             create: vi.fn(async (options) => {
                 const id = nextWindowId++;
                 const tabId = nextTabId++;

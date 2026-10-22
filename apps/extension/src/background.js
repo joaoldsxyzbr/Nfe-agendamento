@@ -10,6 +10,7 @@ const PORTAL_DOWNLOAD_FILTER = {
     urls: ['https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx*'],
 };
 let operationMutationQueue = Promise.resolve();
+let openingAppWindow = null;
 void hardenLocalStorage();
 void reconcileActiveOperation();
 chrome.runtime.onInstalled.addListener(() => {
@@ -26,7 +27,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
 });
 chrome.action.onClicked.addListener(() => {
-    void openAppTab();
+    if (openingAppWindow) return;
+    openingAppWindow = openAppPopup()
+        .catch((error) => {
+            console.error('Falha ao abrir a janela do NFe Agendamento.', error);
+        })
+        .finally(() => { openingAppWindow = null; });
 });
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message?.source === 'background') return false;
@@ -61,17 +67,29 @@ async function hardenLocalStorage() {
 async function reconcileActiveOperation() {
     await getReconciledActiveOperation();
 }
-async function openAppTab() {
+async function openAppPopup() {
     const url = chrome.runtime.getURL('app.html');
-    const tabs = await chrome.tabs.query({}).catch(() => []);
-    const existing = tabs.find((tab) => tab.url === url && Number.isInteger(tab.id));
-    if (existing) {
-        await chrome.tabs.update(existing.id, { active: true });
-        if (Number.isInteger(existing.windowId))
-            await chrome.windows.update(existing.windowId, { focused: true }).catch(() => {});
+    const tabs = await chrome.tabs.query({ url }).catch(() => []);
+    for (const tab of tabs) {
+        if (!Number.isInteger(tab.windowId)) continue;
+        const existingWindow = await chrome.windows.get(tab.windowId).catch(() => null);
+        if (existingWindow?.type !== 'popup' || !Number.isInteger(existingWindow.id)) continue;
+        await chrome.windows.update(existingWindow.id, { focused: true });
         return;
     }
-    await chrome.tabs.create({ url });
+
+    // Não adiciona permissões: usa o tamanho da janela normal do navegador como referência.
+    const reference = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);
+    const availableWidth = Number.isInteger(reference?.width) && reference.width > 0 ? reference.width : null;
+    const availableHeight = Number.isInteger(reference?.height) && reference.height > 0 ? reference.height : null;
+    const width = availableWidth === null ? 840 : Math.min(availableWidth, Math.max(680, Math.round(availableWidth / 2)));
+    const height = availableHeight === null ? 760 : Math.min(availableHeight, Math.max(620, Math.round(availableHeight * 0.85)));
+    const bounds = { width, height };
+    if (Number.isInteger(reference?.left) && availableWidth !== null)
+        bounds.left = reference.left + Math.floor((availableWidth - width) / 2);
+    if (Number.isInteger(reference?.top) && availableHeight !== null)
+        bounds.top = reference.top + Math.floor((availableHeight - height) / 2);
+    await chrome.windows.create({ url, type: 'popup', focused: true, ...bounds });
 }
 
 async function handleMessage(message, sender) {
