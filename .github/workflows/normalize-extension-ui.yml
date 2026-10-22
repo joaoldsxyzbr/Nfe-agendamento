@@ -65,6 +65,14 @@ jobs:
           }
           for (const root of roots) await visit(root);
           await transform('package.json');
+          // A importacao do workspace usa join(...,'web'), nao uma URL: atualizar os nomes do diretorio.
+          for (const file of ['scripts/lint-ui.mjs', 'scripts/format-ui.mjs']) {
+            const old = await readFile(file, 'utf8');
+            const next = old.replaceAll("'web'", "'ui'");
+            if (old === next) throw new Error('Raiz do workspace nao foi ajustada: ' + file);
+            await writeFile(file, next, 'utf8');
+          }
+
           const uiPkg = JSON.parse(await readFile('apps/ui/package.json', 'utf8'));
           delete uiPkg.scripts.dev;
           delete uiPkg.devDependencies.wrangler;
@@ -85,9 +93,11 @@ jobs:
         run: |
           npm install --package-lock-only --ignore-scripts --no-audit
           npm ci
+          npm audit fix --audit-level=high
       - name: Validar interface, extensao e pacote final
         run: |
           npm run lint:ui
+          npm run format:ui
           npm run format:check:ui
           npm run test:ui
           npm run test:extension
