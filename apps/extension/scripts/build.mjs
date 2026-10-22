@@ -36,11 +36,11 @@ await cp(new URL('../manifest.json', import.meta.url), new URL('manifest.json', 
 await cp(new URL('../options.html', import.meta.url), new URL('options.html', outdir));
 await cp(new URL('../icon.png', import.meta.url), new URL('icon.png', outdir));
 // A UI nativa é a interface web existente, embutida no pacote Manifest V3.
-const webRoot = new URL('../../web/', import.meta.url);
-await cp(new URL('src/', webRoot), new URL('src/', outdir), { recursive: true });
-await cp(new URL('public/brand-mark.png', webRoot), new URL('brand-mark.png', outdir));
-await cp(new URL('public/favicon.ico', webRoot), new URL('favicon.ico', outdir));
-const webHtml = await readFile(new URL('index.html', webRoot), 'utf8');
+const uiRoot = new URL('../../ui/', import.meta.url);
+await cp(new URL('src/', uiRoot), new URL('src/', outdir), { recursive: true });
+await cp(new URL('public/brand-mark.png', uiRoot), new URL('brand-mark.png', outdir));
+await cp(new URL('public/favicon.ico', uiRoot), new URL('favicon.ico', outdir));
+const webHtml = await readFile(new URL('index.html', uiRoot), 'utf8');
 const appHtml = webHtml
   .replace(/<script>[\s\S]*?<\/script>/, '')
   .replaceAll('href="/', 'href="./')

@@ -11,7 +11,7 @@ describe('extension-only distribution boundaries', () => {
         expect(manifest.host_permissions).toEqual(['https://www.nfe.fazenda.gov.br/*']);
         expect(manifest.content_scripts).toHaveLength(1);
         const build = await readFile(extBuildUrl, 'utf8');
-        expect(build).toContain("new URL('../../web/', import.meta.url)");
+        expect(build).toContain("new URL('../../ui/', import.meta.url)");
         expect(build).toContain("new URL('app.html', outdir)");
         expect(build).not.toContain("['site-bridge.js'");
     });
@@ -23,7 +23,7 @@ describe('extension-only distribution boundaries', () => {
     it('keeps CI quality checks without any Cloudflare deploy step', async () => {
         const ci = await readFile(ciUrl, 'utf8');
         for (const required of [
-            'npm ci', 'npm run test:web', 'npm run test:extension',
+            'npm ci', 'npm run test:ui', 'npm run test:extension',
             'npm run build:extension', 'npm audit --audit-level=high',
             'npm test --prefix tests/playwright',
         ])

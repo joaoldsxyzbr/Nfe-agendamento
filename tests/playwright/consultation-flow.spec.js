@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 const ACCESS_KEY = '42260812345678000123550010000012341000012342';
-const xmlUrl = new URL('../../apps/web/tests/fixtures/nfe-basic.xml', import.meta.url);
+const xmlUrl = new URL('../../apps/ui/tests/fixtures/nfe-basic.xml', import.meta.url);
 const xml = await readFile(xmlUrl, 'utf8');
 const xmlPath = fileURLToPath(xmlUrl);
 
