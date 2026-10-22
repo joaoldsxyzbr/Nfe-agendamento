@@ -42,7 +42,7 @@ describe('ExtensionPageTransport MV3', () => {
         };
         const transport = new ExtensionPageTransport(api);
         await expect(transport.request({ type: 'ping', requestId: 't-2' }))
-            .rejects.toThrow('precisa estar aberta em uma aba');
+            .rejects.toThrow('precisa estar aberto em uma janela');
         expect(api.runtime.sendMessage).not.toHaveBeenCalled();
     });
 });
