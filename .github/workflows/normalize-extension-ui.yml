@@ -84,6 +84,10 @@ jobs:
                 delete rootPkg.allowScripts[key];
             }
           }
+          for (const [name, value] of Object.entries(rootPkg.scripts)) {
+            if (name.endsWith(':ui'))
+              rootPkg.scripts[name.replace(/:ui$/, ':web')] = value;
+          }
           await writeFile('package.json', JSON.stringify(rootPkg, null, 2) + '\n');
           JS
           git rm -f apps/ui/public/_headers
@@ -114,6 +118,8 @@ jobs:
           rm -f .github/workflows/normalize-extension-ui.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # A credencial GitHub Actions nao pode modificar workflows: deixa-os intactos.
+          git restore .github/workflows
           git add -A
           git diff --cached --check
           git commit -m "refactor: organizar UI e extensao MV3 sem hospedagem"
