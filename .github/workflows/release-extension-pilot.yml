@@ -74,7 +74,8 @@ jobs:
               if manifest.get('host_permissions') != ['https://www.nfe.fazenda.gov.br/*']:
                   raise SystemExit('A extensão não deve depender do site hospedado')
               html = archive.read('app.html').decode('utf-8')
-              if 'src="./src/main.js"' not in html or 'src="./brand-mark.png"' not in html.replace("'", '"'):
+              js = archive.read('src/main.js').decode('utf-8')
+              if 'src="./src/main.js"' not in html or 'src="./brand-mark.png"' not in js:
                   raise SystemExit('Entradas da interface local ausentes')
               if '<script>' in html:
                   raise SystemExit('CSP MV3: script inline na UI não é permitido')
