@@ -1,31 +1,34 @@
-# Arquitetura da edição só extensão
+# Arquitetura — extensão única
 
-Data: 22/10/2026 | Branch: nfe-agendamento | Estado: piloto não validado fisicamente.
+**Data:** 22/10/2026 · **Branch:** `nfe-agendamento` · **Status:** piloto, aceitação física ainda não homologada.
 
-## Reutilização do código
+## Componentes
 
-O build existente da extensão incorpora os arquivos de apps/web/src e apps/web/public, sem duplicar o código-fonte. O HTML do site é transformado em app.html dentro do ZIP. Os caminhos absolutos de CSS/JS são convertidos para relativos; o script inline de tema é retirado por exigência CSP MV3, e main.js já inicializa o tema.
+- `apps/ui/src`: interface, tema, lote, XML, DANFE, CSV, ZIP, regras de apresentação. ES Modules, HTML e CSS puros.
+- `apps/extension/src`: service worker MV3, captura oficial do Portal, controle da janela, fornecedores locais e tela de opções.
+- `apps/extension/scripts/build.mjs`: inclui a UI no pacote `dist/app.html`, preserva os arquivos locais e produz os scripts da extensão.
+- `tests/playwright`: testa comportamento e impressão com dados sintéticos; o servidor HTTP de preview serve **somente** aos testes.
 
-A interface abre em uma janela independente do tipo popup ao clicar no ícone, com largura aproximada de 50% e altura de 85% da janela normal do navegador, centralizada dentro desses limites. Se a janela popup já existe, recebe foco, preservando o estado da consulta; abas normais de versões anteriores não são reutilizadas. Esse ajuste não adiciona permissões de extensão. O Portal Nacional continua em um popup separado, na sua dimensão original.
+O aplicativo não tem site separado nem backend próprio. Não usa Workers Cloudflare, D1, React, Vite ou serviços Windows em sua execução.
 
-O cliente BrowserPortalExtensionClient escolhe ExtensionPageTransport em páginas do protocolo chrome-extension:. A página interna chama chrome.runtime.sendMessage com source:app e appTabId. O service worker exige identidade e URL exata app.html, valida a aba solicitante e mantém uma única operação fiscal em chrome.storage.session. O retorno é enviado por chrome.runtime.sendMessage com siteTabId, e o cliente só aceita eventos destinados à própria aba.
+## Fluxo de consulta
 
-A captura do Portal, hCaptcha manual, certificado gerenciado pelo navegador, limite de XML, rejeição de DTD, geração de DANFE, ZIP e fluxo de lote são reaproveitados. O service worker Manifest V3 é local ao navegador e não é um Cloudflare Worker. Consultar NF-e ainda depende de internet e do Portal Nacional.
+Ícone da extensão → janela popup da UI (`chrome-extension://…/app.html`) → `chrome.runtime.sendMessage` → service worker da extensão → janela de consulta do Portal Nacional da NF-e → hCaptcha manual, certificado do navegador quando aplicável → XML validado → DANFE, download ou impressão.
 
-## Segurança
+O popup da UI usa aproximadamente 50% da largura da janela normal e 85% de sua altura, com limites para monitores menores. O segundo clique foca a janela já aberta. O Portal tem popup próprio e separado.
 
-- Permissões: scripting, storage e webRequest. Host permission: somente www.nfe.fazenda.gov.br.
-- Sem host do antigo site no manifest e sem site-bridge.js empacotado.
-- Sem all_urls, nativeMessaging, webRequestBlocking, solução automática de captcha ou acesso direto à SEFAZ.
-- Regras de fornecedor permanecem locais em chrome.storage.local.
-- Dados fiscais não entram nos logs, histórico de Git ou telemetria.
-- O código da ponte antiga permanece na árvore de fontes para comparação e testes legados, mas não integra a distribuição desta branch; deve ser reavaliado antes de eventual merge.
-- A transmissão do XML de até 10 MiB e reconciliação após suspensão do MV3 exigem testes em navegador real. Não presumir confiabilidade com base somente em mocks.
+## Segurança e privacidade
 
-## Pipeline
+- Manifest V3 e permissões limitadas: `scripting`, `storage`, `webRequest`; host `https://www.nfe.fazenda.gov.br/*`.
+- Somente a `app.html` da própria extensão pode iniciar comandos internos. O worker verifica ID, origem e aba, além de manter uma operação ativa em `chrome.storage.session`.
+- Ponte antiga `site-bridge.js`, `window.postMessage` do site e permissão do domínio hospedado foram removidas do caminho de execução.
+- Regras de fornecedor permanecem locais em `chrome.storage.local`. Não versionar certificado, XML fiscal real, chave completa ou dados pessoais.
+- XML até 10 MiB, sem DTD, com chave correspondente à consulta.
+- Nenhuma automação de CAPTCHA; é necessário resolver o desafio manualmente.
+- A suspensão/reinicialização de service workers MV3 e o tráfego XML extenso ainda precisam de validação em navegador real.
 
-CI testa módulos web reutilizados, extensão e impressão. O build de extensão deve produzir app.html, src/main.js e recursos estáticos. O dry-run Wrangler foi retirado do CI desta branch, pois a extensão dispensa hospedagem. Arquivos históricos de Cloudflare no repositório não são usados no runtime.
+## Build, teste e aceite
 
-## Isolamento
+Execute `npm ci`, lint, formatação, testes de UI/extensão, build e auditoria. O CI integra testes automatizados de impressão. A publicação estável fica bloqueada até o checklist físico de [Chrome/Edge](../testing/extension-only-acceptance.md) e a aprovação do PR.
 
-Nenhuma alteração nesta branch desliga Cloudflare, modifica a main ou publica extensão. Em caso de falha, basta remover a extensão experimental do perfil de teste. Ver docs/testing/extension-only-acceptance.md.
+A integração Cloudflare preexistente pode continuar exibindo checks no GitHub, mas não faz parte do runtime do piloto. **A branch não desliga o site antigo e não altera a main.**
