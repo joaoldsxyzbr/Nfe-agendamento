@@ -35,3 +35,16 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 | Edge | NÃO EXECUTADO | Pendente |
 
 **Decisão:** não publicar release de produção, não mesclar na main e não desligar site existente sem evidência real acima.
+## Evidência CI do piloto — 22/10/2026
+
+Execução de referência: [GitHub Actions #1246](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/39831571824), commit `ba2c1fd993489b5ed950990425054041df1de0f6`.
+
+- **extension: SUCESSO** — testes da extensão e empacotamento MV3 passaram.
+- **danfe-print: SUCESSO** — testes automatizados de impressão passaram.
+- **security-audit: FALHA** — `npm audit --audit-level=high` retornou erro; a causa exata precisa ser conferida no log do job, sem ignorar a falha.
+- **web: situação não confirmada** — o status individual reportado ainda constava em execução na última consulta, embora o workflow geral estivesse concluído com falha.
+- **teste físico: NÃO EXECUTADO** — nenhuma NF-e real, certificado ou captcha foi testado neste piloto.
+
+A checagem automática **Workers Builds** apareceu porque a integração Cloudflare existente ainda acompanha o repositório. Ela **não é dependência de execução do novo aplicativo**; esta alteração não autoriza desativar a produção atual. Não afirmar que sua existência comprova que o piloto foi publicado.
+
+Próxima pendência: investigar/corrigir a auditoria de dependências, obter CI integralmente verde e executar o gate físico nos dois navegadores.
