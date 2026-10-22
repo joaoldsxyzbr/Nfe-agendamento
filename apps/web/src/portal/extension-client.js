@@ -61,11 +61,41 @@ export class WindowPortalExtensionTransport {
         return () => this.windowRef.removeEventListener('message', onMessage);
     }
 }
+// Transporte de página interna MV3; não depende de host, content bridge ou window.postMessage.
+export class ExtensionPageTransport {
+    api;
+    tabId;
+    constructor(api = globalThis.chrome) {
+        this.api = api;
+        this.tabId = api.tabs.getCurrent().then((tab) => tab?.id ?? null);
+    }
+    async request(command, signal) {
+        signal?.throwIfAborted();
+        const response = await this.api.runtime.sendMessage({ source: 'app', command });
+        signal?.throwIfAborted();
+        return response;
+    }
+    subscribe(listener) {
+        const receive = (message) => {
+            if (message?.source !== 'background' || !message.event)
+                return;
+            void this.tabId.then((tabId) => {
+                if (tabId !== null && message.siteTabId === tabId)
+                    listener(message.event);
+            });
+        };
+        this.api.runtime.onMessage.addListener(receive);
+        return () => this.api.runtime.onMessage.removeListener(receive);
+    }
+}
+
 export class BrowserPortalExtensionClient {
     transport;
     cachedInfo = null;
     pendingInfoRequest = null;
-    constructor(transport = new WindowPortalExtensionTransport()) {
+    constructor(transport = globalThis.location?.protocol === 'chrome-extension:' && globalThis.chrome?.runtime?.id
+        ? new ExtensionPageTransport()
+        : new WindowPortalExtensionTransport()) {
         this.transport = transport;
     }
     async getInfo(signal) {
