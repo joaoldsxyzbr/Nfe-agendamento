@@ -303,3 +303,72 @@ describe('extension background behavior', () => {
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
     });
 });
+
+describe('standalone app page', () => {
+    const APP_URL = 'chrome-extension://test-extension-id/app.html';
+    const appSender = (id = 10) => ({
+        id: 'test-extension-id',
+        url: APP_URL,
+        tab: { id, url: APP_URL, windowId: 1 },
+    });
+    const appCommand = (command, tabId = 10) => ({ source: 'app', appTabId: tabId, command });
+
+    it('opens the bundled UI when the extension icon is clicked', async () => {
+        const fake = await loadBackground();
+        fake.chrome.action.onClicked.listeners[0]();
+        await fake.flush();
+        expect(fake.chrome.tabs.create).toHaveBeenCalledWith({ url: APP_URL });
+        expect(fake.chrome.runtime.openOptionsPage).not.toHaveBeenCalled();
+        fake.chrome.action.onClicked.listeners[0]();
+        await fake.flush();
+        expect(fake.chrome.tabs.create).toHaveBeenCalledTimes(1);
+    });
+    it('allows only the own app.html tab to issue commands', async () => {
+        const fake = await loadBackground();
+        const command = appCommand({ type: 'ping', requestId: 'app-info' });
+        expect(await fake.emitRuntimeMessage(command, appSender())).toMatchObject({
+            type: 'ready',
+            requestId: 'app-info',
+        });
+        expect(await fake.emitRuntimeMessage(command, {
+            ...appSender(),
+            url: 'chrome-extension://test-extension-id/options.html',
+        })).toMatchObject({ type: 'failed', message: 'Origem da mensagem não autorizada.' });
+        expect(await fake.emitRuntimeMessage(command, {
+            ...appSender(),
+            id: 'other-extension',
+        })).toMatchObject({ type: 'failed', message: 'Origem da mensagem não autorizada.' });
+        expect(await fake.emitRuntimeMessage({ ...command, appTabId: 99 }, appSender())).toMatchObject({
+            type: 'failed',
+        });
+    });
+    it('sends terminal events to the internal runtime instead of a site bridge', async () => {
+        const fake = await loadBackground();
+        const started = await fake.emitRuntimeMessage(
+            appCommand({ type: 'start', requestId: 'app-start', accessKey: ACCESS_KEY_A }),
+            appSender(),
+        );
+        expect(started.type).toBe('started');
+        const operation = fake.sessionState.get('activePortalOperation');
+        expect(operation.clientType).toBe('app');
+        await fake.emitWindowRemoved(operation.portalWindowId);
+        expect(fake.chrome.runtime.sendMessage).toHaveBeenCalledWith({
+            source: 'background',
+            siteTabId: 10,
+            event: expect.objectContaining({ type: 'cancelled', operationId: started.operationId }),
+        });
+        expect(fake.sentSiteEvents).toEqual([]);
+    });
+    it('keeps an active app operation after worker restart', async () => {
+        const operation = { ...storedOperation(), clientType: 'app' };
+        const fake = await loadBackground({
+            sessionState: { activePortalOperation: operation },
+            windows: [{ id: operation.portalWindowId }],
+            tabs: [
+                { id: operation.siteTabId, url: APP_URL, windowId: 1 },
+                { id: operation.portalTabId, windowId: operation.portalWindowId, url: PORTAL_URL },
+            ],
+        });
+        expect(fake.sessionState.get('activePortalOperation')).toEqual(operation);
+    });
+});
