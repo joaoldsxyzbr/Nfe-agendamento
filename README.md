@@ -32,8 +32,10 @@ No Chrome/Edge: Extensões → Modo do desenvolvedor → Carregar sem compactaç
 
 O projeto dispõe de um fluxo separado em `.github/workflows/release-extension-pilot.yml` para gerar um ZIP da versão experimental a partir da branch `nfe-agendamento` e publicá-lo como **pré-lançamento**, sem marcar como Latest e sem alterar a `main`. A publicação depende do sucesso do build e dos testes desse fluxo.
 
-- [Pré-lançamento v0.3.0-pilot.1](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/tag/v0.3.0-pilot.1)
-- Baixe o asset `NFeAgendamento-Extension-Piloto-v0.3.0.zip` e extraia em uma pasta.
+O piloto 2 abre o aplicativo em uma janela popup independente, centralizada em aproximadamente meia largura do navegador, sem criar uma aba. Fechar e reabrir a janela não altera dados remotos. O popup do Portal Nacional continua separado.
+
+- [Pré-lançamento v0.3.0-pilot.2 — janela popup](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/releases/tag/v0.3.0-pilot.2)
+- Baixe o asset `NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip` e extraia em uma pasta.
 - Use **Carregar sem compactação** apontando para a pasta que contém `manifest.json`.
 
 O pré-lançamento não é versão estável nem substitui o teste físico e a auditoria integral. Se o link não existir, consulte a execução do workflow de publicação: a release não deve ser considerada publicada sem confirmação do GitHub.

@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: nfe-extension-pilot-v0.3.0
+  group: nfe-extension-pilot-v0.3.0-popup
   cancel-in-progress: false
 
 jobs:
@@ -51,12 +51,12 @@ jobs:
           mkdir -p release
           (
             cd apps/extension/dist
-            zip -q -r ../../../release/NFeAgendamento-Extension-Piloto-v0.3.0.zip .
+            zip -q -r ../../../release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip .
           )
           python - <<'PY'
           import json
           from zipfile import ZipFile
-          filename = 'release/NFeAgendamento-Extension-Piloto-v0.3.0.zip'
+          filename = 'release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip'
           with ZipFile(filename) as archive:
               names = set(archive.namelist())
               required = {
@@ -90,9 +90,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag='v0.3.0-pilot.1'
-          archive='release/NFeAgendamento-Extension-Piloto-v0.3.0.zip'
-          notes='docs/releases/v0.3.0-pilot.1.md'
+          tag='v0.3.0-pilot.2'
+          archive='release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip'
+          notes='docs/releases/v0.3.0-pilot.2.md'
           test -s "$archive"
           test -s "$notes"
           if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
@@ -107,7 +107,7 @@ jobs:
           fi
           gh release create "$tag" "$archive" \
             --target "$GITHUB_SHA" \
-            --title 'NFe Agendamento — extensão independente v0.3.0 (PILOTO)' \
+            --title 'NFe Agendamento — extensão popup v0.3.0 (PILOTO 2)' \
             --notes-file "$notes" \
             --prerelease \
             --latest=false
