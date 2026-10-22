@@ -1,0 +1,110 @@
+name: Organizar UI da extensao (uso unico)
+
+on:
+  push:
+    branches: [nfe-agendamento]
+    paths: [.github/workflows/normalize-extension-ui.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.repository == 'joaoldsxyzbr/Nfe-agendamento-2.0' && github.ref == 'refs/heads/nfe-agendamento'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Organizar workspaces e scripts (somente branch experimental)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/nfe-agendamento'
+          git mv apps/web apps/ui
+          git mv scripts/build-web.mjs scripts/build-ui-preview.mjs
+          git mv scripts/serve-web.mjs scripts/serve-ui-preview.mjs
+          git mv scripts/lint-web.mjs scripts/lint-ui.mjs
+          git mv scripts/format-web.mjs scripts/format-ui.mjs
+          node --input-type=module <<'JS'
+          import { readdir, readFile, writeFile } from 'node:fs/promises';
+          import { extname, join } from 'node:path';
+          const roots = [
+            'apps/ui', 'apps/extension/scripts',
+            'scripts', 'tests/playwright', '.github/workflows'
+          ];
+          const extensions = new Set(['.js', '.mjs', '.html', '.json', '.yml']);
+          async function transform(file) {
+            const old = await readFile(file, 'utf8');
+            const next = old
+              .replaceAll('apps/web', 'apps/ui')
+              .replaceAll('@nfe-agendamento/web', '@nfe-agendamento/ui')
+              .replaceAll('../../web/', '../../ui/')
+              .replaceAll('build-web.mjs', 'build-ui-preview.mjs')
+              .replaceAll('serve-web.mjs', 'serve-ui-preview.mjs')
+              .replaceAll('lint-web.mjs', 'lint-ui.mjs')
+              .replaceAll('format-web.mjs', 'format-ui.mjs')
+              .replaceAll(':web', ':ui')
+              .replaceAll('webRoot', 'uiRoot')
+              .replace(/^  web:$/gm, '  ui:');
+            if (old !== next) await writeFile(file, next, 'utf8');
+          }
+          async function visit(path) {
+            const entries = await readdir(path, { withFileTypes: true });
+            for (const entry of entries) {
+              if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === 'test-results') continue;
+              const item = join(path, entry.name);
+              if (entry.isDirectory()) await visit(item);
+              else if (entry.isFile() && extensions.has(extname(item))) await transform(item);
+            }
+          }
+          for (const root of roots) await visit(root);
+          await transform('package.json');
+          const uiPkg = JSON.parse(await readFile('apps/ui/package.json', 'utf8'));
+          delete uiPkg.scripts.dev;
+          delete uiPkg.devDependencies.wrangler;
+          await writeFile('apps/ui/package.json', JSON.stringify(uiPkg, null, 2) + '\n');
+          const rootPkg = JSON.parse(await readFile('package.json', 'utf8'));
+          if (rootPkg.allowScripts) {
+            for (const key of Object.keys(rootPkg.allowScripts)) {
+              if (key.startsWith('workerd@') || key.startsWith('sharp@'))
+                delete rootPkg.allowScripts[key];
+            }
+          }
+          await writeFile('package.json', JSON.stringify(rootPkg, null, 2) + '\n');
+          JS
+          git rm -f apps/ui/public/_headers
+          git rm -r -f --ignore-unmatch tests/playwright/test-results
+          printf '\n# Test output must not be committed\ntests/playwright/test-results/\n' >> .gitignore
+      - name: Atualizar npm lockfile e instalar
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit
+          npm ci
+      - name: Validar interface, extensao e pacote final
+        run: |
+          npm run lint:ui
+          npm run format:check:ui
+          npm run test:ui
+          npm run test:extension
+          npm run build:extension
+          test -s apps/extension/dist/app.html
+          test -s apps/extension/dist/src/main.js
+      - name: Auditar as dependencias necessarias em runtime
+        run: npm audit --omit=dev --audit-level=high
+      - name: Consolidar no GitHub e apos sucesso remover workflow temporario
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/nfe-agendamento'
+          rm -f .github/workflows/normalize-extension-ui.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m "refactor: organizar UI e extensao MV3 sem hospedagem"
+          git push origin HEAD:nfe-agendamento
