@@ -21,7 +21,7 @@ A arquitetura vigente é **site + extensão Chromium MV3 + Portal Nacional**, se
 
 Na branch `nfe-agendamento`, o planejamento para executar toda a aplicação dentro de **uma extensão Chromium, sem Workers e sem hospedagem própria**, está em [docs/plans/2026-10-22-nfe-agendamento-extensao-autonoma.md](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md).
 
-**Status: somente planejamento.** A arquitetura vigente da `main` não mudou. Não houve deploy, teste físico do piloto ou migração de código.
+**Status da branch: implementação inicial, com aceite físico ainda pendente.** A arquitetura vigente da `main` não mudou; não houve deploy. Veja [arquitetura experimental](architecture/extension-only.md) e [aceitação da extensão](testing/extension-only-acceptance.md).
 
 ## Histórico
 
