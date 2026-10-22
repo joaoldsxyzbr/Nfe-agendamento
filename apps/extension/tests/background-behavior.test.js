@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createFakeChrome, } from './fake-chrome';
-const SITE_URL = 'chrome-extension://test-extension-id/app.html';
+const APP_URL = 'chrome-extension://test-extension-id/app.html';
 const PORTAL_URL = 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx';
 const ACCESS_KEY_A = '123456ABCDEFGHIJKL00000000000000000000000000';
 const ACCESS_KEY_B = '654321MNOPQRSTUVWX11111111111111111111111111';
@@ -15,11 +15,11 @@ async function loadBackground(options = {}) {
     await fake.flush();
     return fake;
 }
-function siteSender(tabId = 10) {
+function appSender(tabId = 10) {
     return {
         id: 'test-extension-id',
-        url: SITE_URL,
-        tab: { id: tabId, url: SITE_URL },
+        url: APP_URL,
+        tab: { id: tabId, url: APP_URL },
     };
 }
 function startCommand(requestId, accessKey, appTabId = 10) {
@@ -47,7 +47,7 @@ function portalXml(accessKey) {
     return `<nfeProc><NFe><infNFe Id="NFe${accessKey}"></infNFe></NFe></nfeProc>`;
 }
 async function startToWaitingResult(fake) {
-    const started = await fake.emitRuntimeMessage(startCommand('request-start', ACCESS_KEY_A), siteSender());
+    const started = await fake.emitRuntimeMessage(startCommand('request-start', ACCESS_KEY_A), appSender());
     let operation = fake.sessionState.get('activePortalOperation');
     const sender = portalSender(operation.portalTabId, operation.portalWindowId);
     await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, sender);
@@ -95,9 +95,9 @@ describe('extension background behavior', () => {
             message: 'Origem da mensagem não autorizada.',
         });
     });
-    it('reuses the active operation when the same site tab retries the same access key', async () => {
+    it('reuses the active operation when the same app window retries the same access key', async () => {
         const fake = await loadBackground();
-        const sender = siteSender();
+        const sender = appSender();
         const first = await fake.emitRuntimeMessage(startCommand('request-1', ACCESS_KEY_A), sender);
         const second = await fake.emitRuntimeMessage(startCommand('request-2', ACCESS_KEY_A), sender);
         expect(first.type).toBe('started');
@@ -109,8 +109,8 @@ describe('extension background behavior', () => {
     it('rejects another operation while one is active', async () => {
         const fake = await loadBackground();
         const [first, second] = await Promise.all([
-            fake.emitRuntimeMessage(startCommand('request-1', ACCESS_KEY_A), siteSender(10)),
-            fake.emitRuntimeMessage(startCommand('request-2', ACCESS_KEY_B, 20), siteSender(20)),
+            fake.emitRuntimeMessage(startCommand('request-1', ACCESS_KEY_A), appSender(10)),
+            fake.emitRuntimeMessage(startCommand('request-2', ACCESS_KEY_B, 20), appSender(20)),
         ]);
         const failed = [first, second].find((response) => response?.type === 'failed');
         const started = [first, second].find((response) => response?.type === 'started');
@@ -123,11 +123,12 @@ describe('extension background behavior', () => {
     });
     it('cancel clears the current operation and closes its popup', async () => {
         const fake = await loadBackground();
-        const sender = siteSender();
+        const sender = appSender();
         const started = await fake.emitRuntimeMessage(startCommand('request-start', ACCESS_KEY_A), sender);
         const operation = fake.sessionState.get('activePortalOperation');
         const response = await fake.emitRuntimeMessage({
-            source: 'site',
+            source: 'app',
+            appTabId: 10,
             command: {
                 type: 'cancel',
                 requestId: 'request-cancel',
@@ -141,9 +142,9 @@ describe('extension background behavior', () => {
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
         expect(fake.removedWindows).toContain(operation.portalWindowId);
     });
-    it('closing the Portal window cancels the active operation and notifies the site', async () => {
+    it('closing the Portal window cancels the active operation and notifies the app', async () => {
         const fake = await loadBackground();
-        const started = await fake.emitRuntimeMessage(startCommand('request-start', ACCESS_KEY_A), siteSender());
+        const started = await fake.emitRuntimeMessage(startCommand('request-start', ACCESS_KEY_A), appSender());
         const operation = fake.sessionState.get('activePortalOperation');
         await fake.emitWindowRemoved(operation.portalWindowId);
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
@@ -166,7 +167,7 @@ describe('extension background behavior', () => {
             sessionState: { activePortalOperation: operation },
             windows: [{ id: operation.portalWindowId }],
             tabs: [
-                { id: operation.siteTabId, url: SITE_URL },
+                { id: operation.siteTabId, url: APP_URL },
                 { id: operation.portalTabId, windowId: operation.portalWindowId, url: PORTAL_URL },
             ],
         });
@@ -179,7 +180,7 @@ describe('extension background behavior', () => {
             sessionState: { activePortalOperation: operation },
             windows: [{ id: operation.portalWindowId }],
             tabs: [
-                { id: operation.siteTabId, url: SITE_URL },
+                { id: operation.siteTabId, url: APP_URL },
             ],
         });
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
