@@ -28,7 +28,7 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
 
-  web:
+  ui:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -40,11 +40,11 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: npm run lint:web
-      - run: npm run format:check:web
-      - run: npm run test:web
-      - run: npm run coverage:web
-      - run: npm run build:web
+      - run: npm run lint:ui
+      - run: npm run format:check:ui
+      - run: npm run test:ui
+      - run: npm run coverage:ui
+      - run: npm run build:ui
 
   extension:
     runs-on: ubuntu-24.04
