@@ -1,4 +1,4 @@
-import { PORTAL_ORIGIN, MAX_XML_BYTES, SITE_ORIGIN, parseSiteCommand, validateXmlPayload, } from './protocol';
+import { PORTAL_ORIGIN, MAX_XML_BYTES, parseAppCommand, validateXmlPayload, } from './protocol';
 import { isLikelyHtmlDocument, isOfficialDownloadUrl } from './portal-dom';
 import { capturePortalXmlPage } from './portal-fetch';
 import { buildPageReplayRequest, shouldCapturePortalRequest, } from './portal-request';
@@ -98,34 +98,24 @@ async function handleMessage(message, sender) {
     }
     const envelope = message;
     if (envelope.source === 'app') {
-        return handleSiteCommand(envelope.command, sender, 'app', envelope.appTabId);
-    }
-    if (envelope.source === 'site') {
-        return handleSiteCommand(envelope.command, sender, 'site');
+        return handleAppCommand(envelope.command, sender, envelope.appTabId);
     }
     if (envelope.source === 'portal') {
         return handlePortalMessage(envelope, sender);
     }
     throw new Error('Origem da mensagem não reconhecida.');
 }
-async function handleSiteCommand(commandValue, sender, clientType, claimedTabId) {
+async function handleAppCommand(commandValue, sender, claimedTabId) {
     const appUrl = chrome.runtime.getURL('app.html');
-    if (clientType === 'app') {
-        if (sender.id !== chrome.runtime.id || sender.url !== appUrl)
-            throw new Error('Origem da mensagem não autorizada.');
-    } else {
-        assertSenderOrigin(sender, SITE_ORIGIN);
-    }
-    const siteTabId = sender.tab?.id ?? (clientType === 'app' ? claimedTabId : undefined);
-    if (!Number.isInteger(siteTabId) || (clientType === 'app' && sender.tab?.id !== undefined && sender.tab.id !== claimedTabId)) {
-        throw new Error('A aba do NFe Agendamento não pôde ser identificada.');
-    }
-    if (clientType === 'app') {
-        const appTab = await chrome.tabs.get(siteTabId).catch(() => null);
-        if (!appTab || appTab.url !== appUrl)
-            throw new Error('A aba do NFe Agendamento não foi autorizada.');
-    }
-    const command = parseSiteCommand(commandValue);
+    if (sender.id !== chrome.runtime.id || sender.url !== appUrl)
+        throw new Error('Origem da mensagem não autorizada.');
+    const siteTabId = sender.tab?.id ?? claimedTabId;
+    if (!Number.isInteger(siteTabId) || (sender.tab?.id !== undefined && sender.tab.id !== claimedTabId))
+        throw new Error('A janela do NFe Agendamento não pôde ser identificada.');
+    const appTab = await chrome.tabs.get(siteTabId).catch(() => null);
+    if (!appTab || appTab.url !== appUrl)
+        throw new Error('A janela do NFe Agendamento não foi autorizada.');
+    const command = parseAppCommand(commandValue);
     if (command.type === 'ping') {
         return {
             type: 'ready',
@@ -206,7 +196,7 @@ async function handleSiteCommand(commandValue, sender, clientType, claimedTabId)
                 operationId,
                 accessKey: command.accessKey,
                 siteTabId,
-                clientType,
+                clientType: 'app',
                 portalTabId,
                 portalWindowId,
                 state: 'opening',
@@ -478,7 +468,7 @@ async function transition(operation, state, message) {
             operationId: next.operationId,
             state,
             message,
-        }, next.clientType);
+        });
     }
     return next;
 }
@@ -510,7 +500,7 @@ async function finishOperation(operation, event) {
     });
     if (!current)
         return false;
-    await pushToSite(current.siteTabId, event, current.clientType);
+    await pushToSite(current.siteTabId, event);
     try {
         await chrome.windows.remove(current.portalWindowId);
     }
@@ -519,15 +509,12 @@ async function finishOperation(operation, event) {
     }
     return true;
 }
-async function pushToSite(siteTabId, event, clientType) {
+async function pushToSite(siteTabId, event) {
     try {
-        if (clientType === 'app')
-            await chrome.runtime.sendMessage({ source: 'background', siteTabId, event });
-        else
-            await chrome.tabs.sendMessage(siteTabId, { source: 'background', event });
+        await chrome.runtime.sendMessage({ source: 'background', siteTabId, event });
     }
     catch {
-        // A página pode ter sido fechada: o evento não tem destinatário.
+        // A janela pode ter sido fechada: o evento não tem destinatário.
     }
 }
 async function getActiveOperation() {
@@ -554,9 +541,7 @@ async function getReconciledActiveOperation() {
         portalUrl === 'about:blank' ||
         portalOrigin === PORTAL_ORIGIN;
     const siteUrl = typeof siteTab?.url === 'string' ? siteTab.url : '';
-    const validClient = operation.clientType === 'app'
-        ? siteUrl === chrome.runtime.getURL('app.html')
-        : parseOrigin(siteUrl) === SITE_ORIGIN;
+    const validClient = siteUrl === chrome.runtime.getURL('app.html');
     const valid = Boolean(portalWindow &&
         portalTab &&
         siteTab &&

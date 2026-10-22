@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createFakeChrome, } from './fake-chrome';
-const SITE_URL = 'https://nfeagendamento.joaolds.xyz.br/';
+const SITE_URL = 'chrome-extension://test-extension-id/app.html';
 const PORTAL_URL = 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx';
 const ACCESS_KEY_A = '123456ABCDEFGHIJKL00000000000000000000000000';
 const ACCESS_KEY_B = '654321MNOPQRSTUVWX11111111111111111111111111';
@@ -17,16 +17,15 @@ async function loadBackground(options = {}) {
 }
 function siteSender(tabId = 10) {
     return {
+        id: 'test-extension-id',
         url: SITE_URL,
-        tab: {
-            id: tabId,
-            url: SITE_URL,
-        },
+        tab: { id: tabId, url: SITE_URL },
     };
 }
-function startCommand(requestId, accessKey) {
+function startCommand(requestId, accessKey, appTabId = 10) {
     return {
-        source: 'site',
+        source: 'app',
+        appTabId,
         command: {
             type: 'start',
             requestId,
@@ -67,6 +66,7 @@ function storedOperation() {
         portalWindowId: 100,
         state: 'waiting_user',
         stateChangedAt: 1_700_000_000_000,
+        clientType: 'app',
     };
 }
 describe('extension background behavior', () => {
@@ -78,12 +78,14 @@ describe('extension background behavior', () => {
         expect(chromeApi.tabs.onRemoved.addListener).toHaveBeenCalledTimes(1);
         expect(chromeApi.webRequest.onBeforeRequest.addListener).toHaveBeenCalledTimes(1);
     });
-    it('rejects site commands from a sender outside SITE_ORIGIN', async () => {
+    it('rejects commands from pages outside the extension', async () => {
         const fake = await loadBackground();
         const response = await fake.emitRuntimeMessage({
-            source: 'site',
+            source: 'app',
+            appTabId: 10,
             command: { type: 'ping', requestId: 'request-invalid-origin' },
         }, {
+            id: 'test-extension-id',
             url: 'https://example.invalid/',
             tab: { id: 11, url: 'https://example.invalid/' },
         });
@@ -108,7 +110,7 @@ describe('extension background behavior', () => {
         const fake = await loadBackground();
         const [first, second] = await Promise.all([
             fake.emitRuntimeMessage(startCommand('request-1', ACCESS_KEY_A), siteSender(10)),
-            fake.emitRuntimeMessage(startCommand('request-2', ACCESS_KEY_B), siteSender(20)),
+            fake.emitRuntimeMessage(startCommand('request-2', ACCESS_KEY_B, 20), siteSender(20)),
         ]);
         const failed = [first, second].find((response) => response?.type === 'failed');
         const started = [first, second].find((response) => response?.type === 'started');
@@ -390,7 +392,10 @@ describe('standalone app page', () => {
             siteTabId: 10,
             event: expect.objectContaining({ type: 'cancelled', operationId: started.operationId }),
         });
-        expect(fake.sentSiteEvents).toEqual([]);
+        expect(fake.sentSiteEvents).toContainEqual({
+            tabId: 10,
+            message: { source: 'background', event: expect.objectContaining({ type: 'cancelled' }) },
+        });
     });
     it('keeps an active app operation after worker restart', async () => {
         const operation = { ...storedOperation(), clientType: 'app' };

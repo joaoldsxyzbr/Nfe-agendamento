@@ -66,7 +66,11 @@ export function createFakeChrome(options = {}) {
         runtime: {
             id: 'test-extension-id',
             getURL: vi.fn((path) => `chrome-extension://test-extension-id/${path}`),
-            sendMessage: vi.fn(async () => undefined),
+            sendMessage: vi.fn(async (message) => {
+                if (message?.source === 'background')
+                    sentSiteEvents.push({ tabId: message.siteTabId, message: { source: message.source, event: message.event } });
+                return undefined;
+            }),
             onMessage: runtimeMessage,
             onInstalled: runtimeInstalled,
             onStartup: runtimeStartup,
