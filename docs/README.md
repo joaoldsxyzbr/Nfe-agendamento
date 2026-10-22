@@ -17,6 +17,12 @@ Decisão de stack: docs/architecture/javascript-migration.md e docs/architecture
 
 A arquitetura vigente é **site + extensão Chromium MV3 + Portal Nacional**, sem Bridge/EXE e sem consulta direta à SEFAZ.
 
+## Experimento isolado nesta branch
+
+Na branch `nfe-agendamento`, o planejamento para executar toda a aplicação dentro de **uma extensão Chromium, sem Workers e sem hospedagem própria**, está em [docs/plans/2026-10-22-nfe-agendamento-extensao-autonoma.md](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md).
+
+**Status: somente planejamento.** A arquitetura vigente da `main` não mudou. Não houve deploy, teste físico do piloto ou migração de código.
+
 ## Histórico
 
 Arquivos marcados no topo como **Documento histórico / superseded** registram decisões e arquiteturas antigas. Eles não devem ser usados para decidir comportamento de produção.
