@@ -1,4 +1,5 @@
 // Somente metadados previamente permitidos. Nunca armazenar conteúdo do Portal ou dados fiscais.
+import { MODEL_VERSION } from './portal-model.js';
 export const DIAGNOSTICS_KEY = 'nfeIntelligenceDiagnosticsV1';
 export const MAX_DIAGNOSTICS = 100;
 export const DIAGNOSTICS_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
@@ -20,7 +21,7 @@ export function normalizeDiagnostic(input, now = Date.now()) {
         at: new Date(now).toISOString(),
         code: input.code,
         state: input.state,
-        modelVersion: 'portal-download-shadow-0.1',
+        modelVersion: input.modelVersion === 'portal-download-shadow-0.1' ? input.modelVersion : MODEL_VERSION,
         score,
         inspected,
         ambiguous: input.ambiguous === true,
@@ -41,7 +42,8 @@ export async function readDiagnostics(now = Date.now()) {
         Date.parse(entry.at) >= now - DIAGNOSTICS_RETENTION_MS &&
         ALLOWED_CODES.has(entry.code) &&
         ALLOWED_STATES.has(entry.state)
-    ).slice(-MAX_DIAGNOSTICS);
+    ).slice(-MAX_DIAGNOSTICS).map((entry) =>
+        normalizeDiagnostic(entry, Date.parse(entry.at))).filter(Boolean);
 }
 
 let writeQueue = Promise.resolve();
