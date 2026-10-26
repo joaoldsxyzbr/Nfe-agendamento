@@ -126,6 +126,23 @@ describe('P2: proposta neural é SOMENTE leitura, nunca execução', () => {
         expect(Object.keys(result).sort()).toEqual(
             ['candidates', 'decision', 'inspected', 'modelVersion', 'reason', 'score'].sort());
     });
+    it('bloqueia sobrescrita de rota de formulário, mesmo com score neural alto', () => {
+        for (const attrs of [
+            { formaction: 'https://example.invalid/invoice' },
+            { formtarget: '_blank' },
+            { formmethod: 'post' },
+        ]) {
+            const control = approved('Baixar XML', { attrs });
+            const result = inspect([control]);
+            expect(result).toMatchObject({ decision: 'blocked', reason: 'unsafe_candidate' });
+            expect(control.click).not.toHaveBeenCalled();
+        }
+        const externalForm = approved('Baixar XML', {
+            form: { action: 'https://example.invalid/upload' },
+        });
+        expect(inspect([externalForm]).decision).toBe('blocked');
+        expect(externalForm.click).not.toHaveBeenCalled();
+    });
     it('bloqueia elementos ocultos por CSS computado mesmo com retângulo visível', () => {
         const control = approved('Baixar XML', {
             ownerDocument: { defaultView: { getComputedStyle: () => ({
