@@ -1,7 +1,7 @@
 import { accessKeySelector, consultButtonSelector, isCaptchaResponseReady, isDownloadLabel, isOfficialConsultUrl, isOfficialDownloadUrl, } from './portal-dom';
 import { PORTAL_ORIGIN } from './protocol';
 import { createEventDrivenScheduler } from './portal-scheduler';
-import { inspectDownloadCandidates } from './intelligence/portal-model.js';
+import { evaluateNavigationProposal } from './intelligence/navigation-policy.js';
 import { READY_ATTEMPTS, READY_RETRY_DELAY_MS, MESSAGE_ATTEMPTS, MESSAGE_RETRY_DELAY_MS, RESULT_TIMEOUT_MS, DOWNLOAD_TIMEOUT_MS } from './shared/constants.js';
 let accessKey = '';
 let portalState = '';
@@ -73,19 +73,21 @@ async function tick() {
             const control = findDownloadControl();
             if (!control && !neuralFindingReported) {
                 const candidates = document.querySelectorAll('a[href], button, input[type="button"], input[type="submit"]');
-                const result = inspectDownloadCandidates(candidates);
-                if (result.candidateDetected) {
+                const result = evaluateNavigationProposal({ url: location.href, state: portalState, controls: candidates });
+                if (result.candidates > 0) {
                     neuralFindingReported = true;
                     // Observação passiva: NÃO clicar no candidato neural não homologado.
                     void chrome.runtime.sendMessage({
                         source: 'portal',
                         type: 'intelligence_diagnostic',
                         diagnostic: {
-                            code: result.ambiguous ? 'neural_candidate_ambiguous' : 'neural_candidate_unverified',
+                            code: result.reason === 'ambiguous_candidates' ? 'neural_candidate_ambiguous' :
+                                result.decision === 'blocked' ? 'neural_candidate_rejected' : 'neural_candidate_unverified',
                             state: portalState,
                             score: result.score,
                             inspected: result.inspected,
-                            ambiguous: result.ambiguous,
+                            ambiguous: result.reason === 'ambiguous_candidates',
+                            reason: result.reason,
                         },
                     }).catch(() => {});
                 }
