@@ -14,6 +14,15 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 
 Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → DANFE / impressão / CSV / ZIP.
 
+## Mini-IA local (P0 experimental, branch separada)
+
+A branch `feat/nfe-mini-ia-observability-p0`, baseada no piloto `nfe-agendamento`, começa o motor de inteligência da extensão. Há um pequeno classificador neural feed-forward em JavaScript nativo que **observa** possíveis controles de download sem executar cliques. Os pesos iniciais são heurísticos e **não representam um modelo já treinado ou validado**.
+
+Quando a interface convencional não reconhece um controle, o classificador pode registrar uma hipótese local com código, estado, versão e pontuação. Falhas de operação também geram registros categorizados. O usuário encontra **Exportar relatório JSON** e **Apagar diagnósticos** na página de opções. No máximo 100 registros locais dos últimos 14 dias são recuperados, sem telemetria, chave NF-e, XML, URL ou texto da página. O usuário decide se compartilha o arquivo para revisão técnica.
+
+Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. Esta fase não altera a `main`, a produção ou a extensão já homologada. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
+
+
 ## Compilar e verificar
 
 Requer Node.js e npm:
