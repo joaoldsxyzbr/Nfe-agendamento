@@ -13,6 +13,7 @@ Leia nesta ordem:
 5. [Campos fiscais RTC/IBS/CBS](architecture/rtc-ibs-cbs.md)
 6. [Interface da consulta](ui/consultation-screen.md)
 7. [Plano da migração](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md)
+8. [Mini-IA local e diagnósticos — P0 experimental](plans/2026-10-26-mini-ia-nfe-p0.md)
 
 ## Histórico
 
