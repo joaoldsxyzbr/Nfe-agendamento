@@ -36,6 +36,10 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 | Chrome | NÃO EXECUTADO | Pendente |
 | Edge | NÃO EXECUTADO | Pendente |
 
+## Atualização automática P5 — 26/10/2026
+
+O [GitHub Actions #40400199711](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40400199711) validou **a instalação automatizada da extensão MV3 no Chromium headless com dados sintéticos**, além de 7 testes Playwright de interface/consulta simulada/DANFE, e publicou artefato de teste de 7 dias. Os gates de auditoria e testes da mini-IA também passaram naquele commit experimental. **Isso NÃO marca nenhuma caixa física Chrome/Edge nem comprova operação no Portal oficial**, com hCaptcha ou certificado real. Roteiro: [Homologação P5](mini-ai-p5-manual.md).
+
 **Decisão:** não publicar release de produção, não mesclar na main e não desligar site existente sem evidência real acima.
 ## Evidência CI do piloto — 22/10/2026
 
