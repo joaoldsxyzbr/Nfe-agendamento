@@ -1,4 +1,4 @@
-name: Mini-IA P1 - treinamento e extensão
+name: Mini-IA P3 - diagnósticos e extensão
 
 on:
   push:
@@ -29,6 +29,9 @@ jobs:
       - run: npm audit --audit-level=high
       - name: Validar treinamento reprodutível e métricas sintéticas
         run: node scripts/train-mini-ai.mjs --check
+      - run: npm run lint:ui
+      - run: npm run format:check:ui
+      - run: npm run test:ui
       - run: npm run test:extension
       - run: npm run coverage:extension
       - run: npm run build:extension
