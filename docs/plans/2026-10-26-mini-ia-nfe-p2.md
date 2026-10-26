@@ -25,3 +25,15 @@ Expandir a mini-IA da P1 para avaliar **qual ação ela proporia** diante do DOM
 
 ## Riscos conhecidos
 Snapshots sintéticos não validam a página real. `MutationObserver` e scripts MV3 podem lidar com nós removidos/reinseridos; novas decisões devem ser reavaliadas antes de qualquer clique futuro. Não usar a saída `propose` como autorização automática.
+
+
+## Resultado da implementação (26/10/2026)
+
+- `navigation-policy.js` implementado: `propose` significa **somente proposta para análise** e nunca autorização de clique. O runtime continua usando unicamente o fluxo de clique legado; nenhuma nova ação fiscal foi introduzida.
+- `intelligence-navigation.test.js` exerce cenários sintéticos adversariais com origem falsa, rota alterada, estado incorreto, controle duplicado, limite excedido, CSS invisível, elemento desanexado, `onclick` desconhecido, atributos ARIA, botão inerte e URLs não oficiais.
+- Integração em `portal-content.js` só em modo observação, gerando motivos de diagnóstico por whitelist (`review_required`, `official_link`, `unsafe_candidate`, `ambiguous_candidates`) sem dados fiscais ou conteúdo DOM no relatório.
+- [GitHub Actions #40392386601](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40392386601) no commit `6383d9fdb5326f309c1bfdffd0cb5992cb71bb50`: **sucesso**, 115 testes da extensão aprovados, além de auditoria, verificação de pesos, cobertura e build MV3. Esta verificação não equivale ao CI geral de UI/Playwright/DANFE nem à homologação física.
+- Nenhuma alteração na `main`, publicação de release ou deploy. Pull request #108 permanece em rascunho.
+
+## Próxima etapa
+P3: ampliar diagnósticos para falhas recorrentes, lote e recuperação com relatórios que possam ser compartilhados sob ação explícita. Somente considerar cliques neurais em PR próprio depois de testes físicos e revisão de autorização por ação.
