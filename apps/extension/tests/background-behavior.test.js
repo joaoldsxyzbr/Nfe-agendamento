@@ -125,6 +125,11 @@ describe('extension background behavior', () => {
             command: { ...command.command, diagnostic: { ...diagnostic, success: 3 } },
         }, appSender());
         expect(malformed).toMatchObject({ type: 'diagnostic_recorded', recorded: false });
+        fake.chrome.storage.local.set.mockRejectedValueOnce(new Error('Quota de armazenamento indisponível'));
+        const writeFailure = await fake.emitRuntimeMessage(command, appSender());
+        expect(writeFailure).toMatchObject({ type: 'diagnostic_recorded', recorded: false });
+        const after = (await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1')).nfeIntelligenceDiagnosticsV1;
+        expect(after).toHaveLength(1);
     });
     it('rejects commands from pages outside the extension', async () => {
         const fake = await loadBackground();
