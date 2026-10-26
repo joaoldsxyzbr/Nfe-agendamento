@@ -11,6 +11,12 @@ Concluir a próxima etapa sem colocar a mini-IA para executar ações fiscais. F
 5. Publicar **artefato privado do workflow** com pacote descompactado para homologação manual, somente se o job terminar com sucesso. Retenção curta, sem arquivos fiscais, credenciais ou relatórios do usuário. Não publicar release.
 6. Atualizar o checklist separando `Chromium automatizado + dados simulados` de `Chrome e Edge reais com portal, captcha manual e certificado`; manter os últimos como NÃO EXECUTADO.
 
+## Resultados reais obtidos
+
+No [GitHub Actions #40400199711](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40400199711), SHA `21a0be5de658867bce87f5a967abce603a8a076a`, os jobs `extension-intelligence` e `chromium-smoke` **passaram**. A execução Playwright retornou **7/7 testes aprovados**, incluindo novo `extension-mv3.spec.js` rodando a extensão descompactada no Chromium headless, com MV3/service worker, options, análise de diagnósticos, JSON exportado sanitizado e exclusão local sem afetar outra preferência. Os Playwright antigos seguem como casos de consulta **simulada** e DANFE sintético, não validação contra Portal real.
+
+O artefato `NFe-MiniIA-P5-Experimental-40400199711` foi publicado no workflow ([ID 12689190727](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40400199711/artifacts/12689190727)), com 44 arquivos do pacote e retenção por 7 dias. Não contém notas fiscais nem diagnósticos do usuário. É somente para teste manual e **não é release**.
+
 ## Verificação e critérios
 - Comprovante de instalação automatizada real do service worker MV3 e teste de options/storage/export.
 - Playwright de consulta simulada/DANFE rodando sob Linux CI em navegador Chromium.
