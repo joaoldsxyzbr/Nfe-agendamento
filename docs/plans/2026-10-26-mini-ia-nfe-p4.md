@@ -25,6 +25,11 @@ Validar em casos sintéticos adversariais criados **fora do gerador de treinamen
 `npm run lint:ui && npm run format:check:ui && npm run test:ui && npm run test:extension && npm run coverage:extension && npm run build:extension`
 `npm audit --audit-level=high`
 
+## Evidência inicial da avaliação sintética
+No GitHub Actions [execução #40399159845](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40399159845), a avaliação P4 obteve **9 propostas em 9 controles sintéticos seguros** e **0 propostas em 48 cenários sintéticos inseguros**, após corrigir a brecha de `formaction`. Na primeira execução, antes do reparo, houve 1 proposta insegura de 45 casos, e o CI reprovou, conforme esperado. O resultado também inclui 187 testes de UI e 122 da extensão aprovados. Esses números são de **fixtures programáticas, não de páginas reais**, e não estimam uma taxa real de acerto.
+
+O relatório de revisão `scripts/review-mini-ai-report.mjs` aceita somente o arquivo exportado no esquema 2, revalida registros e recalcula padrões ignorando insights injetados. Saída é limitada a códigos, totais e recomendações pré-definidas. Nenhuma rede neural é treinada com esses relatórios.
+
 ## Condições de parada
 - Se o avaliador revelar propostas inseguras ou perda de cobertura, preservar o bloqueio no runtime, criar regressões e corrigir a causa antes de prosseguir.
 - O relatório é uma **triagem determinística**, não um modelo de linguagem nem uma instrução para autoeditar o repositório.
