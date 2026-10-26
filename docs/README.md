@@ -15,6 +15,7 @@ Leia nesta ordem:
 7. [Plano da migração](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md)
 8. [Mini-IA local e diagnósticos — P0 experimental](plans/2026-10-26-mini-ia-nfe-p0.md)
 9. [Treinamento neural reproduzível — P1](plans/2026-10-26-mini-ia-nfe-p1.md)
+10. [Decisões supervisionadas e testes adversariais — P2](plans/2026-10-26-mini-ia-nfe-p2.md)
 
 ## Histórico
 
