@@ -70,6 +70,9 @@ for (const [i, override] of [
     { ownerDocument: { defaultView: { getComputedStyle: () =>
         ({ display: 'none', visibility: 'visible', pointerEvents: 'auto' }) } } },
     { attrs: { formaction: 'https://evil.invalid/download?xml=1' } },
+    { attrs: { formtarget: '_blank' } },
+    { attrs: { formmethod: 'post' } },
+    { form: { action: 'https://evil.invalid/api/send' } },
 ].entries()) reject('unsafe-dom-' + i, [control('Baixar XML', override)]);
 
 for (const [i, href] of [
