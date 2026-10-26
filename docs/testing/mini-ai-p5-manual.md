@@ -32,7 +32,7 @@ Registrar **apenas** navegador + versão, SHA exato do commit e link do job CI, 
 
 | Plataforma | Teste da extensão P5 | Teste fiscal no Portal real |
 | --- | --- | --- |
-| Chromium headless Playwright (Linux CI) | A confirmar pelo GitHub Actions | NÃO EXECUTADO |
+| Chromium headless Playwright (Linux CI) | APROVADO — [run #40400199711](https://github.com/joaoldsxyzbr/Nfe-agendamento-2.0/actions/runs/40400199711), somente smoke MV3 e opções | NÃO EXECUTADO |
 | Chrome desktop (Windows) | NÃO EXECUTADO | NÃO EXECUTADO |
 | Edge desktop (Windows) | NÃO EXECUTADO | NÃO EXECUTADO |
 
