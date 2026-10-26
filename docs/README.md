@@ -18,6 +18,8 @@ Leia nesta ordem:
 10. [Decisões supervisionadas e testes adversariais — P2](plans/2026-10-26-mini-ia-nfe-p2.md)
 11. [Memória operacional e análise local — P3](plans/2026-10-26-mini-ia-nfe-p3.md)
 12. [Corpus adversarial e triagem privada — P4](plans/2026-10-26-mini-ia-nfe-p4.md)
+13. [P5 — Testes reais do pacote MV3 em Chromium e preparação da homologação](plans/2026-10-26-mini-ia-nfe-p5.md)
+14. [Roteiro manual P5 — Chrome e Edge](testing/mini-ai-p5-manual.md)
 
 ## Histórico
 
