@@ -47,12 +47,14 @@
 
     <section class="card" aria-labelledby="intelligence-title">
       <h2 id="intelligence-title">Diagnósticos da mini-IA (experimental)</h2>
-      <p>O classificador neural observa possíveis mudanças no Portal sem clicar por conta própria. Registra somente códigos, estado da operação, confiança e data. Não inclui chave NF-e, XML, documentos pessoais ou URL do Portal. Limite de 100 eventos, com retenção de até 14 dias.</p>
+      <p>O classificador neural observa possíveis mudanças no Portal sem clicar por conta própria. Registra apenas códigos autorizados, estado, data, pontuação, categorias de erro e contagens agregadas de lotes. Não inclui chave NF-e, XML, documentos pessoais ou URL do Portal. Limite de 100 eventos, com retenção de até 14 dias.</p>
       <div class="actions">
+        <button id="diagnostics-analyze" type="button">Analisar padrões locais</button>
         <button id="diagnostics-export" type="button">Exportar relatório JSON</button>
         <button id="diagnostics-clear" type="button">Apagar diagnósticos</button>
       </div>
       <p id="diagnostics-status" role="status" aria-live="polite">Os diagnósticos permanecem apenas neste navegador até a exportação manual.</p>
+      <p id="diagnostics-insights" aria-live="polite">A análise identifica recorrências por regras auditáveis. Ela não gera alterações automáticas.</p>
     </section>
   </main>
   <script src="options.js"></script>
