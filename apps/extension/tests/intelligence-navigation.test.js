@@ -126,6 +126,15 @@ describe('P2: proposta neural é SOMENTE leitura, nunca execução', () => {
         expect(Object.keys(result).sort()).toEqual(
             ['candidates', 'decision', 'inspected', 'modelVersion', 'reason', 'score'].sort());
     });
+    it('bloqueia elementos ocultos por CSS computado mesmo com retângulo visível', () => {
+        const control = approved('Baixar XML', {
+            ownerDocument: { defaultView: { getComputedStyle: () => ({
+                display: 'block', visibility: 'hidden', pointerEvents: 'auto',
+            }) } },
+        });
+        expect(inspect([control]).decision).not.toBe('propose');
+        expect(control.click).not.toHaveBeenCalled();
+    });
     it('não propõe nada quando o conteúdo não oferece download plausível', () => {
         expect(inspect([approved('Nova consulta')])).toMatchObject({ decision: 'none', reason: 'no_candidate' });
     });
