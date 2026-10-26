@@ -13,7 +13,7 @@ describe('mini-IA do Portal em modo de observação', () => {
         const result = inspectDownloadCandidates([button('Baixar XML')]);
         expect(result.candidateDetected).toBe(true);
         expect(result.score).toBeGreaterThanOrEqual(85);
-        expect(result.modelVersion).toBe('portal-download-shadow-0.1');
+        expect(result.modelVersion).toBe('portal-download-trained-0.2');
         expect(result).not.toHaveProperty('action');
     });
     it('não confunde DANFE, consulta nem botões desativados com download confiável', () => {
@@ -31,6 +31,22 @@ describe('mini-IA do Portal em modo de observação', () => {
         expect(features.officialDownload).toBe(false);
         expect(JSON.stringify(features)).not.toContain('123456');
         expect(JSON.stringify(inspectDownloadCandidates([control]))).not.toContain('segredo');
+    });
+    it('usa acessibilidade sem acessar conteúdo fiscal nos resultados', () => {
+        const accessible = {
+            tagName: 'BUTTON',
+            textContent: '',
+            getAttribute: (name) => name === 'aria-label' ? 'Exportar XML' : null,
+        };
+        const result = inspectDownloadCandidates([accessible]);
+        expect(result.candidateDetected).toBe(true);
+        expect(JSON.stringify(result)).not.toContain('Exportar XML');
+    });
+    it('rejeita URL inesperada ou rótulos instrutivos mesmo com sinal semântico', () => {
+        const link = { ...button('Download do documento'), tagName: 'A',
+            href: 'https://www.nfe.fazenda.gov.br/portal/ajuda.aspx' };
+        expect(neuralDownloadScore(extractControlFeatures(link))).toBe(0);
+        expect(neuralDownloadScore(extractControlFeatures(button('Como baixar XML')))).toBe(0);
     });
     it('limita a varredura e sinaliza candidatos ambíguos', () => {
         const result = inspectDownloadCandidates(Array.from({ length: 150 }, () => button('Baixar XML')));
