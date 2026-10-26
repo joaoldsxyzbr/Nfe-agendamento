@@ -81,6 +81,46 @@ describe('batch controller Portal-only', () => {
         expect(h.toolbar.hidden).toBe(true);
         expect(h.list.hidden).toBe(true);
     });
+    it('gera somente agregados sanitizados e ignora falhas ao registrá-los', async () => {
+        const reports = [];
+        const h = harness({
+            recordDiagnostic: async (report) => { reports.push(report); },
+            waitForResult: async (operationId) => ({
+                operationId, state: operationId === 'op-1' ? 'completed' : 'failed',
+                message: '12345678901234567890123456789012345678901234', code: 'portal_session_lost', xml: '<xml />',
+            }),
+        });
+        h.input.value = `${A}\n${B}`;
+        h.controller.syncDraft();
+        await h.controller.start();
+        await vi.waitFor(() => expect(reports).toHaveLength(1));
+        expect(reports[0]).toEqual({ code: 'batch_completed', state: 'batch',
+            total: 2, success: 1, failed: 1, cancelled: 0 });
+        expect(JSON.stringify(reports)).not.toContain(A);
+        expect(JSON.stringify(reports)).not.toContain(B);
+        const failing = harness({ recordDiagnostic: async () => { throw new Error('storage failed'); } });
+        failing.input.value = A;
+        failing.controller.syncDraft();
+        await expect(failing.controller.start()).resolves.toBeUndefined();
+    });
+    it('registra resultado de reconsulta sem enviar a chave NF-e', async () => {
+        const reports = [];
+        let count = 0;
+        const h = harness({
+            recordDiagnostic: async (report) => { reports.push(report); },
+            waitForResult: async (operationId) => ({
+                operationId, state: ++count === 1 ? 'failed' : 'completed',
+                xml: '<xml />', code: 'portal_session_lost',
+            }),
+        });
+        h.input.value = A;
+        h.controller.syncDraft();
+        await h.controller.start();
+        await h.controller.retryPortal(0);
+        await vi.waitFor(() => expect(reports).toHaveLength(2));
+        expect(reports[1]).toEqual({ state: 'batch', code: 'batch_retry_result', outcome: 'recovered' });
+        expect(JSON.stringify(reports)).not.toContain(A);
+    });
     it('processes every item sequentially through the Portal', async () => {
         const h = harness();
         h.input.value = `${A}\n${B}`;
