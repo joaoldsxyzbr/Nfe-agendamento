@@ -1,6 +1,7 @@
 import { accessKeySelector, consultButtonSelector, isCaptchaResponseReady, isDownloadLabel, isOfficialConsultUrl, isOfficialDownloadUrl, } from './portal-dom';
 import { PORTAL_ORIGIN } from './protocol';
 import { createEventDrivenScheduler } from './portal-scheduler';
+import { inspectDownloadCandidates } from './intelligence/portal-model.js';
 import { READY_ATTEMPTS, READY_RETRY_DELAY_MS, MESSAGE_ATTEMPTS, MESSAGE_RETRY_DELAY_MS, RESULT_TIMEOUT_MS, DOWNLOAD_TIMEOUT_MS } from './shared/constants.js';
 let accessKey = '';
 let portalState = '';
@@ -12,6 +13,7 @@ let resultTimeoutReported = false;
 let downloadTimeoutReported = false;
 let resultTimeoutHandle = null;
 let downloadTimeoutHandle = null;
+let neuralFindingReported = false;
 const scheduleTick = createEventDrivenScheduler(tick);
 void initialize();
 async function initialize() {
@@ -69,6 +71,25 @@ async function tick() {
     if (portalState === 'submitting') {
         if (!downloadTriggered) {
             const control = findDownloadControl();
+            if (!control && !neuralFindingReported) {
+                const candidates = document.querySelectorAll('a[href], button, input[type="button"], input[type="submit"]');
+                const result = inspectDownloadCandidates(candidates);
+                if (result.candidateDetected) {
+                    neuralFindingReported = true;
+                    // Observação passiva: NÃO clicar no candidato neural não homologado.
+                    void chrome.runtime.sendMessage({
+                        source: 'portal',
+                        type: 'intelligence_diagnostic',
+                        diagnostic: {
+                            code: result.ambiguous ? 'neural_candidate_ambiguous' : 'neural_candidate_unverified',
+                            state: portalState,
+                            score: result.score,
+                            inspected: result.inspected,
+                            ambiguous: result.ambiguous,
+                        },
+                    }).catch(() => {});
+                }
+            }
             if (control) {
                 try {
                     const armed = await sendPortalMessageWithRetry({ source: 'portal', type: 'download_ready' });
