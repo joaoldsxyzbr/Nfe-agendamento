@@ -104,6 +104,28 @@ describe('extension background behavior', () => {
         expect(JSON.stringify(records)).not.toContain('privado');
         expect(JSON.stringify(records)).not.toContain(PORTAL_URL);
     });
+    it('registra diagnósticos de lote apenas da janela autenticada, sem chaves fiscais', async () => {
+        const fake = await loadBackground();
+        const diagnostic = { code: 'batch_completed', state: 'batch', total: 2, success: 1,
+            failed: 1, cancelled: 0, accessKey: ACCESS_KEY_A };
+        const command = { source: 'app', appTabId: 10, command: {
+            type: 'record_batch_diagnostic', requestId: 'batch-1', diagnostic,
+        } };
+        const rejected = await fake.emitRuntimeMessage(command, {
+            id: 'other-extension', url: APP_URL, tab: { id: 10, url: APP_URL },
+        });
+        expect(rejected.type).toBe('failed');
+        const accepted = await fake.emitRuntimeMessage(command, appSender());
+        expect(accepted).toMatchObject({ type: 'diagnostic_recorded', recorded: true });
+        const stored = (await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1')).nfeIntelligenceDiagnosticsV1;
+        expect(stored).toHaveLength(1);
+        expect(stored[0]).toMatchObject({ total: 2, success: 1, failed: 1 });
+        expect(JSON.stringify(stored)).not.toContain(ACCESS_KEY_A);
+        const malformed = await fake.emitRuntimeMessage({ ...command,
+            command: { ...command.command, diagnostic: { ...diagnostic, success: 3 } },
+        }, appSender());
+        expect(malformed).toMatchObject({ type: 'diagnostic_recorded', recorded: false });
+    });
     it('rejects commands from pages outside the extension', async () => {
         const fake = await loadBackground();
         const response = await fake.emitRuntimeMessage({
