@@ -11,17 +11,20 @@ async function loadPortal(options = {}) {
     const keyField = { value: '', dispatchEvent: vi.fn(), focus: vi.fn() };
     const captchaField = { value: options.initialCaptcha ?? '' };
     class Button {
+        tagName = 'BUTTON';
         disabled = false;
         textContent = 'Consultar';
         click = vi.fn();
         getAttribute = vi.fn(() => null);
     }
     class Link {
+        tagName = 'A';
         href = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
         textContent = 'Download do documento';
         click = vi.fn();
     }
     class Input {
+        tagName = 'INPUT';
         value = '';
     }
     const consultButton = new Button();
