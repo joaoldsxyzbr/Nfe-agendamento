@@ -1,5 +1,6 @@
 import { analyzeSupplierConfig, clearSupplierConfig, saveSupplierConfig, } from './supplier-store';
 import { clearDiagnostics, readDiagnostics } from './intelligence/diagnostics.js';
+import { buildDiagnosticInsights } from './intelligence/insights.js';
 const fileInput = requireElement('#supplier-config-file');
 const clearButton = requireElement('#supplier-config-clear');
 const status = requireElement('#supplier-config-status');
@@ -8,6 +9,32 @@ clearButton.addEventListener('click', () => void clearLocalConfig());
 const diagnosticStatus = document.querySelector('#diagnostics-status');
 document.querySelector('#diagnostics-export')?.addEventListener('click', () => void exportDiagnostics());
 document.querySelector('#diagnostics-clear')?.addEventListener('click', () => void removeDiagnostics());
+const diagnosticInsights = document.querySelector('#diagnostics-insights');
+document.querySelector('#diagnostics-analyze')?.addEventListener('click', () => void reviewDiagnostics());
+
+const INSIGHT_DESCRIPTIONS = {
+    repeated_portal_failure: 'Falhas recorrentes no Portal',
+    batch_failure_rate: 'Lotes com metade ou mais de erros',
+    recovery_success: 'Recuperações manuais concluídas',
+    stale_operations: 'Operações inconsistentes recuperadas',
+    preflight_repeated: 'Falhas recorrentes na verificação da extensão',
+};
+async function reviewDiagnostics() {
+    try {
+        const records = await readDiagnostics();
+        const insights = buildDiagnosticInsights(records);
+        if (diagnosticInsights) {
+            diagnosticInsights.textContent = insights.length
+                ? insights.map((item) => INSIGHT_DESCRIPTIONS[item.kind] + ': ' + item.count +
+                    (item.failureCode ? ' (' + item.failureCode + ')' : '')).join(' · ')
+                : records.length ? 'Nenhum padrão recorrente identificado nos eventos disponíveis.'
+                    : 'Ainda não há diagnósticos.';
+        }
+    }
+    catch {
+        if (diagnosticInsights) diagnosticInsights.textContent = 'Não foi possível analisar os registros locais.';
+    }
+}
 async function importSelectedFile() {
     const file = fileInput.files?.item(0) ?? null;
     if (!file)
@@ -52,7 +79,8 @@ async function exportDiagnostics() {
             return;
         }
         const payload = JSON.stringify({
-            schemaVersion: 1,
+            schemaVersion: 2,
+            insights: buildDiagnosticInsights(records),
             exportedAt: new Date().toISOString(),
             source: 'NFe Intelligence - diagnóstico local',
             records,
@@ -74,6 +102,7 @@ async function removeDiagnostics() {
     try {
         await clearDiagnostics();
         if (diagnosticStatus) diagnosticStatus.textContent = 'Diagnósticos apagados deste navegador.';
+        if (diagnosticInsights) diagnosticInsights.textContent = 'Os padrões locais foram apagados.';
     }
     catch {
         if (diagnosticStatus) diagnosticStatus.textContent = 'Não foi possível apagar os diagnósticos.';
