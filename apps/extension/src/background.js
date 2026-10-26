@@ -136,6 +136,10 @@ async function handleAppCommand(commandValue, sender, claimedTabId) {
             requestId: command.requestId,
         };
     }
+    if (command.type === 'record_batch_diagnostic') {
+        const recorded = await appendDiagnostic(command.diagnostic).catch(() => false);
+        return { type: 'diagnostic_recorded', requestId: command.requestId, recorded };
+    }
     if (command.type === 'resolve_supplier') {
         return {
             type: 'supplier_resolved',
@@ -566,6 +570,10 @@ async function getReconciledActiveOperation() {
     if (valid)
         return operation;
     const cleared = await clearActiveOperationIfCurrent(operation.operationId);
+    if (cleared) {
+        // Só a razão da recuperação, nunca a operação nem sua chave fiscal.
+        await appendDiagnostic({ code: 'portal_state_reconciled', state: 'failed', reason: 'stale_operation' }).catch(() => {});
+    }
     if (cleared && portalWindow) {
         await chrome.windows.remove(operation.portalWindowId).catch(() => { });
     }
