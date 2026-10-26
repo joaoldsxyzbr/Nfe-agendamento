@@ -572,7 +572,7 @@ async function getReconciledActiveOperation() {
     const cleared = await clearActiveOperationIfCurrent(operation.operationId);
     if (cleared) {
         // Só a razão da recuperação, nunca a operação nem sua chave fiscal.
-        await appendDiagnostic({ code: 'portal_state_reconciled', state: 'failed', reason: 'stale_operation' }).catch(() => {});
+        void appendDiagnostic({ code: 'portal_state_reconciled', state: 'failed', reason: 'stale_operation' }).catch(() => {});
     }
     if (cleared && portalWindow) {
         await chrome.windows.remove(operation.portalWindowId).catch(() => { });
