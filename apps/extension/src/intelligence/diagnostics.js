@@ -3,6 +3,7 @@ export const DIAGNOSTICS_KEY = 'nfeIntelligenceDiagnosticsV1';
 export const MAX_DIAGNOSTICS = 100;
 export const DIAGNOSTICS_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
 const ALLOWED_CODES = new Set(['neural_candidate_unverified', 'neural_candidate_ambiguous', 'portal_operation_failed']);
+const ALLOWED_FAILURES = new Set(['portal_xml_invalid', 'portal_session_lost', 'portal_download_http_error', 'portal_download_not_found', 'portal_download_request_missing', 'portal_xml_capture_unavailable', 'portal_xml_too_large', 'portal_request_replay_invalid']);
 const ALLOWED_STATES = new Set(['submitting', 'waiting_result', 'fetching_xml', 'failed']);
 
 export function normalizeDiagnostic(input, now = Date.now()) {
@@ -23,6 +24,7 @@ export function normalizeDiagnostic(input, now = Date.now()) {
         score,
         inspected,
         ambiguous: input.ambiguous === true,
+        failureCode: ALLOWED_FAILURES.has(input.failureCode) ? input.failureCode : null,
     };
 }
 
