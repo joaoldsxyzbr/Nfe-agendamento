@@ -1,4 +1,4 @@
-name: Mini-IA P3 - diagnósticos e extensão
+name: Mini-IA P4 - avaliação adversarial e extensão
 
 on:
   push:
@@ -29,6 +29,10 @@ jobs:
       - run: npm audit --audit-level=high
       - name: Validar treinamento reprodutível e métricas sintéticas
         run: node scripts/train-mini-ai.mjs --check
+      - name: Avaliação adversarial independente da mini-IA
+        run: node scripts/evaluate-mini-ai-adversarial.mjs
+      - name: Testes do revisor de relatórios privados
+        run: node --test scripts/tests/review-mini-ai-report.test.mjs
       - run: npm run lint:ui
       - run: npm run format:check:ui
       - run: npm run test:ui
