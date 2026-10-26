@@ -27,6 +27,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=high
+      - name: Treinar mini-IA e medir qualidade sintética
+        run: node scripts/train-mini-ai.mjs --print-model
       - run: npm run test:extension
       - run: npm run coverage:extension
       - run: npm run build:extension
