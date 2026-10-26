@@ -78,6 +78,32 @@ describe('extension background behavior', () => {
         expect(chromeApi.tabs.onRemoved.addListener).toHaveBeenCalledTimes(1);
         expect(chromeApi.webRequest.onBeforeRequest.addListener).toHaveBeenCalledTimes(1);
     });
+    it('aceita somente diagnóstico sanitizado da aba oficial da operação ativa', async () => {
+        const fake = await loadBackground();
+        await fake.emitRuntimeMessage(startCommand('ai-start', ACCESS_KEY_A), appSender());
+        const operation = fake.sessionState.get('activePortalOperation');
+        const sender = portalSender(operation.portalTabId, operation.portalWindowId);
+        await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, sender);
+        await fake.emitRuntimeMessage({ source: 'portal', type: 'submitting' }, sender);
+        const report = {
+            source: 'portal', type: 'intelligence_diagnostic',
+            diagnostic: {
+                code: 'neural_candidate_unverified', state: 'submitting', score: 91, inspected: 2,
+                accessKey: ACCESS_KEY_A, xml: '<nfeProc>privado</nfeProc>', url: PORTAL_URL,
+            },
+        };
+        const denied = await fake.emitRuntimeMessage(report, portalSender(operation.portalTabId + 1, operation.portalWindowId));
+        expect(denied.type).toBe('failed');
+        const accepted = await fake.emitRuntimeMessage(report, sender);
+        expect(accepted).toEqual({ recorded: true });
+        const stored = await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1');
+        const records = stored.nfeIntelligenceDiagnosticsV1;
+        expect(records).toHaveLength(1);
+        expect(records[0]).toMatchObject({ code: 'neural_candidate_unverified', score: 91 });
+        expect(JSON.stringify(records)).not.toContain(ACCESS_KEY_A);
+        expect(JSON.stringify(records)).not.toContain('privado');
+        expect(JSON.stringify(records)).not.toContain(PORTAL_URL);
+    });
     it('rejects commands from pages outside the extension', async () => {
         const fake = await loadBackground();
         const response = await fake.emitRuntimeMessage({
