@@ -1,5 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { analyzeExport, formatReview } from '../review-mini-ai-report.mjs';
 
 const fixed = '2026-10-26T16:00:00.000Z';
@@ -89,4 +94,32 @@ test('formato do relatório é determinístico e sem diagnóstico livre', () => 
     assert.equal(first, formatReview(report));
     assert.equal(first.includes('3 ocorrências'), true);
     assert.equal(first.includes('Revisar'), true);
+});
+
+test('CLI lê somente arquivo local e não revela dados brutos nem caminho sensível', async () => {
+    const temp = await mkdtemp(join(tmpdir(), 'nfe-p4-'));
+    const privateValue = '42260812345678000123550010000012341000012342';
+    const script = fileURLToPath(new URL('../review-mini-ai-report.mjs', import.meta.url));
+    try {
+        const file = resolve(temp, 'relatorio.json');
+        await writeFile(file, JSON.stringify(payload([
+            failure({ xml: '<nfeProc>' + privateValue + '</nfeProc>' }),
+            failure({ url: 'https://example.invalid/' + privateValue }),
+            failure({ textContent: privateValue }),
+        ])), 'utf8');
+        const success = spawnSync(process.execPath, [script, file], { encoding: 'utf8', timeout: 10000 });
+        assert.equal(success.status, 0, success.stderr);
+        assert.equal(success.stdout.includes('portal_session_lost'), true);
+        for (const secret of [privateValue, 'nfeProc', 'example.invalid', temp]) {
+            assert.equal((success.stdout + success.stderr).includes(secret), false);
+        }
+        const badFile = resolve(temp, 'arquivo-privado-' + privateValue + '.json');
+        await writeFile(badFile, '{malformed:' + privateValue, 'utf8');
+        const failureRun = spawnSync(process.execPath, [script, badFile], { encoding: 'utf8', timeout: 10000 });
+        assert.equal(failureRun.status, 1);
+        assert.equal((failureRun.stdout + failureRun.stderr).includes(privateValue), false);
+        assert.equal((failureRun.stdout + failureRun.stderr).includes(temp), false);
+    } finally {
+        await rm(temp, { force: true, recursive: true });
+    }
 });
