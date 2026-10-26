@@ -1,4 +1,4 @@
-name: Mini-IA P4 - avaliação adversarial e extensão
+name: Mini-IA P5 - Chromium MV3 e avaliação
 
 on:
   push:
@@ -46,3 +46,30 @@ jobs:
           test -s apps/extension/dist/portal-content.js
           test -s apps/extension/dist/options.js
           node -e 'const m=require("./apps/extension/dist/manifest.json"); if(m.host_permissions.some(h=>h.includes("joaolds.xyz.br"))) process.exit(1)'
+
+  chromium-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix tests/playwright
+      - run: npm audit --prefix tests/playwright --audit-level=high
+      - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+      - name: Empacotar extensão MV3 para testes
+        run: npm run build:extension
+      - name: Smoke Chromium MV3 e regressões de interface/DANFE
+        run: npm test --prefix tests/playwright
+      - name: Artefato experimental para homologação física
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: NFe-MiniIA-P5-Experimental-${{ github.run_id }}
+          path: apps/extension/dist/
+          if-no-files-found: error
+          retention-days: 7
