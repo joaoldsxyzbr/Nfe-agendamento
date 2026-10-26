@@ -12,6 +12,13 @@ async function loadPortal(options = {}) {
     const captchaField = { value: options.initialCaptcha ?? '' };
     class Button {
         tagName = 'BUTTON';
+        isConnected = true;
+        hidden = false;
+        inert = false;
+        onclick = null;
+        style = { display: 'block', visibility: 'visible' };
+        getClientRects = () => [{ width: 35, height: 15 }];
+        closest = () => null;
         disabled = false;
         textContent = 'Consultar';
         click = vi.fn();
@@ -19,6 +26,14 @@ async function loadPortal(options = {}) {
     }
     class Link {
         tagName = 'A';
+        isConnected = true;
+        hidden = false;
+        inert = false;
+        onclick = null;
+        style = { display: 'block', visibility: 'visible' };
+        getClientRects = () => [{ width: 35, height: 15 }];
+        closest = () => null;
+        getAttribute = () => null;
         href = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
         textContent = 'Download do documento';
         click = vi.fn();
@@ -122,6 +137,7 @@ describe('real Portal content-script event handling (fake browser environment)',
         expect(reports).toHaveLength(1);
         expect(reports[0].diagnostic).toMatchObject({
             code: 'neural_candidate_unverified',
+            reason: 'review_required',
             state: 'submitting',
         });
         expect(JSON.stringify(reports[0])).not.toContain(ACCESS_KEY);
