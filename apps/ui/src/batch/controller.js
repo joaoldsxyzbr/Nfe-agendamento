@@ -231,6 +231,7 @@ export function createBatchController(deps) {
         }
     }
     async function importManual(index) {
+        let selectedFile = false;
         const item = items[index];
         if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy)
             return;
@@ -240,6 +241,7 @@ export function createBatchController(deps) {
             const parsed = await deps.importManualXml(item.accessKey);
             if (!parsed)
                 return;
+            selectedFile = true;
             let supplierRuleId = null;
             try {
                 supplierRuleId = (await deps.portal.resolveSupplier(parsed.issuer.taxId)).supplierId;
@@ -261,7 +263,7 @@ export function createBatchController(deps) {
                 : 'Não foi possível validar o XML selecionado.';
         }
         finally {
-            recordBatchDiagnostic({
+            if (selectedFile) recordBatchDiagnostic({
                 code: 'batch_retry_result',
                 outcome: item.status === 'success' ? 'recovered' : item.status === 'portal_error' ? 'failed' : 'cancelled',
             });
