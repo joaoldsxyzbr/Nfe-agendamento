@@ -121,6 +121,19 @@ describe('batch controller Portal-only', () => {
         expect(reports[1]).toEqual({ state: 'batch', code: 'batch_retry_result', outcome: 'recovered' });
         expect(JSON.stringify(reports)).not.toContain(A);
     });
+    it('não registra recuperação falsa quando usuário cancela seleção de XML', async () => {
+        const reports = [];
+        const h = harness({
+            recordDiagnostic: async (report) => { reports.push(report); },
+            waitForResult: async () => ({ state: 'failed', code: 'portal_session_lost' }),
+        }, async () => null);
+        h.input.value = A;
+        h.controller.syncDraft();
+        await h.controller.start();
+        await h.controller.importManual(0);
+        await vi.waitFor(() => expect(reports).toHaveLength(1));
+        expect(reports[0].code).toBe('batch_completed');
+    });
     it('processes every item sequentially through the Portal', async () => {
         const h = harness();
         h.input.value = `${A}\n${B}`;
