@@ -42,6 +42,17 @@ function hasSafeDom(control) {
         control.closest('fieldset[disabled], [inert], [aria-hidden="true"], [hidden]')) return false;
     if (control.style?.display === 'none' || control.style?.visibility === 'hidden' ||
         control.style?.pointerEvents === 'none') return false;
+    // Inclui classes CSS sem ler nem armazenar textos ou estilos da página.
+    const styleOf = control.ownerDocument?.defaultView?.getComputedStyle;
+    if (typeof styleOf === 'function') {
+        try {
+            const css = styleOf.call(control.ownerDocument.defaultView, control);
+            if (css?.display === 'none' || css?.visibility === 'hidden' ||
+                css?.visibility === 'collapse' || css?.pointerEvents === 'none') return false;
+        } catch {
+            return false;
+        }
+    }
     if (typeof control.getClientRects !== 'function') return false;
     const rectangles = control.getClientRects();
     return Boolean(rectangles && Array.from(rectangles).some(
