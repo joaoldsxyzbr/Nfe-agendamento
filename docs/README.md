@@ -17,6 +17,7 @@ Leia nesta ordem:
 9. [Treinamento neural reproduzível — P1](plans/2026-10-26-mini-ia-nfe-p1.md)
 10. [Decisões supervisionadas e testes adversariais — P2](plans/2026-10-26-mini-ia-nfe-p2.md)
 11. [Memória operacional e análise local — P3](plans/2026-10-26-mini-ia-nfe-p3.md)
+12. [Corpus adversarial e triagem privada — P4](plans/2026-10-26-mini-ia-nfe-p4.md)
 
 ## Histórico
 
