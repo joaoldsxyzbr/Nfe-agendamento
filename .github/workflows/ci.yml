@@ -92,5 +92,8 @@ jobs:
       - run: npm ci --prefix tests/playwright
       - run: npm audit --prefix tests/playwright --audit-level=high
       - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+      # Playwright agora exercita a extensao MV3 real; precisa do dist antes dos testes.
+      - name: Compilar extensao MV3 para o smoke Chromium
+        run: npm run build:extension
       - name: Generate and validate browser/DANFE flows
         run: npm test --prefix tests/playwright
