@@ -1,41 +1,27 @@
-// Classificador neural local em modo de observação. Pesos iniciais NÃO treinados nem calibrados.
-export const MODEL_VERSION = 'portal-download-shadow-0.1';
+// Modelo treinado exclusivamente em exemplos sintéticos; execução local em shadow mode.
+// A rede NÃO tem permissão para executar ações. Limites de segurança são determinísticos.
+import { TRAINED_MODEL } from './trained-model.js';
+import { extractControlFeatures, featureVector, FEATURE_NAMES } from './portal-features.js';
 
+export { extractControlFeatures };
+export const MODEL_VERSION = TRAINED_MODEL.version;
+const THRESHOLD = Math.round(TRAINED_MODEL.threshold * 100);
 const sigmoid = (value) => 1 / (1 + Math.exp(-Math.max(-30, Math.min(30, value))));
-const asBit = (value) => value === true ? 1 : 0;
 
-export function extractControlFeatures(control) {
-    const tag = String(control?.tagName ?? '').toLowerCase();
-    const label = String(tag === 'input' ? control?.value ?? '' : control?.textContent ?? '').slice(0, 160).toLowerCase();
-    const href = typeof control?.href === 'string' ? control.href : '';
-    let officialDownload = false;
-    try {
-        const url = new URL(href);
-        officialDownload = url.origin === 'https://www.nfe.fazenda.gov.br' &&
-            url.pathname.toLowerCase() === '/portal/downloadnfe.aspx';
-    }
-    catch { /* A ausência de URL não é erro. */ }
-    return {
-        downloadWord: /download|baixar|salvar|obter/.test(label),
-        documentWord: /xml|documento/.test(label),
-        officialDownload,
-        printWord: /imprim|danfe/.test(label),
-        disabled: control?.disabled === true || control?.getAttribute?.('aria-disabled') === 'true',
-    };
-}
-
-// Rede feed-forward mínima: cinco entradas binárias, três neurônios ocultos e uma saída.
-// A pontuação é apenas um sinal comparativo; NÃO autoriza ações no Portal.
 export function neuralDownloadScore(features) {
-    const download = asBit(features?.downloadWord);
-    const document = asBit(features?.documentWord);
-    const official = asBit(features?.officialDownload);
-    const print = asBit(features?.printWord);
-    const disabled = asBit(features?.disabled);
-    const recognition = sigmoid(-3 + 4 * download + 2 * document + official);
-    const destination = sigmoid(-4 + 7 * official);
-    const unsafe = sigmoid(-2 + 3 * print + 3 * disabled);
-    return Math.round(100 * sigmoid(-2 + 5 * recognition + 4 * destination - 3 * unsafe));
+    // Falha fechada em entradas malformadas ou controles inseguramente acionáveis.
+    if (!features || typeof features !== 'object' || Array.isArray(features)) return 0;
+    if (TRAINED_MODEL.features.length !== FEATURE_NAMES.length ||
+        TRAINED_MODEL.features.some((feature, index) => feature !== FEATURE_NAMES[index])) return 0;
+    if (features.printWord || features.disabled || features.unsupportedHref ||
+        features.helpWord || features.cancelWord || !features.controlTag) return 0;
+
+    const vector = featureVector(features);
+    const hidden = TRAINED_MODEL.weights1.map((row, j) =>
+        Math.tanh(row.reduce((sum, weight, i) => sum + weight * vector[i], TRAINED_MODEL.bias1[j])));
+    const output = hidden.reduce((sum, value, j) =>
+        sum + value * TRAINED_MODEL.weights2[j], TRAINED_MODEL.bias2);
+    return Math.round(100 * sigmoid(output));
 }
 
 export function inspectDownloadCandidates(controls) {
@@ -48,8 +34,7 @@ export function inspectDownloadCandidates(controls) {
         if (score > maximum) {
             maximum = score;
             ties = 1;
-        }
-        else if (score === maximum) {
+        } else if (score === maximum) {
             ties += 1;
         }
     }
@@ -57,7 +42,7 @@ export function inspectDownloadCandidates(controls) {
         modelVersion: MODEL_VERSION,
         score: maximum,
         inspected,
-        ambiguous: maximum >= 85 && ties > 1,
-        candidateDetected: maximum >= 85,
+        ambiguous: maximum >= THRESHOLD && ties > 1,
+        candidateDetected: maximum >= THRESHOLD,
     };
 }
