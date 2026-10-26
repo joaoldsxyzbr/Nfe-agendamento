@@ -37,7 +37,16 @@ function hasSafeDom(control) {
     const getAttr = typeof control.getAttribute === 'function' ? (key) => control.getAttribute(key) : () => null;
     if (getAttr('aria-hidden') === 'true' || getAttr('aria-disabled') === 'true' ||
         getAttr('hidden') !== null || getAttr('inert') !== null ||
-        getAttr('onclick') !== null) return false;
+        getAttr('onclick') !== null || getAttr('formaction') !== null ||
+        getAttr('formtarget') !== null || getAttr('formmethod') !== null) return false;
+    // Um botão em formulário que aponta para outra origem não pode ser proposto.
+    if (typeof control.form?.action === 'string' && control.form.action) {
+        try {
+            if (new URL(control.form.action).origin !== PORTAL_ORIGIN) return false;
+        } catch {
+            return false;
+        }
+    }
     if (typeof control.closest !== 'function' ||
         control.closest('fieldset[disabled], [inert], [aria-hidden="true"], [hidden]')) return false;
     if (control.style?.display === 'none' || control.style?.visibility === 'hidden' ||
