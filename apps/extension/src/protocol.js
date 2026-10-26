@@ -13,6 +13,13 @@ export function parseAppCommand(value) {
     if (type === 'ping' || type === 'open_options') {
         return { type, requestId };
     }
+    if (type === 'record_batch_diagnostic') {
+        const diagnostic = input.diagnostic;
+        if (!diagnostic || typeof diagnostic !== 'object' || Array.isArray(diagnostic) ||
+            !['batch_completed', 'batch_retry_result', 'batch_preflight_failed'].includes(diagnostic.code) ||
+            diagnostic.state !== 'batch') throw new Error('Diagnóstico de lote inválido.');
+        return { type, requestId, diagnostic };
+    }
     if (type === 'start') {
         const accessKey = stringField(input, 'accessKey').toUpperCase();
         if (!ACCESS_KEY_PATTERN.test(accessKey)) {

@@ -4,6 +4,7 @@ import { capturePortalXmlPage } from './portal-fetch';
 import { buildPageReplayRequest, shouldCapturePortalRequest, } from './portal-request';
 import { SUPPLIER_CONFIG_KEY, invalidateSupplierConfigCache, loadSupplierConfig, resolveSupplierFromConfig, } from './supplier-store';
 import { PORTAL_POPUP_WIDTH, PORTAL_POPUP_HEIGHT } from './shared/constants.js';
+import { appendDiagnostic } from './intelligence/diagnostics.js';
 const ACTIVE_OPERATION_KEY = 'activePortalOperation';
 const PORTAL_URL = 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&tipoConteudo=7PhJ+gAVw2g%3D';
 const PORTAL_DOWNLOAD_FILTER = {
@@ -135,6 +136,10 @@ async function handleAppCommand(commandValue, sender, claimedTabId) {
             requestId: command.requestId,
         };
     }
+    if (command.type === 'record_batch_diagnostic') {
+        const recorded = await appendDiagnostic(command.diagnostic).catch(() => false);
+        return { type: 'diagnostic_recorded', requestId: command.requestId, recorded };
+    }
     if (command.type === 'resolve_supplier') {
         return {
             type: 'supplier_resolved',
@@ -253,6 +258,12 @@ async function handlePortalMessage(envelope, sender) {
         throw new ExtensionFailure('portal_tab_mismatch', 'Esta aba não pertence à operação Portal ativa.');
     }
     const type = envelope.type;
+    if (type === 'intelligence_diagnostic') {
+        if (operation.state !== 'submitting')
+            return { recorded: false };
+        const saved = await appendDiagnostic(envelope.diagnostic).catch(() => false);
+        return { recorded: saved };
+    }
     if (type === 'ready') {
         let activeOperation = operation;
         if (operation.state === 'opening' || operation.state === 'loading_portal') {
@@ -500,6 +511,14 @@ async function finishOperation(operation, event) {
     });
     if (!current)
         return false;
+    if (event.type === 'failed') {
+        // Falha operacional categorizada, sem código de acesso, mensagens nem XML.
+        await appendDiagnostic({
+            code: 'portal_operation_failed',
+            state: 'failed',
+            failureCode: event.code,
+        }).catch(() => {});
+    }
     await pushToSite(current.siteTabId, event);
     try {
         await chrome.windows.remove(current.portalWindowId);
@@ -551,6 +570,10 @@ async function getReconciledActiveOperation() {
     if (valid)
         return operation;
     const cleared = await clearActiveOperationIfCurrent(operation.operationId);
+    if (cleared) {
+        // Só a razão da recuperação, nunca a operação nem sua chave fiscal.
+        void appendDiagnostic({ code: 'portal_state_reconciled', state: 'failed', reason: 'stale_operation' }).catch(() => {});
+    }
     if (cleared && portalWindow) {
         await chrome.windows.remove(operation.portalWindowId).catch(() => { });
     }

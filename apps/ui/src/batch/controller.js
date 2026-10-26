@@ -17,6 +17,11 @@ export function createBatchController(deps) {
     let abortController = null;
     let activePortalOperationId = null;
     let renderedRows = [];
+    function recordBatchDiagnostic(data) {
+        if (typeof deps.portal?.recordDiagnostic !== 'function') return;
+        // Registro de diagnóstico é isolado: nunca bloqueia o lote e nunca recebe a chave.
+        void Promise.resolve().then(() => deps.portal.recordDiagnostic({ state: 'batch', ...data })).catch(() => {});
+    }
     function syncDraft() {
         if (running || preflighting || manualActionBusy)
             return;
@@ -53,12 +58,14 @@ export function createBatchController(deps) {
         try {
             const info = await deps.portal.getInfo();
             if (!info) {
+                recordBatchDiagnostic({ code: 'batch_preflight_failed', reason: 'extension_unavailable' });
                 renderState('Extensão não conectada');
                 elements.routeText.textContent =
                     'Extensão não conectada. Instale ou ative a extensão antes de consultar.';
                 return;
             }
             if (!info.capabilities.portalLookup) {
+                recordBatchDiagnostic({ code: 'batch_preflight_failed', reason: 'unsupported_extension' });
                 renderState('Atualize a extensão');
                 elements.routeText.textContent =
                     'Atualize a extensão para usar a consulta pelo Portal Nacional.';
@@ -66,6 +73,7 @@ export function createBatchController(deps) {
             }
         }
         catch {
+            recordBatchDiagnostic({ code: 'batch_preflight_failed', reason: 'handshake_failed' });
             renderState('Não foi possível verificar a extensão');
             elements.routeText.textContent =
                 'Falha ao verificar a extensão. Confira se está ativa e tente novamente.';
@@ -107,6 +115,13 @@ export function createBatchController(deps) {
             const doneLabel = outcomeLabel();
             const cancelledLabel = items.length === 1 ? 'Consulta cancelada' : 'Lote cancelado';
             renderState(cancelled ? cancelledLabel : finalFailureMessage ?? doneLabel, undefined, true);
+            recordBatchDiagnostic({
+                code: 'batch_completed',
+                total: items.length,
+                success: items.filter((item) => item.status === 'success').length,
+                failed: items.filter((item) => item.status === 'portal_error').length,
+                cancelled: items.filter((item) => item.status !== 'success' && item.status !== 'portal_error').length,
+            });
         }
     }
     async function processPortalItem(item, signal) {
@@ -206,12 +221,17 @@ export function createBatchController(deps) {
             await processPortalItem(item);
         }
         finally {
+            recordBatchDiagnostic({
+                code: 'batch_retry_result',
+                outcome: item.status === 'success' ? 'recovered' : item.status === 'portal_error' ? 'failed' : 'cancelled',
+            });
             manualActionBusy = false;
             setControlsLocked(false);
             renderState(outcomeLabel(), item);
         }
     }
     async function importManual(index) {
+        let selectedFile = false;
         const item = items[index];
         if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy)
             return;
@@ -221,6 +241,7 @@ export function createBatchController(deps) {
             const parsed = await deps.importManualXml(item.accessKey);
             if (!parsed)
                 return;
+            selectedFile = true;
             let supplierRuleId = null;
             try {
                 supplierRuleId = (await deps.portal.resolveSupplier(parsed.issuer.taxId)).supplierId;
@@ -242,6 +263,10 @@ export function createBatchController(deps) {
                 : 'Não foi possível validar o XML selecionado.';
         }
         finally {
+            if (selectedFile) recordBatchDiagnostic({
+                code: 'batch_retry_result',
+                outcome: item.status === 'success' ? 'recovered' : item.status === 'portal_error' ? 'failed' : 'cancelled',
+            });
             manualActionBusy = false;
             setControlsLocked(false);
             renderState(outcomeLabel(), item);

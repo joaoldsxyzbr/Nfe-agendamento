@@ -78,6 +78,59 @@ describe('extension background behavior', () => {
         expect(chromeApi.tabs.onRemoved.addListener).toHaveBeenCalledTimes(1);
         expect(chromeApi.webRequest.onBeforeRequest.addListener).toHaveBeenCalledTimes(1);
     });
+    it('aceita somente diagnóstico sanitizado da aba oficial da operação ativa', async () => {
+        const fake = await loadBackground();
+        await fake.emitRuntimeMessage(startCommand('ai-start', ACCESS_KEY_A), appSender());
+        const operation = fake.sessionState.get('activePortalOperation');
+        const sender = portalSender(operation.portalTabId, operation.portalWindowId);
+        await fake.emitRuntimeMessage({ source: 'portal', type: 'ready' }, sender);
+        await fake.emitRuntimeMessage({ source: 'portal', type: 'submitting' }, sender);
+        const report = {
+            source: 'portal', type: 'intelligence_diagnostic',
+            diagnostic: {
+                code: 'neural_candidate_unverified', state: 'submitting', score: 91, inspected: 2,
+                accessKey: ACCESS_KEY_A, xml: '<nfeProc>privado</nfeProc>', url: PORTAL_URL,
+            },
+        };
+        const denied = await fake.emitRuntimeMessage(report, portalSender(operation.portalTabId + 1, operation.portalWindowId));
+        expect(denied.type).toBe('failed');
+        const accepted = await fake.emitRuntimeMessage(report, sender);
+        expect(accepted).toEqual({ recorded: true });
+        const stored = await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1');
+        const records = stored.nfeIntelligenceDiagnosticsV1;
+        expect(records).toHaveLength(1);
+        expect(records[0]).toMatchObject({ code: 'neural_candidate_unverified', score: 91 });
+        expect(JSON.stringify(records)).not.toContain(ACCESS_KEY_A);
+        expect(JSON.stringify(records)).not.toContain('privado');
+        expect(JSON.stringify(records)).not.toContain(PORTAL_URL);
+    });
+    it('registra diagnósticos de lote apenas da janela autenticada, sem chaves fiscais', async () => {
+        const fake = await loadBackground();
+        const diagnostic = { code: 'batch_completed', state: 'batch', total: 2, success: 1,
+            failed: 1, cancelled: 0, accessKey: ACCESS_KEY_A };
+        const command = { source: 'app', appTabId: 10, command: {
+            type: 'record_batch_diagnostic', requestId: 'batch-1', diagnostic,
+        } };
+        const rejected = await fake.emitRuntimeMessage(command, {
+            id: 'other-extension', url: APP_URL, tab: { id: 10, url: APP_URL },
+        });
+        expect(rejected.type).toBe('failed');
+        const accepted = await fake.emitRuntimeMessage(command, appSender());
+        expect(accepted).toMatchObject({ type: 'diagnostic_recorded', recorded: true });
+        const stored = (await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1')).nfeIntelligenceDiagnosticsV1;
+        expect(stored).toHaveLength(1);
+        expect(stored[0]).toMatchObject({ total: 2, success: 1, failed: 1 });
+        expect(JSON.stringify(stored)).not.toContain(ACCESS_KEY_A);
+        const malformed = await fake.emitRuntimeMessage({ ...command,
+            command: { ...command.command, diagnostic: { ...diagnostic, success: 3 } },
+        }, appSender());
+        expect(malformed).toMatchObject({ type: 'diagnostic_recorded', recorded: false });
+        fake.chrome.storage.local.set.mockRejectedValueOnce(new Error('Quota de armazenamento indisponível'));
+        const writeFailure = await fake.emitRuntimeMessage(command, appSender());
+        expect(writeFailure).toMatchObject({ type: 'diagnostic_recorded', recorded: false });
+        const after = (await fake.chrome.storage.local.get('nfeIntelligenceDiagnosticsV1')).nfeIntelligenceDiagnosticsV1;
+        expect(after).toHaveLength(1);
+    });
     it('rejects commands from pages outside the extension', async () => {
         const fake = await loadBackground();
         const response = await fake.emitRuntimeMessage({

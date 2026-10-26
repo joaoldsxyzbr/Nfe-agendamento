@@ -200,6 +200,12 @@ export class BrowserPortalExtensionClient {
         const requestId = globalThis.crypto.randomUUID();
         await this.transport.request({ type: 'cancel', requestId, operationId });
     }
+    async recordDiagnostic(diagnostic) {
+        const requestId = globalThis.crypto.randomUUID();
+        const response = await this.transport.request({ type: 'record_batch_diagnostic', requestId, diagnostic });
+        if (!isRecord(response) || response.type !== 'diagnostic_recorded' || response.recorded !== true)
+            throw new Error('O diagnóstico local não pôde ser registrado.');
+    }
     async resolveSupplier(taxId) {
         const requestId = globalThis.crypto.randomUUID();
         const response = await this.transport.request({ type: 'resolve_supplier', requestId, taxId });

@@ -7,24 +7,45 @@ async function loadPortal(options = {}) {
     let notifyMutation = () => { };
     let resolveSubmission = () => { };
     let showDownload = false;
+    let showUnknownDownload = false;
     const keyField = { value: '', dispatchEvent: vi.fn(), focus: vi.fn() };
     const captchaField = { value: options.initialCaptcha ?? '' };
     class Button {
+        tagName = 'BUTTON';
+        isConnected = true;
+        hidden = false;
+        inert = false;
+        onclick = null;
+        style = { display: 'block', visibility: 'visible' };
+        getClientRects = () => [{ width: 35, height: 15 }];
+        closest = () => null;
         disabled = false;
         textContent = 'Consultar';
         click = vi.fn();
         getAttribute = vi.fn(() => null);
     }
     class Link {
+        tagName = 'A';
+        isConnected = true;
+        hidden = false;
+        inert = false;
+        onclick = null;
+        style = { display: 'block', visibility: 'visible' };
+        getClientRects = () => [{ width: 35, height: 15 }];
+        closest = () => null;
+        getAttribute = () => null;
         href = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
         textContent = 'Download do documento';
         click = vi.fn();
     }
     class Input {
+        tagName = 'INPUT';
         value = '';
     }
     const consultButton = new Button();
     const downloadLink = new Link();
+    const unknownDownload = new Button();
+    unknownDownload.textContent = 'Baixar XML';
     const documentRef = {
         documentElement: {},
         visibilityState: 'visible',
@@ -38,7 +59,7 @@ async function loadPortal(options = {}) {
                 return consultButton;
             return null;
         }),
-        querySelectorAll: vi.fn(() => showDownload ? [downloadLink] : []),
+        querySelectorAll: vi.fn(() => showDownload ? [downloadLink] : showUnknownDownload ? [unknownDownload] : []),
     };
     const sendMessage = vi.fn(async (message) => {
         if (message.type === 'ready') {
@@ -81,9 +102,11 @@ async function loadPortal(options = {}) {
         captchaField,
         consultButton,
         downloadLink,
+        unknownDownload,
         notifyMutation: () => notifyMutation(),
         notifyChange: () => documentListeners.get('change')?.(),
         displayDownload: () => { showDownload = true; },
+        displayUnknownDownload: () => { showUnknownDownload = true; },
         releaseSubmission: () => resolveSubmission({ ok: true }),
         flush: async () => { for (let attempt = 0; attempt < 20; attempt += 1)
             await Promise.resolve(); },
@@ -102,6 +125,27 @@ describe('real Portal content-script event handling (fake browser environment)',
         await portal.flush();
         expect(portal.sendMessage.mock.calls.filter(([value]) => value.type === 'submitting')).toHaveLength(1);
         expect(portal.consultButton.click).toHaveBeenCalledTimes(1);
+    });
+    it('relata candidato neural desconhecido sem clicar e sem dados fiscais', async () => {
+        const portal = await loadPortal({ initialCaptcha: 'human-captcha-response' });
+        portal.displayUnknownDownload();
+        portal.notifyMutation();
+        await portal.flush();
+        const reports = portal.sendMessage.mock.calls
+            .map(([message]) => message)
+            .filter((message) => message.type === 'intelligence_diagnostic');
+        expect(reports).toHaveLength(1);
+        expect(reports[0].diagnostic).toMatchObject({
+            code: 'neural_candidate_unverified',
+            reason: 'review_required',
+            state: 'submitting',
+        });
+        expect(JSON.stringify(reports[0])).not.toContain(ACCESS_KEY);
+        expect(portal.unknownDownload.click).not.toHaveBeenCalled();
+        expect(portal.sendMessage.mock.calls.filter(([message]) => message.type === 'download_ready')).toHaveLength(0);
+        portal.notifyMutation();
+        await portal.flush();
+        expect(portal.sendMessage.mock.calls.filter(([message]) => message.type === 'intelligence_diagnostic')).toHaveLength(1);
     });
     it('replays a download event arriving while submission is still awaiting background', async () => {
         const portal = await loadPortal({ initialCaptcha: 'human-captcha-response', delaySubmission: true });
