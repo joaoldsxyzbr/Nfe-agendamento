@@ -1,0 +1,75 @@
+name: Mini-IA P5 - Chromium MV3 e avaliação
+
+on:
+  push:
+    branches: ['feat/nfe-mini-ia-*']
+  pull_request:
+    branches: [nfe-agendamento]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mini-ia-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extension-intelligence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - name: Validar treinamento reprodutível e métricas sintéticas
+        run: node scripts/train-mini-ai.mjs --check
+      - name: Avaliação adversarial independente da mini-IA
+        run: node scripts/evaluate-mini-ai-adversarial.mjs
+      - name: Testes do revisor de relatórios privados
+        run: node --test scripts/tests/review-mini-ai-report.test.mjs
+      - run: npm run lint:ui
+      - run: npm run format:check:ui
+      - run: npm run test:ui
+      - run: npm run test:extension
+      - run: npm run coverage:extension
+      - run: npm run build:extension
+      - name: Conferir pacote MV3
+        run: |
+          test -s apps/extension/dist/app.html
+          test -s apps/extension/dist/background.js
+          test -s apps/extension/dist/portal-content.js
+          test -s apps/extension/dist/options.js
+          node -e 'const m=require("./apps/extension/dist/manifest.json"); if(m.host_permissions.some(h=>h.includes("joaolds.xyz.br"))) process.exit(1)'
+
+  chromium-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix tests/playwright
+      - run: npm audit --prefix tests/playwright --audit-level=high
+      - run: tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+      - name: Empacotar extensão MV3 para testes
+        run: npm run build:extension
+      - name: Smoke Chromium MV3 e regressões de interface/DANFE
+        run: npm test --prefix tests/playwright
+      - name: Artefato experimental para homologação física
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: NFe-MiniIA-P5-Experimental-${{ github.run_id }}
+          path: apps/extension/dist/
+          if-no-files-found: error
+          retention-days: 7

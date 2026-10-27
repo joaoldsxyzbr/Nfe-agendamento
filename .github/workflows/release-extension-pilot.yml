@@ -1,0 +1,139 @@
+name: Release experimental da extensão
+
+on:
+  push:
+    branches: [nfe-agendamento]
+    paths:
+      - .github/workflows/release-extension-pilot.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nfe-extension-pilot-v0.3.0-pilot.4
+  cancel-in-progress: false
+
+jobs:
+  publish-pilot:
+    if: github.repository == 'joaoldsxyzbr/Nfe-agendamento' && github.ref == 'refs/heads/nfe-agendamento'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout do commit da branch experimental
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Instalar dependências reproduzíveis
+        run: npm ci
+
+      - name: Auditoria de dependencias e qualidade da UI local
+        run: |
+          npm audit --audit-level=high
+          npm run lint:ui
+          npm run format:check:ui
+          npm run test:ui
+          npm run coverage:ui
+          npm run build:ui
+
+      - name: Verificar treinamento neural e casos adversariais
+        run: |
+          node scripts/train-mini-ai.mjs --check
+          node scripts/evaluate-mini-ai-adversarial.mjs
+          node --test scripts/tests/review-mini-ai-report.test.mjs
+
+      - name: Testar e medir cobertura da extensão
+        run: |
+          npm run test:extension
+          npm run coverage:extension
+
+      - name: Gerar a extensão MV3
+        run: npm run build:extension
+
+      - name: Executar smoke Chromium e testes de DANFE/consulta simulada
+        run: |
+          npm ci --prefix tests/playwright
+          npm audit --prefix tests/playwright --audit-level=high
+          tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+          npm test --prefix tests/playwright
+
+      - name: Validar o ZIP instalado sem precisar de site hospedado
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          (
+            cd apps/extension/dist
+            zip -q -r ../../../release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip .
+          )
+          python - <<'PY'
+          import json
+          from zipfile import ZipFile
+          filename = 'release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip'
+          with ZipFile(filename) as archive:
+              names = set(archive.namelist())
+              required = {
+                  'manifest.json', 'app.html', 'src/main.js',
+                  'src/portal/extension-client.js', 'brand-mark.png',
+                  'background.js', 'portal-content.js', 'options.html',
+                  'options.js', 'icon.png',
+              }
+              missing = required - names
+              if missing:
+                  raise SystemExit(f'Arquivos ausentes no ZIP: {sorted(missing)}')
+              manifest = json.loads(archive.read('manifest.json'))
+              if manifest.get('manifest_version') != 3 or manifest.get('version') != '0.3.0':
+                  raise SystemExit('Manifest MV3/versão inválido')
+              if manifest.get('host_permissions') != ['https://www.nfe.fazenda.gov.br/*']:
+                  raise SystemExit('A extensão não deve depender do site hospedado')
+              html = archive.read('app.html').decode('utf-8')
+              js = archive.read('src/main.js').decode('utf-8')
+              batch = archive.read('src/batch/controller.js').decode('utf-8')
+              if 'src="./src/main.js"' not in html or 'src="./brand-mark.png"' not in js:
+                  raise SystemExit('Entradas da interface local ausentes')
+              if 'batch-csv' in js or 'Relatório CSV' in js or 'downloadCsv' in js:
+                  raise SystemExit('Relatório CSV não deve aparecer na interface empacotada')
+              if 'csvButton' in batch or 'downloadCsvReport' in batch:
+                  raise SystemExit('Controller do lote ainda contém ações do relatório CSV')
+              if '<script>' in html:
+                  raise SystemExit('CSP MV3: script inline na UI não é permitido')
+              if not all(archive.getinfo(name).file_size > 0 for name in required):
+                  raise SystemExit('O pacote contém arquivos obrigatórios vazios')
+          print('ZIP MV3 experimental inspecionado e consistente')
+          PY
+
+      - name: Publicar pré-lançamento isolado da main
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag='v0.3.0-pilot.4'
+          archive='release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip'
+          notes='docs/releases/v0.3.0-pilot.4.md'
+          test -s "$archive"
+          test -s "$notes"
+          if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
+            if [[ "$existing_sha" != "$GITHUB_SHA" ]]; then
+              echo "Tag $tag existente em outro commit; não será sobrescrita." >&2
+              exit 1
+            fi
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Pré-lançamento já publicado neste commit."
+              exit 0
+            fi
+          fi
+          gh release create "$tag" "$archive" \
+            --target "$GITHUB_SHA" \
+            --title 'NFe Agendamento — extensão independente v0.3.0 (PILOTO 4)' \
+            --notes-file "$notes" \
+            --prerelease \
+            --latest=false
+          gh release view "$tag" --json tagName,isPrerelease,isDraft,assets,url \
+            --jq 'if .isPrerelease and (.isDraft | not) and (.assets | length) == 1 then .url else error("Pré-lançamento ou ZIP não confirmado") end'

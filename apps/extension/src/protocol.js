@@ -1,11 +1,9 @@
 import { normalizeTaxId } from './supplier-store';
 import { ACCESS_KEY_PATTERN } from './shared/access-key.js';
 import { MAX_XML_BYTES } from './shared/constants.js';
-export const SITE_ORIGIN = 'https://nfeagendamento.joaolds.xyz.br';
 export const PORTAL_ORIGIN = 'https://www.nfe.fazenda.gov.br';
-export const PAGE_CHANNEL = 'nfe-agendamento:portal-extension';
 export { ACCESS_KEY_PATTERN, MAX_XML_BYTES };
-export function parseSiteCommand(value) {
+export function parseAppCommand(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error('Comando inválido.');
     }
@@ -14,6 +12,13 @@ export function parseSiteCommand(value) {
     const requestId = stringField(input, 'requestId');
     if (type === 'ping' || type === 'open_options') {
         return { type, requestId };
+    }
+    if (type === 'record_batch_diagnostic') {
+        const diagnostic = input.diagnostic;
+        if (!diagnostic || typeof diagnostic !== 'object' || Array.isArray(diagnostic) ||
+            !['batch_completed', 'batch_retry_result', 'batch_preflight_failed'].includes(diagnostic.code) ||
+            diagnostic.state !== 'batch') throw new Error('Diagnóstico de lote inválido.');
+        return { type, requestId, diagnostic };
     }
     if (type === 'start') {
         const accessKey = stringField(input, 'accessKey').toUpperCase();

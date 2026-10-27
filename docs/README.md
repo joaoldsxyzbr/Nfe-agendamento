@@ -1,32 +1,30 @@
-# Documentação do NFe Agendamento 2.0
+# Documentação — NFe Agendamento 2.0
 
-## Fonte vigente
+## Arquitetura vigente nesta branch experimental
 
-Para entender o sistema atual, leia nesta ordem:
+O produto é uma **extensão Chromium Manifest V3**, com interface interna, sem site próprio e sem backend Cloudflare. O Portal Nacional da NF-e continua sendo externo e requer conexão com a internet.
 
-1. `README.md`;
-2. `docs/architecture/frontend-boundaries.md`;
-3. `docs/architecture/supplier-rules.md`;
-4. `docs/architecture/rtc-ibs-cbs.md`;
-5. `docs/ui/consultation-screen.md`;
-6. `docs/testing/browser-extension-portal.md`;
-7. `docs/testing/acceptance.md`;
-8. `docs/operations/repository-hardening.md`.
+Leia nesta ordem:
 
-Decisão de stack: docs/architecture/javascript-migration.md e docs/architecture/site-estatico-sem-vite.md.
-
-A arquitetura vigente é **site + extensão Chromium MV3 + Portal Nacional**, sem Bridge/EXE e sem consulta direta à SEFAZ.
+1. [README do projeto](../README.md)
+2. [Arquitetura extensão autônoma](architecture/extension-only.md)
+3. [Checklist de aceitação física](testing/extension-only-acceptance.md)
+4. [Regras de fornecedores](architecture/supplier-rules.md)
+5. [Campos fiscais RTC/IBS/CBS](architecture/rtc-ibs-cbs.md)
+6. [Interface da consulta](ui/consultation-screen.md)
+7. [Plano da migração](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md)
+8. [Mini-IA local e diagnósticos — P0 experimental](plans/2026-10-26-mini-ia-nfe-p0.md)
+9. [Treinamento neural reproduzível — P1](plans/2026-10-26-mini-ia-nfe-p1.md)
+10. [Decisões supervisionadas e testes adversariais — P2](plans/2026-10-26-mini-ia-nfe-p2.md)
+11. [Memória operacional e análise local — P3](plans/2026-10-26-mini-ia-nfe-p3.md)
+12. [Corpus adversarial e triagem privada — P4](plans/2026-10-26-mini-ia-nfe-p4.md)
+13. [P5 — Testes reais do pacote MV3 em Chromium e preparação da homologação](plans/2026-10-26-mini-ia-nfe-p5.md)
+14. [Roteiro manual P5 — Chrome e Edge](testing/mini-ai-p5-manual.md)
 
 ## Histórico
 
-Arquivos marcados no topo como **Documento histórico / superseded** registram decisões e arquiteturas antigas. Eles não devem ser usados para decidir comportamento de produção.
+Documentos antigos de site, Worker, Windows Bridge, consultador SEFAZ, Vite, projetos e provas de conceito ficam preservados para rastreabilidade, mas **não definem o runtime desta branch**. São históricos: `architecture/frontend-boundaries.md`, `architecture/site-estatico-sem-vite.md`, `architecture/bridge-security.md`, `superpowers/`, relatórios de releases anteriores e documentos em `operations/` anteriores à mudança.
 
-Isso inclui, entre outros:
+## Escopo e publicação
 
-- Bridge/Windows/WebView2;
-- consulta direta `NFeDistribuicaoDFe`;
-- coordenação fiscal antiga;
-- POCs .NET/Unimake;
-- planos e specs antigos em `docs/superpowers/`.
-
-O histórico é preservado para rastreabilidade, mas o código e a documentação da seção **Fonte vigente** prevalecem.
+Esta documentação descreve apenas `nfe-agendamento`. A `main` mantém sua configuração atual até a homologação e decisão de merge, sem alterações automáticas de Cloudflare.

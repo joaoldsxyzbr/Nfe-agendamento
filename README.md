@@ -1,163 +1,75 @@
-# NFe Agendamento 2.0
+# NFe Agendamento 2.0 — extensão independente (piloto)
 
-Aplicação interna para consultar NF-e pelo Portal Nacional, obter o XML oficial e gerar/visualizar DANFE.
+**Branch de desenvolvimento:** `nfe-agendamento` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop**
 
-## Arquitetura atual
+O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
-O fluxo vigente é **site + extensão Chromium**, sem Bridge/EXE e sem consulta direta à SEFAZ:
+## Estrutura atual
 
-```text
-Site NFe Agendamento
-        ↓
-Extensão Chromium MV3
-        ↓
-Portal Nacional da NF-e
-        ↓
-hCaptcha manual
-        ↓
-Download oficial do XML
-        ↓
-Site → validação XML → DANFE/XML
-```
+- `apps/ui/` — interface em JavaScript puro, HTML e CSS; tratamento de XML, DANFE, lote e testes. É código incorporado à extensão, **não um site implantado**.
+- `apps/extension/` — manifesto MV3, service worker, integração com o Portal, opções, testes e build do ZIP.
+- `scripts/` — validação, formatação e servidor de preview **exclusivo para testes**.
+- `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
+- `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Toda consulta abre o Portal Nacional. A extensão preenche a chave, acompanha a sessão do navegador e devolve o XML oficial ao site.
+Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE / XML individual / ZIP de XMLs.
 
-## Portal Nacional
+## Mini-IA local (P0–P5 experimentais, integrados ao piloto)
 
-Fluxo nominal:
+A Mini-IA P0–P5 foi integrada à branch experimental `nfe-agendamento` pela PR #108 em 26/10/2026. Ela ainda não faz parte da `main`. O motor de inteligência da extensão está implementado em modo de observação. Há um pequeno classificador neural feed-forward em JavaScript nativo que **observa** possíveis controles de download sem executar cliques. Na P1, os pesos passaram a ser **treinados de forma reproduzível com exemplos sintéticos**, com checagem automática de regressão. Isso **não equivale a validação em páginas reais**.
 
-1. o site valida a chave;
-2. a extensão abre um popup oficial do Portal;
-3. a chave é preenchida;
-4. o usuário resolve o **hCaptcha manualmente**;
-5. a extensão acompanha a continuação oficial;
-6. o navegador usa o certificado digital quando o Portal exigir;
-7. a extensão captura o download oficial dentro da mesma sessão;
-8. o XML é limitado, validado contra a chave e devolvido ao site;
-9. o site gera DANFE e libera o download do XML.
+Quando a interface convencional não reconhece um controle, o classificador pode registrar uma hipótese local com código, estado, versão e pontuação. Falhas de operação também geram registros categorizados. O usuário encontra **Exportar relatório JSON** e **Apagar diagnósticos** na página de opções. No máximo 100 registros locais dos últimos 14 dias são recuperados, sem telemetria, chave NF-e, XML, URL ou texto da página. O usuário decide se compartilha o arquivo para revisão técnica.
 
-Não existe solver/bypass de captcha. O acompanhamento da página do Portal é orientado a eventos (`MutationObserver`, eventos de formulário/navegação e mensagens da página), sem `setInterval` periódico. Eventos ocorridos durante uma verificação assíncrona ficam pendentes para uma nova verificação após a atual. A captura do XML usa a resposta textual autenticada do Portal, conforme a extensão 0.2.13 confirmada funcional. O limite de 10 MiB é validado após a leitura, antes de retornar o payload ao site. Os timeouts de espera do resultado/download seguem ativos.
+Na P2, uma política independente valida origem e rota oficiais, estado da consulta, ambiguidades, quantidade de candidatos, visibilidade, desativação e links externos antes de emitir uma **proposta de navegação**. A integração somente registra códigos e motivos autorizados; a mini-IA **não clica nem interfere no fluxo de consulta**. Testes adversariais cobrem controles enganosos e condições inseguras. Consulte [P1](docs/plans/2026-10-26-mini-ia-nfe-p1.md) e [P2](docs/plans/2026-10-26-mini-ia-nfe-p2.md).
 
-## Consulta unificada
+Na P3, as consultas em lote passaram a registrar **somente contagens agregadas**, resultados de tentativas de recuperação e códigos de falhas de verificação. A página de opções analisa falhas recorrentes por regras locais auditáveis e inclui os padrões identificados no JSON de exportação. Logs jamais contêm chave NF-e, XML ou identificação de fornecedor. Consulte o [plano P3](docs/plans/2026-10-26-mini-ia-nfe-p3.md). A análise de padrões é determinística; não significa treinamento automático do modelo.
 
-A tela usa um único fluxo para uma ou várias chaves:
+Na P4, adicionamos um **corpus adversarial independente do treinamento** para bloquear propostas inseguras na CI e corrigimos a permissão indevida de botões com `formaction`/`formtarget` ou formulário externo. O script `node scripts/review-mini-ai-report.mjs caminho/para/nfe-intelligence-diagnosticos.json` analisa localmente um relatório exportado e imprime só contagens, categorias e ações técnicas pré-definidas — não revela o conteúdo bruto. Nenhum relatório é enviado automaticamente. Consulte o [plano P4](docs/plans/2026-10-26-mini-ia-nfe-p4.md).
 
-- uma chave usa a mesma máquina de estados do lote;
-- várias chaves são processadas estritamente em sequência;
-- no máximo uma janela do Portal fica ativa;
-- cancelamento impede abrir os próximos itens;
-- falha de um item não inicia rota escondida;
-- quando o Portal falha, o item pode ser reconsultado ou recuperado com um XML local validado contra a mesma chave;
-- resultados concluídos podem ser baixados em ZIP ou impressos em conjunto.
+Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromium automatizado**, conferir service worker, permissões, tela de opções e privacidade do JSON exportado. O mesmo job executa os testes Playwright de consulta simulada/DANFE e publica um artefato experimental por 7 dias (não é release): [GitHub Actions P5](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711). O roteiro físico para Chrome e Edge fica em [Homologação P5](docs/testing/mini-ai-p5-manual.md). **O CI não executa consultas reais, hCaptcha, certificado nem testes físicos Windows.**
 
-Não existem limite/cooldown de consulta direta, porque o projeto não chama `NFeDistribuicaoDFe`.
+Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. Esta fase não altera a `main`, a produção ou a extensão já homologada. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
-### Recursos de interface (20/10/2026)
 
-- atalhos de teclado: `Ctrl+Enter` consulta, `Ctrl+N` nova consulta, `Ctrl+P` imprime DANFE(s), `Ctrl+D` baixa ZIP, `Ctrl+Shift+T` alterna tema e `Escape` cancela/fecha;
-- tema escuro (padrão), claro e do sistema, persistido em `localStorage`, com aviso rápido ao alternar;
-- botão **Relatório CSV** do lote: chave, número, série, modelo, emitente, destinatário, data de emissão, valor total, status, origem e mensagem, com formatação BRL e BOM UTF-8; reflete o estado atual dos itens sem reconsultar o Portal;
-- validação completa da chave de acesso: UF válida (27 UFs), dígito verificador e modelos 55 (NF-e) e 65 (NFC-e);
-- log de depuração opcional via `?nfe-debug` na URL, sem dados fiscais nas mensagens;
-- módulos compartilhados em `apps/web/src/shared` e `apps/extension/src/shared` (constantes, validação de chave, logger e métricas), sem duplicação entre site e extensão.
+## Compilar e verificar
 
-## Certificado digital
-
-A extensão não lê, importa, exporta nem armazena PFX/P12, senha ou chave privada.
-
-Quando o Portal Nacional exigir certificado digital para o download, a autenticação continua sob responsabilidade do Chrome/Edge e do Windows. O projeto não mantém mais CNPJ fiscal de A1 nem configuração de certificado para consulta direta.
-
-## Regras privadas de fornecedor
-
-CNPJ/CPF real de fornecedor não faz parte do bundle público. A configuração privada é importada pela página de opções da extensão e fica em `chrome.storage.local`. O site recebe somente o `supplierId` lógico.
-
-Clicar no ícone da extensão abre essa configuração.
-
-## Extensão
-
-Versão na `main`: **0.2.16**.
-
-Permissões:
-
-- `scripting`;
-- `storage`;
-- `webRequest`.
-
-Hosts:
-
-- `https://nfeagendamento.joaolds.xyz.br/*`;
-- `https://www.nfe.fazenda.gov.br/*`.
-
-A política de conteúdo da extensão é declarada explicitamente como `script-src 'self'; object-src 'self';`.
-
-Sem `<all_urls>`, Native Messaging, `downloads`, `webRequestBlocking`, acesso genérico ao sistema de arquivos ou host direto `www1.nfe.fazenda.gov.br`.
-
-## Cloudflare
-
-O site é publicado como **Workers Static Assets**, sem Worker script intermediário. O `wrangler.jsonc` aponta diretamente para `apps/web/dist`.
-
-XML, certificado e regras privadas não são enviados à Cloudflare pelo fluxo de consulta.
-
-## Linguagens e ferramentas
-
-O site, a extensão e os testes usam JavaScript (ES Modules), HTML e CSS.
-TypeScript foi removido do código próprio e das dependências diretas.
-O site usa módulos JavaScript nativos, com CSS carregado pelo HTML, sem Vite nem bundler frontend. Um script Node.js apenas copia arquivos para apps/web/dist. Vitest e Playwright testam; esbuild empacota somente a extensão Chromium; Wrangler publica o site.
-Python, C# e SQL não são necessários para esta arquitetura sem backend ou banco.
-Detalhes: docs/architecture/javascript-migration.md e docs/architecture/site-estatico-sem-vite.md.
-
-## Desenvolvimento e validação
+Requer Node.js e npm:
 
 ```bash
 npm ci
 npm audit --audit-level=high
-npm run lint:web
-npm run format:check:web
-npm run test:web
-npm run coverage:web
-npm run build:web
-npm --workspace @nfe-agendamento/web run dev
+npm run lint:ui
+npm run format:check:ui
+npm run test:ui
 npm run test:extension
-npm run coverage:extension
 npm run build:extension
-npm test --prefix tests/playwright
-./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-CI: `web`, `extension` e `danfe-print`. Os gates incluem `npm audit --audit-level=high`, lint/sintaxe, formatação, testes, cobertura, builds, Playwright e dry-run do Wrangler. O CI não envia mais artefatos temporários ao Actions: a release recompila e empacota a extensão a partir do commit validado pelo CI. Consulte `docs/operations/repository-hardening.md`.
+O job de CI `web` mantém a compatibilidade com o ruleset `main-required-ci`, mas executa de fato lint, formatação, testes, cobertura e build da interface local `apps/ui`; não existe hospedagem web nesta arquitetura.
 
-O repositório é público. Os rulesets do GitHub exigem os checks `web`, `extension` e `danfe-print` aprovados para mesclar PRs na `main`.
-
-## Repositório público
-
-O código e as releases ficam no repositório público `joaoldsxyzbr/Nfe-agendamento-2.0`. O site também é público via Cloudflare Static Assets e não depende do GitHub para consultar NF-e. O GitHub é usado como fonte de verdade, histórico e distribuição da extensão.
+O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge://extensions`, ative o Modo do desenvolvedor → **Carregar sem compactação** → escolha essa pasta. Clique no ícone para abrir ou focar a janela popup. Nenhum Node.js fica em execução após a instalação.
 
 ## Releases
 
-A **v0.0.41 / extensão 0.2.16** consolida as melhorias de site e testes feitas após a v0.0.40: proteção adicional de regressões, indicação consultiva de compatibilidade, resumo de êxitos/falhas e retomada do lote, diagnósticos com códigos conhecidos sem dados fiscais, interface mais compacta e correções da auditoria #86. A rotina de captura do Portal e a versão da extensão não mudaram; portanto, quem já usa a extensão 0.2.16 não precisa reinstalá-la por causa desta atualização do site. Notas: `docs/releases/v0.0.41.md`. A aceitação física integral permanece **PENDENTE** em `docs/testing/acceptance-results/v0.0.41.md`.
+O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) reúne as últimas correções e **remove o botão “Relatório CSV”** e seu acionamento, mantendo consulta unitária/em lote, DANFE, XML individual e ZIP de XMLs. O workflow bloqueia a publicação caso o botão ainda apareça no pacote. É um pré-lançamento de avaliação, **não uma release estável nem um aceite físico**.
 
-A **v0.0.40 / extensão 0.2.16** restaura a captura textual `response.text()` no `MAIN` world do Portal, compatível com o fluxo funcional da 0.2.13. A regressão da 0.2.14/0.2.15 coincide com a introdução do streaming/AbortController; não há evidência de qual das mudanças isoladas causou a falha. A validação de tamanho ocorre após a leitura e antes do envio ao site. O teste real em Chrome/Edge da 0.2.16 permanece **PENDENTE**.
+O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
 
-A **v0.0.39 / extensão 0.2.15** altera a captura do XML para o mundo `ISOLATED` da própria aba do Portal, mantendo os cookies e a autenticação do navegador sem depender do JavaScript e das políticas de execução do `MAIN` world do site externo. É uma correção de compatibilidade proposta após falha real reportada na extensão 0.2.14; a confirmação de recuperação no Chrome/Edge permanece **PENDENTE**. Não há retry extra, permissões novas ou mudança de hCaptcha/certificado.
+O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI, e a publicação estável só deve ocorrer após homologação.
 
-A **v0.0.38 / extensão 0.2.14** limita a captura do XML a 10 MiB durante o streaming, impõe timeout de transferência, preserva sinais assíncronos do Portal e corrige cancelamento feito enquanto uma janela ainda está abrindo. Os testes automatizados incluem cenários de falha; a aceitação física continua pendente.
+Não instale o piloto sobre a versão antiga durante uma operação fiscal; prefira um perfil separado no navegador. O armazenamento das regras de fornecedores é local (`chrome.storage.local`), sem exposição de dados fiscais ao GitHub.
 
-A **v0.0.37 / extensão 0.2.13** remove o fallback periódico do content script, preserva os timeouts com timers únicos, reforça cobertura crítica e melhora o diagnóstico da integração.
+## Critérios para integração à main
 
-A **v0.0.36 / extensão 0.2.12** consolida o hardening pós-auditoria: CI com CodeQL, testes comportamentais adicionais da extensão, cobertura mínima, configuração Wrangler consolidada e rastreabilidade da aceitação física.
+- Testes de UI e extensão, cobertura, impressão e auditoria de dependências aprovados no CI.
+- Testes físicos de Chrome e Edge com Portal oficial, XML, DANFE, lote, cancelamento, reabertura de janela e impressão.
+- Evidências registradas no [checklist](docs/testing/extension-only-acceptance.md) e na [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107).
 
-A **v0.0.35 / extensão 0.2.12** permanece como base funcional anterior deste hardening.
+**A branch `main` e a infraestrutura anterior não foram alteradas.** Não desligar serviços nem mesclar o piloto antes da aceitação física.
 
-A v0.0.34/extensão 0.2.11 consolidou a arquitetura Portal-only e permanece como base funcional anterior a esta otimização.
+## Documentação
 
-O atalho do site abre a release mais recente no GitHub. Com o repositório público, o download da extensão não exige sessão GitHub autenticada.
-
-## Aceitação física
-
-O gate físico vigente é o Portal Nacional: popup, chave preenchida, hCaptcha manual, certificado quando exigido, captura do XML, segunda consulta, lote e cancelamento.
-
-Checklist: `docs/testing/acceptance.md`.
-
-Cada release registra o resultado físico em `docs/testing/acceptance-results/vX.Y.Z.md`. A publicação depende do CI automatizado; Chrome e Edge são validados separadamente e o registro permanece `PENDENTE` até o teste real.
-
-A `v0.0.41 / extensão 0.2.16` está registrada em `docs/testing/acceptance-results/v0.0.41.md` como **PENDENTE**, inclusive para revisão das mudanças visuais e do lote. A `v0.0.40 / extensão 0.2.16` está registrada em `docs/testing/acceptance-results/v0.0.40.md` como **PENDENTE** até execução física real. A `v0.0.39 / extensão 0.2.15` foi reportada com a mesma falha de captura de XML e seu registro não deve ser interpretado como aprovação. A `v0.0.38 / extensão 0.2.14` tem falha real de handoff XML relatada em 14/10, documentada em seu registro. A `v0.0.37 / extensão 0.2.13` permanece com evidência histórica pendente. A `v0.0.36 / extensão 0.2.12` também permanece com evidência física pendente em seu registro histórico.
+- [Arquitetura de extensão única](docs/architecture/extension-only.md)
+- [Índice de documentos](docs/README.md)
+- [Plano inicial de migração](docs/plans/2026-10-22-nfe-agendamento-extensao-autonoma.md)
+- [Histórico de releases](docs/releases/)
