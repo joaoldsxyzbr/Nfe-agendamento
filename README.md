@@ -12,7 +12,7 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → DANFE / impressão / XML / ZIP.
+Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE / XML individual / ZIP de XMLs.
 
 ## Mini-IA local (P0–P5 experimentais, integrados ao piloto)
 
@@ -50,6 +50,8 @@ O job de CI `web` mantém a compatibilidade com o ruleset `main-required-ci`, ma
 O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge://extensions`, ative o Modo do desenvolvedor → **Carregar sem compactação** → escolha essa pasta. Clique no ícone para abrir ou focar a janela popup. Nenhum Node.js fica em execução após a instalação.
 
 ## Releases
+
+O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) reúne as últimas correções e **remove o botão “Relatório CSV”** e seu acionamento, mantendo consulta unitária/em lote, DANFE, XML individual e ZIP de XMLs. O workflow bloqueia a publicação caso o botão ainda apareça no pacote. É um pré-lançamento de avaliação, **não uma release estável nem um aceite físico**.
 
 O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
 

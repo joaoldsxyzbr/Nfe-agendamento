@@ -23,7 +23,7 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 - [ ] Certificado digital permanece sob gestão do Chrome/Edge quando solicitado.
 - [ ] XML oficial é recebido na aba da extensão e corresponde à chave.
 - [ ] DANFE e impressão/PDF funcionam com notas curtas e longas.
-- [ ] Downloads XML, ZIP, CSV funcionam.
+- [ ] Download individual de XML e ZIP de XMLs funcionam.
 - [ ] Segunda consulta funciona no mesmo navegador.
 - [ ] Duas chaves em lote seguem em ordem, sem duas consultas simultâneas.
 - [ ] Cancelar/fechar janela impede avançar no lote.
@@ -35,6 +35,12 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 | --- | --- | --- |
 | Chrome | NÃO EXECUTADO | Pendente |
 | Edge | NÃO EXECUTADO | Pendente |
+
+## Atualização da interface e CI — 27/10/2026
+
+- [CI #40567853304](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40567853304) — quatro jobs aprovados no commit `2200a7c17773060bb55b7b83ce8b2c53005b8643` após a remoção do botão Relatório CSV; testes de regressão preservam ZIP, XML e DANFE.
+- O piloto 4 inclui essa alteração no ZIP da extensão; o workflow de pré-lançamento verifica que não existem mais a ação `batch-csv` na interface nem métodos de relatório CSV no controller.
+- **Homologação física permanece NÃO EXECUTADA** para o conjunto completo de cenários de Chrome/Edge, certificado, Portal e lote. Não confundir teste automatizado com aceite fiscal.
 
 ## Atualização automática P5 — 26/10/2026
 

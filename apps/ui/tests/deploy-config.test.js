@@ -56,7 +56,7 @@ describe('extension-only distribution boundaries', () => {
         const workflow = await readFile(new URL('../../../.github/workflows/release-extension-pilot.yml', import.meta.url), 'utf8');
         expect(workflow).toContain("github.repository == 'joaoldsxyzbr/Nfe-agendamento'");
         expect(workflow).toContain("github.ref == 'refs/heads/nfe-agendamento'");
-        expect(workflow).toContain("tag='v0.3.0-pilot.3'");
+        expect(workflow).toContain("tag='v0.3.0-pilot.4'");
         expect(workflow).toContain('--prerelease');
         expect(workflow).toContain('--latest=false');
         for (const command of [
@@ -67,6 +67,8 @@ describe('extension-only distribution boundaries', () => {
             'npm test --prefix tests/playwright',
         ])
             expect(workflow).toContain(command);
+        expect(workflow).toContain("'batch-csv' in js");
+        expect(workflow).toContain("'csvButton' in batch");
         expect(workflow).not.toContain('wrangler deploy');
     });
 });

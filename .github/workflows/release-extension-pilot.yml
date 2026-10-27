@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: nfe-extension-pilot-v0.3.0-pilot.3
+  group: nfe-extension-pilot-v0.3.0-pilot.4
   cancel-in-progress: false
 
 jobs:
@@ -70,12 +70,12 @@ jobs:
           mkdir -p release
           (
             cd apps/extension/dist
-            zip -q -r ../../../release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip .
+            zip -q -r ../../../release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip .
           )
           python - <<'PY'
           import json
           from zipfile import ZipFile
-          filename = 'release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip'
+          filename = 'release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip'
           with ZipFile(filename) as archive:
               names = set(archive.namelist())
               required = {
@@ -94,8 +94,13 @@ jobs:
                   raise SystemExit('A extensão não deve depender do site hospedado')
               html = archive.read('app.html').decode('utf-8')
               js = archive.read('src/main.js').decode('utf-8')
+              batch = archive.read('src/batch/controller.js').decode('utf-8')
               if 'src="./src/main.js"' not in html or 'src="./brand-mark.png"' not in js:
                   raise SystemExit('Entradas da interface local ausentes')
+              if 'batch-csv' in js or 'Relatório CSV' in js or 'downloadCsv' in js:
+                  raise SystemExit('Relatório CSV não deve aparecer na interface empacotada')
+              if 'csvButton' in batch or 'downloadCsvReport' in batch:
+                  raise SystemExit('Controller do lote ainda contém ações do relatório CSV')
               if '<script>' in html:
                   raise SystemExit('CSP MV3: script inline na UI não é permitido')
               if not all(archive.getinfo(name).file_size > 0 for name in required):
@@ -109,9 +114,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag='v0.3.0-pilot.3'
-          archive='release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip'
-          notes='docs/releases/v0.3.0-pilot.3.md'
+          tag='v0.3.0-pilot.4'
+          archive='release/NFeAgendamento-Extension-v0.3.0-pilot.4.zip'
+          notes='docs/releases/v0.3.0-pilot.4.md'
           test -s "$archive"
           test -s "$notes"
           if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
@@ -126,7 +131,7 @@ jobs:
           fi
           gh release create "$tag" "$archive" \
             --target "$GITHUB_SHA" \
-            --title 'NFe Agendamento — extensão independente v0.3.0 (PILOTO 3)' \
+            --title 'NFe Agendamento — extensão independente v0.3.0 (PILOTO 4)' \
             --notes-file "$notes" \
             --prerelease \
             --latest=false
