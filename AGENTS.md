@@ -3,7 +3,7 @@
 ## Fonte de verdade
 
 - O GitHub é a única fonte de verdade e área de trabalho do projeto.
-- Trabalhe exclusivamente no repositório `joaoldsxyzbr/Nfe-agendamento-2.0`.
+- Trabalhe exclusivamente no repositório `joaoldsxyzbr/Nfe-agendamento`.
 - Antes de alterar código, arquitetura, configuração ou documentação, consulte o estado atual da `main`, o `README.md`, `docs/README.md` e os documentos vigentes relacionados.
 - Se houver divergência entre conversa anterior e repositório, valide o estado atual no GitHub e trate o repositório como referência.
 

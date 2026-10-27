@@ -59,6 +59,11 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Validar modelo e casos adversariais da mini-IA
+        run: |
+          node scripts/train-mini-ai.mjs --check
+          node scripts/evaluate-mini-ai-adversarial.mjs
+          node --test scripts/tests/review-mini-ai-report.test.mjs
       - run: npm run test:extension
       - run: npm run coverage:extension
       - run: npm run build:extension
