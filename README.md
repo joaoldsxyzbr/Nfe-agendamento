@@ -12,7 +12,7 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → DANFE / impressão / CSV / ZIP.
+Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → DANFE / impressão / XML / ZIP.
 
 ## Mini-IA local (P0–P5 experimentais, integrados ao piloto)
 

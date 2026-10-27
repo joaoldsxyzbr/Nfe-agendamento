@@ -14,7 +14,6 @@ function harness(overrides = {}, importManualXml = async () => null) {
     const list = el({ hidden: true });
     const zipButton = el({ disabled: true, hidden: true });
     const printButton = el({ disabled: true, hidden: true });
-    const csvButton = el({ disabled: true, hidden: true });
     const portal = {
         getInfo: async () => ({
             version: '0.2.11',
@@ -39,7 +38,6 @@ function harness(overrides = {}, importManualXml = async () => null) {
             cancelButton: el({ hidden: true }),
             zipButton,
             printButton,
-            csvButton,
             progress: el({ textContent: '' }),
             routeText: route,
             toolbar,
@@ -64,7 +62,7 @@ function harness(overrides = {}, importManualXml = async () => null) {
         importManualXml,
         renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
     });
-    return { controller, input, route, toolbar, list, zipButton, printButton, csvButton, portalStarts, snapshots };
+    return { controller, input, route, toolbar, list, zipButton, printButton, portalStarts, snapshots };
 }
 describe('batch controller Portal-only', () => {
     it('reveals progress and results after starting, retaining one input for batches', async () => {

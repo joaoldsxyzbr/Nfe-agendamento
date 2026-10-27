@@ -4,7 +4,7 @@
 
 ## Componentes
 
-- `apps/ui/src`: interface, tema, lote, XML, DANFE, CSV, ZIP, regras de apresentação. ES Modules, HTML e CSS puros.
+- `apps/ui/src`: interface, tema, lote, XML, DANFE, ZIP, regras de apresentação. ES Modules, HTML e CSS puros.
 - `apps/extension/src`: service worker MV3, captura oficial do Portal, controle da janela, fornecedores locais e tela de opções.
 - `apps/extension/scripts/build.mjs`: inclui a UI no pacote `dist/app.html`, preserva os arquivos locais e produz os scripts da extensão.
 - `tests/playwright`: testa comportamento e impressão com dados sintéticos; o servidor HTTP de preview serve **somente** aos testes.

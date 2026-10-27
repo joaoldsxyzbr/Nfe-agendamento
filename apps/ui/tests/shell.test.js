@@ -52,4 +52,17 @@ describe('application shell', () => {
         expect(main).toContain('Baixar XMLs (.zip)');
         expect(main).toContain('Imprimir DANFEs');
     });
+    it('keeps consultation actions focused on XML and DANFE without a CSV report', () => {
+        const main = readFileSync(fromWeb('src/main.js'), 'utf8');
+        const batch = readFileSync(fromWeb('src/batch/controller.js'), 'utf8');
+        expect(main).not.toContain('id="batch-csv"');
+        expect(main).not.toContain('Relatório CSV');
+        expect(main).not.toContain('downloadCsv');
+        expect(batch).not.toContain('csvButton');
+        expect(batch).not.toContain('downloadCsvReport');
+        expect(main).toContain('id="batch-zip"');
+        expect(main).toContain('id="batch-print"');
+        expect(batch).toContain('downloadZip,');
+        expect(batch).toContain('printDanfes,');
+    });
 });

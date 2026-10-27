@@ -12,7 +12,6 @@ import { logger } from './shared/logger.js';
 import { metrics } from './shared/metrics.js';
 import { initTheme, cycleTheme } from './shared/theme.js';
 import { createKeyboardShortcuts } from './shared/keyboard-shortcuts.js';
-import { downloadCsv } from './shared/csv-report.js';
 
 initTheme();
 
@@ -78,7 +77,6 @@ app.innerHTML = `
           </div>
           <div class="batch-toolbar-actions">
             <button id="batch-cancel" class="secondary-button" type="button" hidden>${actionIconMarkup('cancel')}<span>Cancelar consulta</span></button>
-            <button id="batch-csv" class="secondary-button" type="button" disabled title="Baixar relatório CSV">${actionIconMarkup("csv")}<span>Relatório CSV</span></button>
             <button id="batch-zip" class="secondary-button" type="button" disabled>${actionIconMarkup('zip')}<span>Baixar XMLs (.zip)</span></button>
             <button id="batch-print" class="secondary-button" type="button" disabled>${actionIconMarkup('print')}<span>Imprimir DANFEs</span></button>
           </div>
@@ -118,7 +116,6 @@ const batchReset = requireElement('#batch-reset');
 const batchProgress = requireElement('#batch-progress');
 const batchRouteText = requireElement('#batch-route');
 const batchCancel = requireElement('#batch-cancel');
-const batchCsv = requireElement('#batch-csv');
 const batchZip = requireElement('#batch-zip');
 const batchPrint = requireElement('#batch-print');
 const batchList = requireElement('#batch-list');
@@ -153,7 +150,6 @@ const batchController = createBatchController({
         startButton: batchStart,
         resetButton: batchReset,
         cancelButton: batchCancel,
-        csvButton: batchCsv,
         zipButton: batchZip,
         printButton: batchPrint,
         progress: batchProgress,
@@ -170,7 +166,6 @@ const batchController = createBatchController({
     openDanfeDocuments: (documents, title) => danfeViewerController.openMany(documents, title),
     printWindow: () => danfeViewerController.print(),
     importManualXml: selectManualXml,
-    downloadCsv: (items) => downloadCsv(items, `nfe-lote-${new Date().toISOString().slice(0, 10)}.csv`),
 });
 metrics.end('batch-controller-init');
 logger.info('Batch controller inicializado');
@@ -194,7 +189,6 @@ batchReset.addEventListener('click', () => {
 batchCancel.addEventListener('click', () => {
     void batchController.cancel();
 });
-batchCsv.addEventListener('click', () => batchController.downloadCsvReport());
 batchZip.addEventListener('click', () => batchController.downloadZip());
 batchPrint.addEventListener('click', () => batchController.printDanfes());
 

@@ -474,15 +474,10 @@ export function createBatchController(deps) {
     }
     function refreshResultActions(changedItem, refreshAllRows = false) {
         const completed = completedItems();
-        const hasItems = items.length > 0;
         elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
         elements.printButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
         elements.zipButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
         elements.printButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
-        if (elements.csvButton) {
-            elements.csvButton.disabled = !hasItems || preflighting || running || manualActionBusy;
-            elements.csvButton.hidden = !hasItems || preflighting || running;
-        }
         if (refreshAllRows) {
             renderRows();
         }
@@ -502,12 +497,6 @@ export function createBatchController(deps) {
             content: item.parsed.originalXml,
         })));
         deps.downloadBlob(blob, `nfe-lote-${new Date().toISOString().slice(0, 10)}.zip`);
-    }
-    function downloadCsvReport() {
-        if (items.length === 0 || !deps.downloadCsv)
-            return;
-        logger.info('Gerando relatório CSV', { items: items.length });
-        deps.downloadCsv(items);
     }
     function printDanfes() {
         const parsed = completedItems()
@@ -567,7 +556,6 @@ export function createBatchController(deps) {
         start,
         cancel,
         downloadZip,
-        downloadCsvReport,
         printDanfes,
         importManual,
         retryPortal,
