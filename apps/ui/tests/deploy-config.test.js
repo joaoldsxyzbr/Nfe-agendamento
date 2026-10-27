@@ -30,4 +30,14 @@ describe('extension-only distribution boundaries', () => {
             expect(ci).toContain(required);
         expect(ci).not.toContain('wrangler deploy');
     });
+    it('preserves the required web check with real UI validation', async () => {
+        const ci = await readFile(ciUrl, 'utf8');
+        const webJob = ci.split(/\n(?=  [\w-]+:\n)/).find((part) => part.startsWith('  web:\n'));
+        expect(webJob).toBeDefined();
+        for (const command of [
+            'npm run lint:ui', 'npm run format:check:ui', 'npm run test:ui',
+            'npm run coverage:ui', 'npm run build:ui',
+        ])
+            expect(webJob).toContain(command);
+    });
 });

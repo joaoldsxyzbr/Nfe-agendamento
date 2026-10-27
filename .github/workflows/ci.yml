@@ -28,7 +28,8 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
 
-  ui:
+  # Nome exigido pelo ruleset da main: valida a interface local apps/ui, sem site hospedado.
+  web:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
