@@ -52,4 +52,21 @@ describe('extension-only distribution boundaries', () => {
         ])
             expect(extensionJob).toContain(command);
     });
+    it('keeps the experimental release isolated from production', async () => {
+        const workflow = await readFile(new URL('../../../.github/workflows/release-extension-pilot.yml', import.meta.url), 'utf8');
+        expect(workflow).toContain("github.repository == 'joaoldsxyzbr/Nfe-agendamento'");
+        expect(workflow).toContain("github.ref == 'refs/heads/nfe-agendamento'");
+        expect(workflow).toContain("tag='v0.3.0-pilot.3'");
+        expect(workflow).toContain('--prerelease');
+        expect(workflow).toContain('--latest=false');
+        for (const command of [
+            'npm run test:ui', 'npm run coverage:ui', 'npm run test:extension',
+            'npm run coverage:extension', 'node scripts/train-mini-ai.mjs --check',
+            'node scripts/evaluate-mini-ai-adversarial.mjs',
+            'node --test scripts/tests/review-mini-ai-report.test.mjs',
+            'npm test --prefix tests/playwright',
+        ])
+            expect(workflow).toContain(command);
+        expect(workflow).not.toContain('wrangler deploy');
+    });
 });

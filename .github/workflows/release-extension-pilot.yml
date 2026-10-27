@@ -10,14 +10,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: nfe-extension-pilot-v0.3.0-popup
+  group: nfe-extension-pilot-v0.3.0-pilot.3
   cancel-in-progress: false
 
 jobs:
   publish-pilot:
-    if: github.repository == 'joaoldsxyzbr/Nfe-agendamento-2.0' && github.ref == 'refs/heads/nfe-agendamento'
+    if: github.repository == 'joaoldsxyzbr/Nfe-agendamento' && github.ref == 'refs/heads/nfe-agendamento'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - name: Checkout do commit da branch experimental
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -33,8 +33,20 @@ jobs:
       - name: Instalar dependências reproduzíveis
         run: npm ci
 
-      - name: Verificar vulnerabilidades nas dependências de runtime
-        run: npm audit --omit=dev --audit-level=high
+      - name: Auditoria de dependencias e qualidade da UI local
+        run: |
+          npm audit --audit-level=high
+          npm run lint:ui
+          npm run format:check:ui
+          npm run test:ui
+          npm run coverage:ui
+          npm run build:ui
+
+      - name: Verificar treinamento neural e casos adversariais
+        run: |
+          node scripts/train-mini-ai.mjs --check
+          node scripts/evaluate-mini-ai-adversarial.mjs
+          node --test scripts/tests/review-mini-ai-report.test.mjs
 
       - name: Testar e medir cobertura da extensão
         run: |
@@ -44,6 +56,13 @@ jobs:
       - name: Gerar a extensão MV3
         run: npm run build:extension
 
+      - name: Executar smoke Chromium e testes de DANFE/consulta simulada
+        run: |
+          npm ci --prefix tests/playwright
+          npm audit --prefix tests/playwright --audit-level=high
+          tests/playwright/node_modules/.bin/playwright install --with-deps chromium
+          npm test --prefix tests/playwright
+
       - name: Validar o ZIP instalado sem precisar de site hospedado
         shell: bash
         run: |
@@ -51,12 +70,12 @@ jobs:
           mkdir -p release
           (
             cd apps/extension/dist
-            zip -q -r ../../../release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip .
+            zip -q -r ../../../release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip .
           )
           python - <<'PY'
           import json
           from zipfile import ZipFile
-          filename = 'release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip'
+          filename = 'release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip'
           with ZipFile(filename) as archive:
               names = set(archive.namelist())
               required = {
@@ -90,9 +109,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag='v0.3.0-pilot.2'
-          archive='release/NFeAgendamento-Extension-Piloto-v0.3.0-popup.zip'
-          notes='docs/releases/v0.3.0-pilot.2.md'
+          tag='v0.3.0-pilot.3'
+          archive='release/NFeAgendamento-Extension-v0.3.0-pilot.3.zip'
+          notes='docs/releases/v0.3.0-pilot.3.md'
           test -s "$archive"
           test -s "$notes"
           if existing_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq '.sha' 2>/dev/null)"; then
@@ -107,7 +126,7 @@ jobs:
           fi
           gh release create "$tag" "$archive" \
             --target "$GITHUB_SHA" \
-            --title 'NFe Agendamento — extensão popup v0.3.0 (PILOTO 2)' \
+            --title 'NFe Agendamento — extensão independente v0.3.0 (PILOTO 3)' \
             --notes-file "$notes" \
             --prerelease \
             --latest=false
