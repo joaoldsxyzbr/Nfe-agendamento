@@ -25,7 +25,7 @@ Este é um **roteiro opcional de diagnóstico futuro**, pois a execução integr
 - [ ] Certificado digital permanece sob gestão do Chrome/Edge quando solicitado.
 - [ ] XML oficial é recebido na aba da extensão e corresponde à chave.
 - [ ] DANFE e impressão/PDF funcionam com notas curtas e longas.
-- [ ] Download individual de XML e ZIP de XMLs funcionam.
+- [ ] Na futura versão com PR #113, o lote solicita cada XML em arquivo separado, e **Copiar chave** copia os 44 dígitos; testar aviso/permite downloads múltiplos no Chrome e Edge. No piloto `v0.3.0-pilot.4`, o fluxo histórico ainda usava ZIP.
 - [ ] Segunda consulta funciona no mesmo navegador.
 - [ ] Duas chaves em lote seguem em ordem, sem duas consultas simultâneas.
 - [ ] Cancelar/fechar janela impede avançar no lote.
