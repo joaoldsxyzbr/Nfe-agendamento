@@ -1,10 +1,10 @@
 # Aceite físico: NFe Agendamento somente extensão
 
-Branch de referência: `main` (merge PR #107, `a0a586c`) | Manifest: `0.3.0` | **Aceite físico: NÃO EXECUTADO**.
+Branch de referência: `main` (merge PR #107, `a0a586c`) | Manifest: `0.3.0` | **Aceite físico: NÃO EXECUTADO — DISPENSADO POR DECISÃO DO RESPONSÁVEL EM 28/10/2026**.
 
 Registro específico para a versão integrada: [resultado v0.3.0](acceptance-results/v0.3.0-main.md). O ZIP [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) é um **pré-lançamento**, não uma versão estável.
 
-Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados reais da NF-e, chave completa, XML, CNPJ/CPF ou certificado em evidências.
+Este é um **roteiro opcional de diagnóstico futuro**, pois a execução integral foi dispensada em 28/10/2026. Se for necessário testar após relato de falha, usar perfis separados de Chrome e Edge no Windows. Nunca registrar dados reais da NF-e, chave completa, XML, CNPJ/CPF ou certificado em evidências.
 
 ## Compilação e instalação
 
@@ -35,8 +35,8 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 
 | Navegador | Status | Observações |
 | --- | --- | --- |
-| Chrome | NÃO EXECUTADO | Pendente |
-| Edge | NÃO EXECUTADO | Pendente |
+| Chrome | NÃO EXECUTADO | Dispensado; não aprovado |
+| Edge | NÃO EXECUTADO | Dispensado; não aprovado |
 
 ## Integração à `main` e CI — 27/10/2026
 
@@ -74,4 +74,4 @@ Execução de referência: [GitHub Actions #1246](https://github.com/joaoldsxyzb
 
 A checagem automática **Workers Builds** apareceu porque a integração Cloudflare existente ainda acompanha o repositório. Ela **não é dependência de execução do novo aplicativo**; esta alteração não autoriza desativar a produção atual. Não afirmar que sua existência comprova que o piloto foi publicado.
 
-Próxima pendência vigente: concluir o gate físico nos dois navegadores e registrar resultados reais; os resultados anteriores de auditoria estão preservados acima somente como histórico.
+**Decisão vigente em 28/10/2026:** o responsável dispensou o gate físico. Manter os resultados como **NÃO EXECUTADO** (não marcar como aprovados); priorizar os checks automáticos e registrar falhas de uso real caso sejam relatadas. Os resultados anteriores de auditoria estão preservados acima somente como histórico.
