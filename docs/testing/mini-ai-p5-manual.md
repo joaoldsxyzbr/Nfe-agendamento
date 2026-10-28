@@ -20,6 +20,8 @@
 - [ ] Não há tentativas da mini-IA de clicar em botões inesperados; sem alteração da consulta se a IA encontrar candidato incerto.
 
 ## Aceite do piloto fiscal completo — depende de usuário autorizado
+
+**Nota de versão:** este roteiro refere-se ao pacote experimental `v0.3.0-pilot.4`, que ainda possuía ZIP de XMLs. A evolução proposta na [PR #113](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/113) substitui o ZIP por downloads individuais e inclui o botão **Copiar chave**, ainda sem release estável.
 - [ ] Portal Nacional abre apenas na origem oficial; chave é preenchida e hCaptcha permanece **manual**.
 - [ ] Certificado digital, quando necessário, é selecionado apenas pelo navegador/usuário.
 - [ ] XML oficial recebido pertence à chave consultada, e XML inválido não é aceito.
