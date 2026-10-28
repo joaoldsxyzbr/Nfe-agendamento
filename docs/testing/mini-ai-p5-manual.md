@@ -1,6 +1,6 @@
 # Homologação manual — mini-IA P5 (Chromium MV3 experimental)
 
-**Situação inicial: NÃO EXECUTADA.** A instalação automatizada no **Chromium empacotado do Playwright** (Linux CI) é separada dos testes físicos com **Chrome/Edge em Windows**, Portal oficial, hCaptcha, certificado e documentos fiscais.
+**Situação: NÃO EXECUTADA — DISPENSADA POR DECISÃO DO RESPONSÁVEL EM 28/10/2026.** Este roteiro fica disponível para investigação futura de falhas. A instalação automatizada no **Chromium empacotado do Playwright** (Linux CI) não valida os testes físicos com **Chrome/Edge em Windows**, Portal oficial, hCaptcha, certificado ou documentos fiscais.
 
 ## Preparação
 1. Confirmar a referência da `main` ([merge #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107), `a0a586c`) e o [CI aprovado dessa revisão](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508). A PR #108 já foi incorporada ao piloto, posteriormente integrado à `main`.
@@ -37,4 +37,4 @@ Registrar **apenas** navegador + versão, SHA exato do commit e link do job CI, 
 | Edge desktop (Windows) | NÃO EXECUTADO | NÃO EXECUTADO |
 
 ## Regra de promoção
-A PR #108 já foi integrada ao piloto e a PR #107 à `main`. Isso **não conclui a homologação**: não publicar release estável nem desativar infraestrutura remanescente sem os testes físicos necessários. A mini-IA continua somente em **shadow mode**, sem executar ações nem resolver hCaptcha. Consolidar o resultado no [aceite v0.3.0](acceptance-results/v0.3.0-main.md).
+A PR #108 foi integrada ao piloto e a PR #107 à `main`. A homologação física foi **dispensada, não aprovada**, em 28/10/2026; os testes não executados permanecem como tal. A Mini-IA continua somente em **shadow mode**, sem executar ações nem resolver hCaptcha. A decisão não autoriza novas ações neurais, implantação ou publicação estável automaticamente. Registro: [aceite v0.3.0](acceptance-results/v0.3.0-main.md).
