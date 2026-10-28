@@ -237,7 +237,7 @@
 }
 
 .batch-item[data-state='portal_error'] .batch-item-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) 40px;
+  grid-template-columns: 40px repeat(2, minmax(0, 1fr));
 }
 
 /* A apresentação de uma NF-e usa a mesma linha do lote, sem faixa extra de ações. */
@@ -508,7 +508,7 @@
   }
 
   .batch-item[data-state='portal_error'] .batch-item-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) 40px;
+    grid-template-columns: 40px repeat(2, minmax(0, 1fr));
   }
 
   .batch-item-actions button {
