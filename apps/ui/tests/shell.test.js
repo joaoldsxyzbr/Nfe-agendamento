@@ -66,6 +66,8 @@ describe('application shell', () => {
         expect(batch).toContain("actionIconMarkup('copy')");
         expect(batch).toContain("'Copiar chave da NF-e'");
         expect(main).not.toContain('createStoredZip');
+        expect(main).not.toContain('Baixar XMLs (.zip)');
+        expect(main).not.toContain('id="batch-zip"');
         expect(batch).toContain('printDanfes,');
     });
 });
