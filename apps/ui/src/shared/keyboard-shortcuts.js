@@ -3,7 +3,7 @@ const SHORTCUTS = Object.freeze({
   CANCEL: { key: 'Escape', description: 'Cancelar/Fechar' },
   PRINT: { key: 'p', ctrl: true, description: 'Imprimir DANFE' },
   NEW: { key: 'n', ctrl: true, description: 'Nova consulta' },
-  ZIP: { key: 'd', ctrl: true, description: 'Baixar ZIP' },
+  DOWNLOADS: { key: 'd', ctrl: true, description: 'Baixar todos os XMLs' },
   THEME: { key: 't', ctrl: true, shift: true, description: 'Alternar tema' },
 });
 
