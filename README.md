@@ -12,7 +12,7 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo vigente na evolução proposta (PR #113): popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE, XML individual ou downloads de XMLs separados, e cópia da chave NF-e. **Até o merge da PR #113, a `main` ainda contém o botão de ZIP de XMLs**; o pacote `v0.3.0-pilot.4` preserva esse comportamento histórico.
+Fluxo da extensão: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE e download de XML individual. **O comportamento do lote depende da versão**: o pacote histórico `v0.3.0-pilot.4` oferece ZIP de XMLs; a [PR #113](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/113) implementa downloads de XMLs separados e cópia da chave da NF-e. A presença dessas novas ações depende de a versão instalada incluir a PR #113.
 
 ## Mini-IA local (P0–P5, integrados em modo de observação)
 
