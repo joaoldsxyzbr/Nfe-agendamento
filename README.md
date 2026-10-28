@@ -1,6 +1,6 @@
 # NFe Agendamento 2.0 — extensão independente
 
-**Branch principal:** `main` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop** · **Aceite físico: pendente**
+**Branch principal:** `main` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
 
 O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
@@ -55,18 +55,19 @@ O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agen
 
 O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
 
-O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI, e a publicação estável só deve ocorrer após homologação.
+O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI; a decisão de distribuição estável é separada da homologação física dispensada.
 
 Não instale o piloto sobre a versão antiga durante uma operação fiscal; prefira um perfil separado no navegador. O armazenamento das regras de fornecedores é local (`chrome.storage.local`), sem exposição de dados fiscais ao GitHub.
 
-## Critérios para homologação e release estável
+## Validação e decisão de distribuição
 
 - **Integração à `main`: realizada** na [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107), commit `a0a586c` (27/10/2026).
 - **CI da `main`: aprovado** no [workflow 40573677508](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508), jobs `web`, `extension`, `danfe-print` e `security-audit`.
-- **Aceite físico: não executado**. Testar Chrome e Edge com Portal oficial, hCaptcha manual, certificado quando exigido, XML, DANFE, lote, cancelamento, reabertura e impressão.
-- Registrar cada evidência no [checklist](docs/testing/extension-only-acceptance.md) e no [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md), sem dados fiscais.
+- **Homologação física: dispensada por decisão do responsável em 28/10/2026**. Os cenários reais de Chrome/Edge, Portal, hCaptcha manual, certificado, XML, DANFE, lote, cancelamento e impressão **não foram executados ou comprovados**. A dispensa não equivale a aprovação nem elimina o risco de falhas em uso real.
+- Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
+- Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
 
-A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) é **pré-lançamento**, não versão homologada. A arquitetura atual não necessita de site/Worker próprios; qualquer desligamento de infraestrutura remanescente exige decisão separada. Não publicar release estável apenas com CI verde.
+A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento**. A dispensa de homologação física não publica uma release estável nem autoriza implantação, merge adicional ou desligamento de infraestrutura remanescente. Essas ações dependem de decisão separada.
 
 ## Documentação
 
