@@ -12,7 +12,7 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE / XML individual / ZIP de XMLs.
+Fluxo vigente na evolução proposta (PR #113): popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE, XML individual ou downloads de XMLs separados, e cópia da chave NF-e. **Até o merge da PR #113, a `main` ainda contém o botão de ZIP de XMLs**; o pacote `v0.3.0-pilot.4` preserva esse comportamento histórico.
 
 ## Mini-IA local (P0–P5, integrados em modo de observação)
 
@@ -67,7 +67,7 @@ Não instale o piloto sobre a versão antiga durante uma operação fiscal; pref
 - Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
 - Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
 
-A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento**. A dispensa de homologação física não publica uma release estável nem autoriza implantação, merge adicional ou desligamento de infraestrutura remanescente. Essas ações dependem de decisão separada.
+A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento**. A dispensa de homologação física não publica uma release estável nem autoriza merge adicional. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer outra implantação ou alteração de infraestrutura depende de decisão separada.
 
 ## Documentação
 
