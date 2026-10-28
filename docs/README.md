@@ -27,4 +27,4 @@ Documentos antigos de site, Worker, Windows Bridge, consultador SEFAZ, Vite, pro
 
 ## Escopo e publicação
 
-A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico continua não executado e não existe release estável da v0.3.0.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).
+A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico não foi executado e foi dispensado pelo responsável em 28/10/2026, sem declarar aprovação; não existe release estável da v0.3.0.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).
