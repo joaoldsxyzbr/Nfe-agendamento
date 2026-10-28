@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { createBatchController } from '../src/batch/controller';
+import { generateAccessKey } from '../src/shared/access-key.js';
 const A = '42260912345678000195550010000000011123456786';
 const B = '35260812345678000195550010000000011000000018';
 const C = '42260812345678000123550010000012341000012342';
@@ -8,11 +9,14 @@ const el = (value) => value;
 function harness(overrides = {}, importManualXml = async () => null) {
     const snapshots = [];
     const portalStarts = [];
+    const downloads = [];
+    const notices = [];
+    let currentTime = 10000;
     const input = el({ value: '', disabled: false, focus: () => { } });
     const route = el({ textContent: '' });
     const toolbar = el({ hidden: true });
     const list = el({ hidden: true });
-    const zipButton = el({ disabled: true, hidden: true });
+    const downloadAllButton = el({ disabled: true, hidden: true });
     const printButton = el({ disabled: true, hidden: true });
     const portal = {
         getInfo: async () => ({
@@ -36,7 +40,7 @@ function harness(overrides = {}, importManualXml = async () => null) {
             inputSummary: el({ textContent: '' }),
             startButton: el({ disabled: false }),
             cancelButton: el({ hidden: true }),
-            zipButton,
+            downloadAllButton,
             printButton,
             progress: el({ textContent: '' }),
             routeText: route,
@@ -53,16 +57,16 @@ function harness(overrides = {}, importManualXml = async () => null) {
             number: '1',
             series: '1',
         }),
-        createZip: () => new Blob(),
-        downloadBlob: () => { },
+        now: () => currentTime,
+        notify: (message) => notices.push(message),
         openDanfe: () => { },
-        downloadXml: () => { },
+        downloadXml: (parsed) => { downloads.push(parsed.accessKey); },
         openDanfeDocuments: () => { },
         printWindow: () => { },
         importManualXml,
         renderRows: (items) => snapshots.push(items.map((item) => ({ ...item }))),
     });
-    return { controller, input, route, toolbar, list, zipButton, printButton, portalStarts, snapshots };
+    return { controller, input, route, toolbar, list, downloadAllButton, printButton, portalStarts, snapshots, downloads, notices, advance: (ms) => { currentTime += ms; } };
 }
 describe('batch controller Portal-only', () => {
     it('reveals progress and results after starting, retaining one input for batches', async () => {
@@ -188,10 +192,10 @@ describe('batch controller Portal-only', () => {
         h.input.value = A;
         h.controller.syncDraft();
         await h.controller.start();
-        expect(h.zipButton.disabled).toBe(false);
+        expect(h.downloadAllButton.disabled).toBe(false);
         expect(h.printButton.disabled).toBe(false);
         await h.controller.start();
-        expect(h.zipButton.disabled).toBe(false);
+        expect(h.downloadAllButton.disabled).toBe(false);
         expect(h.printButton.disabled).toBe(false);
         expect(h.route.textContent).toContain('Extensão não conectada');
     });
@@ -263,7 +267,7 @@ describe('batch controller Portal-only', () => {
         expect(h.route.textContent).toContain('3 concluída(s) · 0 com erro');
         expect(h.snapshots.at(-1)?.map((item) => item.status)).toEqual(['success', 'success', 'success']);
         expect(h.portalStarts).toEqual([A, B, C, C, C]);
-        expect(h.zipButton.disabled).toBe(false);
+        expect(h.downloadAllButton.disabled).toBe(false);
         expect(h.printButton.disabled).toBe(false);
     });
     it('updates the outcome after recovering an error from a local validated XML', async () => {
@@ -287,6 +291,38 @@ describe('batch controller Portal-only', () => {
         await h.controller.importManual(0);
         expect(h.route.textContent).toBe('Consulta concluída');
         expect(h.snapshots.at(-1)?.[0]?.source).toBe('XML manual');
+    });
+    it('solicita um XML individual por nota concluída, sem ZIP ou reconsulta', async () => {
+        const h = harness();
+        const keys = Array.from({ length: 11 }, (_, i) => generateAccessKey({
+            uf: '42', year: 2026, month: 8, cnpj: '12345678000195', series: 1, number: i + 1,
+        }));
+        h.input.value = keys.join('\n');
+        h.controller.syncDraft();
+        await h.controller.start();
+        h.controller.downloadAllXml();
+        expect(h.downloads).toEqual(keys);
+        expect(h.portalStarts).toEqual(keys);
+        expect(h.notices).toContain('11 downloads de XML solicitados. Se o navegador bloquear, permita downloads múltiplos.');
+        h.controller.downloadAllXml();
+        expect(h.downloads).toHaveLength(11);
+        h.advance(1200);
+        h.controller.downloadAllXml();
+        expect(h.downloads).toHaveLength(22);
+    });
+    it('ignora resultados sem XML validado e não declara download confirmado', async () => {
+        const h = harness({
+            waitForResult: async (operationId) => operationId === 'op-2'
+                ? { state: 'failed', code: 'portal_unavailable', xml: null }
+                : { state: 'completed', xml: '<xml />' },
+        });
+        h.input.value = [A, B, C].join('\n');
+        h.controller.syncDraft();
+        await h.controller.start();
+        h.controller.downloadAllXml();
+        expect(h.downloads).toEqual([A, C]);
+        expect(h.notices).toContain('2 downloads de XML solicitados. Se o navegador bloquear, permita downloads múltiplos.');
+        expect(h.portalStarts).toEqual([A, B, C]);
     });
     it('resets the unified consultation state', () => {
         const h = harness();
