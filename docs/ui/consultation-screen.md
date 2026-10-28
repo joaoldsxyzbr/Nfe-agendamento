@@ -42,7 +42,7 @@ Existe um único campo de chaves.
 - o botão **Copiar chave da NF-e** também aparece para a chave válida em linhas com falha no Portal, permitindo reutilizar a chave sem reconsulta; a cópia oferece aviso discreto de sucesso ou falha, sem expor a chave no aviso;
 - o lote exibe as mesmas ações compactas por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
 - a nota individual não abre mais uma faixa extra de botões abaixo da linha; o cabeçalho da lista é omitido quando só há uma NF-e;
-- botões de recuperação de erro seguem o mesmo padrão de ícones;
+- em erro do Portal, **Copiar chave** continua somente com ícone; **Tentar novamente** e **Importar XML** preservam texto visível para distinguir as ações de recuperação;
 - o padrão de botões toma apenas **layout/ícones/tipografia** como inspiração do FSist: mantém as cores próprias do sistema (verde já existente na ação principal, azul nos focos e superfícies escuras nas ações secundárias).
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
@@ -68,7 +68,7 @@ O botão coletivo **Baixar todos os XMLs** solicita um arquivo `.xml` individual
 
 ## Depuração
 
-O parâmetro `?nfe-debug` na URL ativa registro detalhado no console do site. Mensagens não incluem chave fiscal completa, XML, CNPJ/CPF ou certificado.
+O parâmetro `?nfe-debug` na URL da interface local da extensão ativa registro detalhado no console da extensão. Mensagens não incluem chave fiscal completa, XML, CNPJ/CPF ou certificado.
 
 ## Recuperação por XML
 
@@ -91,10 +91,10 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 - tema escuro padrão, com tema claro e do sistema disponíveis;
 - controles e foco padronizados;
-- botões de cantos discretos e ícones locais em SVG; rótulos centrais nos comandos de consulta e rótulos curtos nas ações de cada NF-e;
+- botões de cantos discretos e ícones locais em SVG; comandos principais exibem texto, enquanto visualizar/imprimir/XML/copiar em cada NF-e concluída exibem apenas ícones com nomes acessíveis;
 - cabeçalho reduzido, campo de uma linha que cresce com lote, barra de progresso compacta, informações prioritárias acima da chave abreviada;
 - tooltip nativo com informação completa em detalhes truncados, botões acessíveis por nome completo;
-- botões mantêm altura mínima confortável e layout responsivo (ícone acima do rótulo apenas até 420 px), sem criar rolagem horizontal;
+- botões mantêm altura mínima confortável e layout responsivo; ações concluídas usam quatro ícones alinhados, inclusive em até 420 px, sem criar rolagem horizontal;
 - consulta como ação protagonista, destacada em verde;
 - geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;
