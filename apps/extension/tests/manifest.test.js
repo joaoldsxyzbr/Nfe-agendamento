@@ -8,7 +8,7 @@ describe('extension manifest', () => {
             return;
         const manifest = JSON.parse(readFileSync(manifestUrl, 'utf8'));
         expect(manifest.manifest_version).toBe(3);
-        expect(manifest.version).toBe('0.3.0');
+        expect(manifest.version).toBe('0.3.1');
         expect(Number(manifest.minimum_chrome_version)).toBeGreaterThanOrEqual(120);
         expect([...(manifest.permissions ?? [])].sort()).toEqual(['scripting', 'storage', 'webRequest']);
         expect([...(manifest.host_permissions ?? [])].sort()).toEqual([
