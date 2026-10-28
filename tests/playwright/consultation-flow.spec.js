@@ -140,9 +140,11 @@ test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ pag
     await page.locator('#settings-close').click();
     await page.setViewportSize({ width: 390, height: 780 });
     await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
+    await assertRecoveryActionWidths(failedRow);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.setViewportSize({ width: 1280, height: 800 });
     await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
+    await assertRecoveryActionWidths(failedRow);
     await expect(failedRow.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(3);
     await expect(failedRow.getByRole('button', { name: 'Copiar chave da NF-e' })).toBeVisible();
     const chooserPromise = page.waitForEvent('filechooser');
@@ -169,3 +171,22 @@ test('copiar chave falha com aviso, sem afirmar sucesso', async ({ page }) => {
     await failedRow.getByRole('button', { name: 'Copiar chave da NF-e' }).click();
     await expect(page.locator('.theme-toast')).toContainText('Não foi possível copiar a chave');
 });
+
+async function assertRecoveryActionWidths(failedRow) {
+    const actions = failedRow.locator('.batch-item-actions');
+    const copy = failedRow.getByRole('button', { name: 'Copiar chave da NF-e' });
+    const retry = failedRow.getByRole('button', { name: 'Tentar novamente' });
+    const importXml = failedRow.getByRole('button', { name: 'Importar XML' });
+    const containerBox = await actions.boundingBox();
+    const [copyBox, retryBox, importBox] = await Promise.all([
+        copy.boundingBox(), retry.boundingBox(), importXml.boundingBox(),
+    ]);
+    expect(containerBox).not.toBeNull();
+    for (const box of [copyBox, retryBox, importBox]) {
+        expect(box).not.toBeNull();
+        expect(box.x).toBeGreaterThanOrEqual(containerBox.x - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(containerBox.x + containerBox.width + 1);
+    }
+    expect(copyBox.width).toBeLessThan(retryBox.width);
+    expect(copyBox.width).toBeLessThan(importBox.width);
+}
