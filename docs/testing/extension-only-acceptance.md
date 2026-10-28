@@ -1,6 +1,8 @@
 # Aceite físico: NFe Agendamento somente extensão
 
-Branch: nfe-agendamento | Manifest: 0.3.0 | **Status: NÃO EXECUTADO**.
+Branch de referência: `main` (merge PR #107, `a0a586c`) | Manifest: `0.3.0` | **Aceite físico: NÃO EXECUTADO**.
+
+Registro específico para a versão integrada: [resultado v0.3.0](acceptance-results/v0.3.0-main.md). O ZIP [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) é um **pré-lançamento**, não uma versão estável.
 
 Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados reais da NF-e, chave completa, XML, CNPJ/CPF ou certificado em evidências.
 
@@ -36,6 +38,11 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 | Chrome | NÃO EXECUTADO | Pendente |
 | Edge | NÃO EXECUTADO | Pendente |
 
+## Integração à `main` e CI — 27/10/2026
+
+- [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107) foi integrada à `main` no commit `a0a586cb78ea55784a19ebfcbaa2a30c2029c90c`, antes da homologação física.
+- [CI da `main` #40573677508](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508) concluiu com quatro jobs aprovados (`web`, `extension`, `danfe-print`, `security-audit`). Testes sintéticos não comprovam operação no Portal real.
+
 ## Atualização da interface e CI — 27/10/2026
 
 - [CI #40567853304](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40567853304) — quatro jobs aprovados no commit `2200a7c17773060bb55b7b83ce8b2c53005b8643` após a remoção do botão Relatório CSV; testes de regressão preservam ZIP, XML e DANFE.
@@ -46,8 +53,9 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 
 O [GitHub Actions #40400199711](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711) validou **a instalação automatizada da extensão MV3 no Chromium headless com dados sintéticos**, além de 7 testes Playwright de interface/consulta simulada/DANFE, e publicou artefato de teste de 7 dias. Os gates de auditoria e testes da mini-IA também passaram naquele commit experimental. **Isso NÃO marca nenhuma caixa física Chrome/Edge nem comprova operação no Portal oficial**, com hCaptcha ou certificado real. Roteiro: [Homologação P5](mini-ai-p5-manual.md).
 
-**Decisão:** não publicar release de produção, não mesclar na main e não desligar site existente sem evidência real acima.
-## CI atualizado da branch — 27/10/2026
+**Decisão atualizada após merge #107:** não publicar release estável nem desativar infraestrutura remanescente por causa de CI verde; a `main` já contém o piloto, mas o aceite físico permanece pendente.
+
+## CI histórico da branch de piloto — 27/10/2026
 
 - [GitHub Actions #40506594582](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40506594582) passou no SHA `490a63b5f951b0d317e60babb1967ff78b19f328`: jobs `web` (validação real da UI local), `extension`, `danfe-print` e `security-audit` aprovados.
 - O job `extension` passa a incorporar a verificação reproduzível do modelo neural, a avaliação adversarial sintética e os testes do revisor offline de relatórios. O resultado final desse novo gate precisa ser conferido no CI do commit que o introduziu.
