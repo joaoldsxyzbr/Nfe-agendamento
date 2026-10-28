@@ -47,6 +47,12 @@ Existe um único campo de chaves.
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
 
+## Paleta visual — petróleo suave (28/10/2026)
+
+A extensão utiliza superfícies foscas e baixo brilho, sem preto absoluto nem branco puro na interface. O tema escuro padrão parte do fundo `#151C1D`, cards `#1C2627`/`#222D2E`, verde-petróleo de referência `#398C87`, detalhes areia `#C4AE91`, texto principal `#DFE5E1` e texto secundário `#97A7A4`. Os botões com texto adotam verde-petróleo mais fechado (`#286D68`) para preservar legibilidade e contraste. Foco, ações por ícone, estados de consulta e painel de configurações compartilham os tokens do tema.
+
+O tema claro permanece disponível, mas é suavizado: fundo `#E4E9E4` e superfícies esverdeadas, sem branco intenso. A página independente de opções da extensão segue o tema escuro suave. O papel do DANFE e sua impressão permanecem deliberadamente brancos, com texto preto, por se tratarem de documento fiscal. Esta mudança é estritamente visual: não altera consulta, XML, lote, certificado, hCaptcha ou Mini-IA.
+
 ## Tema
 
 O tema padrão é escuro. `Ctrl+Shift+T` percorre escuro → claro → sistema; a escolha persiste em `localStorage` e o tema do sistema segue `prefers-color-scheme`. Um aviso rápido confirma a troca. A definição inicial ocorre antes da renderização, sem flash de tema incorreto.

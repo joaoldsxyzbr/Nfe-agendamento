@@ -6,11 +6,11 @@
   resize: vertical;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #465669 #0e141b;
+  scrollbar-color: var(--control-border) var(--control-bg);
   padding: 9px 12px;
-  border: 1px solid #344252;
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-control);
-  background: #0e141b;
+  background: var(--control-bg);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 13px;
@@ -27,7 +27,7 @@
 }
 
 #batch-form textarea::placeholder {
-  color: #667686;
+  color: var(--muted-2);
   font-family: var(--font-sans);
   font-size: 12.5px;
 }
@@ -105,14 +105,14 @@
 .batch-actions .batch-reset {
   min-height: 42px;
   margin: 0;
-  border-color: #3a495a;
-  background: #1a232d;
-  color: #dce5ee;
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .batch-actions .batch-reset:hover:not(:disabled) {
-  border-color: #516275;
-  background: #222d39;
+  border-color: var(--accent-hover);
+  background: var(--surface-3);
 }
 
 .batch-actions .action-icon {
@@ -132,7 +132,7 @@
   align-items: center;
   min-height: 19px;
   margin: 0;
-  color: #c4d0dd;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 600;
 }
@@ -144,14 +144,14 @@
 }
 
 #batch-start:not(:disabled) {
-  border-color: #259e53;
-  background: #259e53;
-  color: #fff;
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  color: var(--on-accent);
 }
 
 #batch-start:hover:not(:disabled) {
-  border-color: #2cbb61;
-  background: #2cbb61;
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
 }
 
 .batch-run-toolbar {
@@ -160,7 +160,7 @@
   padding: 9px 11px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-control);
-  background: #10171f;
+  background: var(--surface);
 }
 
 .batch-progress-copy {
@@ -218,7 +218,7 @@
   min-height: 34px;
   padding: 6px 5px;
   border-radius: 5px;
-  background: #18212b;
+  background: var(--surface-2);
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
@@ -232,7 +232,7 @@
 }
 
 .batch-item-actions .batch-action:focus-visible {
-  outline: 2px solid #80c3ff;
+  outline: 2px solid var(--blue);
   outline-offset: 2px;
 }
 
@@ -253,10 +253,10 @@
   gap: 6px;
   min-height: 32px;
   padding: 0 10px;
-  border: 1px solid #3a495a;
+  border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: transparent;
-  color: #d2dce6;
+  color: var(--on-secondary);
   box-shadow: none;
   font-size: 12px;
   font-weight: 650;
@@ -265,7 +265,7 @@
 .secondary-button:hover:not(:disabled),
 .batch-action:hover:not(:disabled) {
   background: var(--surface-2);
-  border-color: #516275;
+  border-color: var(--accent-hover);
 }
 
 .batch-action[hidden] {
@@ -277,14 +277,14 @@
 }
 
 .batch-download {
-  border-color: #566476;
-  background: #1a232d;
-  color: #dce5ee;
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .batch-download:hover:not(:disabled) {
-  border-color: #697b8f;
-  background: #222d39;
+  border-color: var(--accent-hover);
+  background: var(--surface-3);
 }
 
 .batch-list {
@@ -303,7 +303,7 @@
   align-items: center;
   gap: 9px;
   padding: 7px 10px;
-  background: #0e141b;
+  background: var(--control-bg);
   color: var(--muted-2);
   font-size: 9.5px;
   font-weight: 750;
@@ -326,7 +326,7 @@
   padding: 7px 10px;
   border: 0;
   border-radius: 0;
-  background: #10171f;
+  background: var(--surface);
 }
 
 .batch-item[data-state='success'] {
@@ -349,7 +349,7 @@
   height: 24px;
   border-radius: 6px;
   background: var(--surface-3);
-  color: #cbd6e1;
+  color: var(--text);
   font-size: 11.5px;
   font-weight: 750;
 }
@@ -371,7 +371,7 @@
 
 .batch-details {
   overflow: hidden;
-  color: #e2e9f0;
+  color: var(--text);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.35;
@@ -393,34 +393,34 @@
   align-items: center;
   min-height: 20px;
   padding: 0 6px;
-  border: 1px solid #3a4857;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  color: #bdc9d5;
+  color: var(--muted);
   font-size: 9.5px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .batch-item[data-state='success'] .batch-status-badge {
-  border-color: rgba(79, 195, 148, 0.4);
+  border-color: color-mix(in srgb, var(--green) 42%, transparent);
   color: var(--green);
 }
 
 .batch-item[data-state='portal_waiting_user'] .batch-status-badge {
-  border-color: rgba(217, 174, 66, 0.45);
+  border-color: color-mix(in srgb, var(--yellow) 45%, transparent);
   color: var(--yellow-soft);
 }
 
 .batch-item[data-state='transport_error'] .batch-status-badge,
 .batch-item[data-state='portal_error'] .batch-status-badge {
-  border-color: rgba(239, 113, 128, 0.45);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
   color: var(--danger);
 }
 
 .batch-source {
   border-color: transparent;
-  background: #182535;
-  color: #9ebce2;
+  background: var(--source-bg);
+  color: var(--source-text);
 }
 
 @media (max-width: 900px) {

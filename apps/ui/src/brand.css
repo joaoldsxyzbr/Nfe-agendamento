@@ -32,11 +32,11 @@
 }
 
 .brand-title span:first-child {
-  color: #fff;
+  color: var(--text);
 }
 
 .brand-title span:last-child {
-  color: #cbd6e1;
+  color: var(--muted);
 }
 
 .brand-heading > .subtitle {
