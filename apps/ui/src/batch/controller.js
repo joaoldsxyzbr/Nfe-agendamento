@@ -17,6 +17,7 @@ export function createBatchController(deps) {
     let abortController = null;
     let activePortalOperationId = null;
     let renderedRows = [];
+    let lastBulkDownloadAt = -Infinity;
     function recordBatchDiagnostic(data) {
         if (typeof deps.portal?.recordDiagnostic !== 'function') return;
         // Registro de diagnóstico é isolado: nunca bloqueia o lote e nunca recebe a chave.
@@ -357,7 +358,6 @@ export function createBatchController(deps) {
         const preview = documentRef.createElement('button');
         preview.type = 'button';
         preview.className = 'batch-action';
-        preview.textContent = 'Visualizar';
         preview.setAttribute('aria-label', 'Visualizar DANFE');
         preview.title = 'Visualizar DANFE';
         preview.insertAdjacentHTML('afterbegin', actionIconMarkup('view'));
@@ -369,7 +369,8 @@ export function createBatchController(deps) {
         const print = documentRef.createElement('button');
         print.type = 'button';
         print.className = 'batch-action';
-        print.textContent = 'Imprimir';
+        print.setAttribute('aria-label', 'Imprimir DANFE');
+        print.title = 'Imprimir DANFE';
         print.insertAdjacentHTML('afterbegin', actionIconMarkup('print'));
         print.addEventListener('click', () => {
             const current = items[index];
@@ -381,7 +382,6 @@ export function createBatchController(deps) {
         const download = documentRef.createElement('button');
         download.type = 'button';
         download.className = 'batch-action batch-download';
-        download.textContent = 'XML';
         download.setAttribute('aria-label', 'Baixar XML');
         download.title = 'Baixar XML';
         download.insertAdjacentHTML('afterbegin', actionIconMarkup('download'));
@@ -389,6 +389,26 @@ export function createBatchController(deps) {
             const current = items[index];
             if (current?.parsed)
                 deps.downloadXml(current.parsed);
+        });
+        const copy = documentRef.createElement('button');
+        copy.type = 'button';
+        copy.className = 'batch-action batch-copy';
+        copy.setAttribute('aria-label', 'Copiar chave da NF-e');
+        copy.title = 'Copiar chave da NF-e';
+        copy.insertAdjacentHTML('afterbegin', actionIconMarkup('copy'));
+        copy.addEventListener('click', () => {
+            const current = items[index];
+            if (!current?.accessKey)
+                return;
+            try {
+                const write = deps.copyAccessKey(current.accessKey);
+                void Promise.resolve(write)
+                    .then(() => deps.notify('Chave copiada'))
+                    .catch(() => deps.notify('Não foi possível copiar a chave.'));
+            }
+            catch {
+                deps.notify('Não foi possível copiar a chave.');
+            }
         });
         const retry = documentRef.createElement('button');
         retry.type = 'button';
@@ -402,7 +422,7 @@ export function createBatchController(deps) {
         importManualButton.textContent = 'Importar XML';
         importManualButton.insertAdjacentHTML('afterbegin', actionIconMarkup('import'));
         importManualButton.addEventListener('click', () => void importManual(index));
-        actions.append(preview, print, download, retry, importManualButton);
+        actions.append(preview, print, download, copy, retry, importManualButton);
         root.append(order, information, status, actions);
         const rendered = {
             accessKey: item.accessKey,
@@ -413,6 +433,7 @@ export function createBatchController(deps) {
             preview,
             print,
             download,
+            copy,
             retry,
             importManual: importManualButton,
         };
@@ -445,6 +466,7 @@ export function createBatchController(deps) {
         row.print.hidden = item.parsed === null;
         row.download.disabled = item.parsed === null;
         row.download.hidden = item.parsed === null;
+        row.copy.disabled = !item.accessKey;
         row.retry.hidden = item.status !== 'portal_error';
         row.retry.disabled = preflighting || running || manualActionBusy;
         row.importManual.hidden = item.status !== 'portal_error';
@@ -474,9 +496,9 @@ export function createBatchController(deps) {
     }
     function refreshResultActions(changedItem, refreshAllRows = false) {
         const completed = completedItems();
-        elements.zipButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
+        elements.downloadAllButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
         elements.printButton.disabled = completed.length === 0 || preflighting || running || manualActionBusy;
-        elements.zipButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
+        elements.downloadAllButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
         elements.printButton.hidden = items.length < 2 || completed.length === 0 || preflighting || running;
         if (refreshAllRows) {
             renderRows();
@@ -488,15 +510,33 @@ export function createBatchController(deps) {
             refreshRenderedActionState();
         }
     }
-    function downloadZip() {
+    function downloadAllXml() {
+        if (preflighting || running || manualActionBusy)
+            return;
         const completed = completedItems();
         if (completed.length === 0)
             return;
-        const blob = deps.createZip(completed.map((item) => ({
-            name: `${item.parsed.accessKey}.xml`,
-            content: item.parsed.originalXml,
-        })));
-        deps.downloadBlob(blob, `nfe-lote-${new Date().toISOString().slice(0, 10)}.zip`);
+        const now = deps.now?.() ?? Date.now();
+        if (now - lastBulkDownloadAt < 1000)
+            return;
+        lastBulkDownloadAt = now;
+        let requested = 0;
+        let failed = 0;
+        // Um clique do usuário inicia cada download nativo sem consultar novamente o Portal.
+        // Chrome/Edge podem solicitar permissão para downloads automáticos múltiplos.
+        for (const item of completed) {
+            try {
+                deps.downloadXml(item.parsed);
+                requested += 1;
+            }
+            catch {
+                failed += 1;
+            }
+        }
+        if (requested > 0)
+            deps.notify?.(`${requested} downloads de XML solicitados. Se o navegador bloquear, permita downloads múltiplos.`);
+        if (failed > 0)
+            deps.notify?.(`${failed} solicitação(ões) de XML não puderam ser iniciadas.`);
     }
     function printDanfes() {
         const parsed = completedItems()
@@ -537,6 +577,7 @@ export function createBatchController(deps) {
         elements.keysInput.value = '';
         hasRun = false;
         items = [];
+        lastBulkDownloadAt = -Infinity;
         elements.startButton.hidden = false;
         elements.resetButton.hidden = false;
         syncDraft();
@@ -555,7 +596,7 @@ export function createBatchController(deps) {
         syncDraft,
         start,
         cancel,
-        downloadZip,
+        downloadAllXml,
         printDanfes,
         importManual,
         retryPortal,
