@@ -5,19 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NFe Agendamento - Configuração local</title>
   <style>
-    :root { font-family: Arial, Helvetica, sans-serif; color-scheme: light dark; }
-    body { margin: 0; padding: 32px; max-width: 760px; }
-    main { display: grid; gap: 20px; }
-    h1 { margin: 0; font-size: 24px; }
+    :root {
+      color-scheme: dark;
+      font-family: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+      --bg: #151c1d;
+      --surface: #222d2e;
+      --surface-2: #2b393a;
+      --line: #425354;
+      --text: #dfe5e1;
+      --muted: #b0bdb8;
+      --accent: #286d68;
+      --accent-hover: #32776f;
+      --focus: #70bfb7;
+    }
+    * { box-sizing: border-box; }
+    body { max-width: 840px; margin: 0 auto; padding: clamp(16px, 4vw, 32px); background: var(--bg); color: var(--text); }
+    main { display: grid; gap: 18px; }
+    h1 { margin: 0; font-size: clamp(22px, 3vw, 26px); letter-spacing: -.02em; }
+    h2 { margin: 0 0 10px; font-size: 17px; }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 44px; height: 44px; object-fit: contain; }
-    p { line-height: 1.5; }
-    .card { border: 1px solid currentColor; border-radius: 12px; padding: 20px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .brand img { width: 40px; height: 40px; object-fit: contain; }
+    p { margin: 10px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+    .card { padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
     button, input { font: inherit; }
-    button { padding: 8px 14px; cursor: pointer; }
-    #supplier-config-status { min-height: 1.5em; }
-    code { word-break: break-word; }
+    button { min-height: 40px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 650; transition: background .15s ease, border-color .15s ease; }
+    button:hover:not(:disabled) { background: #344645; border-color: #617a75; }
+    #diagnostics-analyze { border-color: var(--accent); background: var(--accent); color: #edf4f0; }
+    #diagnostics-analyze:hover:not(:disabled) { border-color: var(--accent-hover); background: var(--accent-hover); }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    input[type="file"] { max-width: 100%; color: var(--muted); font-size: 12.5px; }
+    input[type="file"]::file-selector-button { margin-right: 10px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--text); cursor: pointer; }
+    input[type="file"]::file-selector-button:hover { background: #344645; }
+    code { padding: 1px 4px; border-radius: 4px; background: var(--surface-2); color: var(--text); overflow-wrap: anywhere; }
+    #supplier-config-status, #diagnostics-status { min-height: 1.5em; }
+    @media (max-width: 520px) {
+      .card { padding: 15px; }
+      .actions { align-items: stretch; flex-direction: column; }
+      .actions button, .actions input { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+    }
   </style>
 </head>
 <body>
