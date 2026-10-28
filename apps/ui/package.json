@@ -12,8 +12,8 @@
     "format:check": "node ../../scripts/format-ui.mjs --check"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/coverage-v8": "^5.0.5",
     "@xmldom/xmldom": "0.9.12",
-    "vitest": "5.0.3"
+    "vitest": "^5.0.5"
   }
 }

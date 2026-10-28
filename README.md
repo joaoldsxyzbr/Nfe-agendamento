@@ -1,6 +1,6 @@
 # NFe Agendamento 2.0 — extensão independente
 
-**Branch principal:** `main` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
+**Branch principal:** `main` · **Manifest V3 (próxima versão):** `0.3.1` · **Última release publicada:** `v0.3.0` · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
 
 O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
@@ -12,7 +12,7 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo da extensão: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE e download de XML individual. **O comportamento do lote depende da versão**: o pacote histórico `v0.3.0-pilot.4` oferece ZIP de XMLs; a [PR #113](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/113) implementa downloads de XMLs separados e cópia da chave da NF-e. A presença dessas novas ações depende de a versão instalada incluir a PR #113.
+Fluxo da extensão: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE e download de XML individual. A versão estável `v0.3.0` já inclui os downloads de XMLs individuais e cópia da chave da NF-e, integrados pela [PR #113](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/113). O piloto histórico `v0.3.0-pilot.4` ainda oferecia ZIP de XMLs.
 
 ## Mini-IA local (P0–P5, integrados em modo de observação)
 
@@ -28,7 +28,7 @@ Na P4, adicionamos um **corpus adversarial independente do treinamento** para bl
 
 Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromium automatizado**, conferir service worker, permissões, tela de opções e privacidade do JSON exportado. O mesmo job executa os testes Playwright de consulta simulada/DANFE e publica um artefato experimental por 7 dias (não é release): [GitHub Actions P5](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711). O roteiro físico para Chrome e Edge fica em [Homologação P5](docs/testing/mini-ai-p5-manual.md). **O CI não executa consultas reais, hCaptcha, certificado nem testes físicos Windows.**
 
-Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas ou para publicação estável. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
+Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas. A publicação estável de `v0.3.0` não altera o limite de observação da Mini-IA. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
 
 ## Compilar e verificar
@@ -51,6 +51,8 @@ O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge:/
 
 ## Releases
 
+A [release estável `v0.3.0`](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0) foi publicada em 28/10/2026, após aprovação do CI. Ela não constitui homologação física. A **`v0.3.1` está em preparação**, reunindo tema petróleo suave, atualização de dependências de testes e documentação; consulte `docs/releases/v0.3.1.md` antes de afirmar que foi publicada.
+
 O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) reúne as últimas correções e **remove o botão “Relatório CSV”** e seu acionamento, mantendo consulta unitária/em lote, DANFE, XML individual e ZIP de XMLs. O workflow bloqueia a publicação caso o botão ainda apareça no pacote. É um pré-lançamento de avaliação, **não uma release estável nem um aceite físico**.
 
 O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
@@ -67,7 +69,7 @@ Não instale o piloto sobre a versão antiga durante uma operação fiscal; pref
 - Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
 - Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
 
-A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento**. A dispensa de homologação física não publica uma release estável nem autoriza merge adicional. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer outra implantação ou alteração de infraestrutura depende de decisão separada.
+A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento histórico**; a `v0.3.0` estável foi publicada em 28/10/2026. A dispensa de homologação física não constitui aceite nem autoriza merges adicionais. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer outra implantação ou alteração de infraestrutura depende de decisão separada.
 
 ## Documentação
 
