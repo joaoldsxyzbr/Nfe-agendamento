@@ -1,8 +1,10 @@
 # Aceite físico: NFe Agendamento somente extensão
 
-Branch: nfe-agendamento | Manifest: 0.3.0 | **Status: NÃO EXECUTADO**.
+Branch de referência: `main` (merge PR #107, `a0a586c`) | Manifest: `0.3.0` | **Aceite físico: NÃO EXECUTADO — DISPENSADO POR DECISÃO DO RESPONSÁVEL EM 28/10/2026**.
 
-Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados reais da NF-e, chave completa, XML, CNPJ/CPF ou certificado em evidências.
+Registro específico para a versão integrada: [resultado v0.3.0](acceptance-results/v0.3.0-main.md). O ZIP [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) é um **pré-lançamento**, não uma versão estável.
+
+Este é um **roteiro opcional de diagnóstico futuro**, pois a execução integral foi dispensada em 28/10/2026. Se for necessário testar após relato de falha, usar perfis separados de Chrome e Edge no Windows. Nunca registrar dados reais da NF-e, chave completa, XML, CNPJ/CPF ou certificado em evidências.
 
 ## Compilação e instalação
 
@@ -23,7 +25,7 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 - [ ] Certificado digital permanece sob gestão do Chrome/Edge quando solicitado.
 - [ ] XML oficial é recebido na aba da extensão e corresponde à chave.
 - [ ] DANFE e impressão/PDF funcionam com notas curtas e longas.
-- [ ] Download individual de XML e ZIP de XMLs funcionam.
+- [ ] Nas versões que incluem a PR #113, o lote solicita cada XML em arquivo separado, e **Copiar chave** copia os 44 dígitos; verificar confirmação e permissão para downloads múltiplos no Chrome e Edge. O piloto histórico `v0.3.0-pilot.4` usava ZIP.
 - [ ] Segunda consulta funciona no mesmo navegador.
 - [ ] Duas chaves em lote seguem em ordem, sem duas consultas simultâneas.
 - [ ] Cancelar/fechar janela impede avançar no lote.
@@ -33,8 +35,13 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 
 | Navegador | Status | Observações |
 | --- | --- | --- |
-| Chrome | NÃO EXECUTADO | Pendente |
-| Edge | NÃO EXECUTADO | Pendente |
+| Chrome | NÃO EXECUTADO | Dispensado; não aprovado |
+| Edge | NÃO EXECUTADO | Dispensado; não aprovado |
+
+## Integração à `main` e CI — 27/10/2026
+
+- [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107) foi integrada à `main` no commit `a0a586cb78ea55784a19ebfcbaa2a30c2029c90c`, antes da homologação física.
+- [CI da `main` #40573677508](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508) concluiu com quatro jobs aprovados (`web`, `extension`, `danfe-print`, `security-audit`). Testes sintéticos não comprovam operação no Portal real.
 
 ## Atualização da interface e CI — 27/10/2026
 
@@ -46,8 +53,9 @@ Realizar no Windows com perfis separados do Chrome e Edge. Nunca registrar dados
 
 O [GitHub Actions #40400199711](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711) validou **a instalação automatizada da extensão MV3 no Chromium headless com dados sintéticos**, além de 7 testes Playwright de interface/consulta simulada/DANFE, e publicou artefato de teste de 7 dias. Os gates de auditoria e testes da mini-IA também passaram naquele commit experimental. **Isso NÃO marca nenhuma caixa física Chrome/Edge nem comprova operação no Portal oficial**, com hCaptcha ou certificado real. Roteiro: [Homologação P5](mini-ai-p5-manual.md).
 
-**Decisão:** não publicar release de produção, não mesclar na main e não desligar site existente sem evidência real acima.
-## CI atualizado da branch — 27/10/2026
+**Decisão atualizada após merge #107:** não publicar release estável nem desativar infraestrutura remanescente por causa de CI verde; a `main` já contém o piloto, mas o aceite físico permanece pendente.
+
+## CI histórico da branch de piloto — 27/10/2026
 
 - [GitHub Actions #40506594582](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40506594582) passou no SHA `490a63b5f951b0d317e60babb1967ff78b19f328`: jobs `web` (validação real da UI local), `extension`, `danfe-print` e `security-audit` aprovados.
 - O job `extension` passa a incorporar a verificação reproduzível do modelo neural, a avaliação adversarial sintética e os testes do revisor offline de relatórios. O resultado final desse novo gate precisa ser conferido no CI do commit que o introduziu.
@@ -66,4 +74,4 @@ Execução de referência: [GitHub Actions #1246](https://github.com/joaoldsxyzb
 
 A checagem automática **Workers Builds** apareceu porque a integração Cloudflare existente ainda acompanha o repositório. Ela **não é dependência de execução do novo aplicativo**; esta alteração não autoriza desativar a produção atual. Não afirmar que sua existência comprova que o piloto foi publicado.
 
-Próxima pendência vigente: concluir o gate físico nos dois navegadores e registrar resultados reais; os resultados anteriores de auditoria estão preservados acima somente como histórico.
+**Decisão vigente em 28/10/2026:** o responsável dispensou o gate físico. Manter os resultados como **NÃO EXECUTADO** (não marcar como aprovados); priorizar os checks automáticos e registrar falhas de uso real caso sejam relatadas. Os resultados anteriores de auditoria estão preservados acima somente como histórico.

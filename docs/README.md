@@ -1,6 +1,6 @@
 # Documentação — NFe Agendamento 2.0
 
-## Arquitetura vigente nesta branch experimental
+## Arquitetura vigente na `main`
 
 O produto é uma **extensão Chromium Manifest V3**, com interface interna, sem site próprio e sem backend Cloudflare. O Portal Nacional da NF-e continua sendo externo e requer conexão com a internet.
 
@@ -8,7 +8,7 @@ Leia nesta ordem:
 
 1. [README do projeto](../README.md)
 2. [Arquitetura extensão autônoma](architecture/extension-only.md)
-3. [Checklist de aceitação física](testing/extension-only-acceptance.md)
+3. [Checklist de aceitação física](testing/extension-only-acceptance.md) e [resultado v0.3.0](testing/acceptance-results/v0.3.0-main.md)
 4. [Regras de fornecedores](architecture/supplier-rules.md)
 5. [Campos fiscais RTC/IBS/CBS](architecture/rtc-ibs-cbs.md)
 6. [Interface da consulta](ui/consultation-screen.md)
@@ -27,4 +27,4 @@ Documentos antigos de site, Worker, Windows Bridge, consultador SEFAZ, Vite, pro
 
 ## Escopo e publicação
 
-Esta documentação descreve apenas `nfe-agendamento`. A `main` mantém sua configuração atual até a homologação e decisão de merge, sem alterações automáticas de Cloudflare.
+A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico não foi executado e foi dispensado pelo responsável em 28/10/2026, sem declarar aprovação; não existe release estável da v0.3.0.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).

@@ -1,6 +1,6 @@
-# NFe Agendamento 2.0 — extensão independente (piloto)
+# NFe Agendamento 2.0 — extensão independente
 
-**Branch de desenvolvimento:** `nfe-agendamento` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop**
+**Branch principal:** `main` · **Manifest V3:** `0.3.0` · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
 
 O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
@@ -12,11 +12,11 @@ O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproxima
 - `tests/playwright/` — cenários automatizados de consulta simulada e impressão.
 - `docs/` — arquitetura atual, aceitação, decisões e histórico.
 
-Fluxo: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE / XML individual / ZIP de XMLs.
+Fluxo da extensão: popup local `app.html` → mensagens `chrome.runtime` → service worker MV3 → Portal Nacional → XML conferido → visualização/impressão de DANFE e download de XML individual. **O comportamento do lote depende da versão**: o pacote histórico `v0.3.0-pilot.4` oferece ZIP de XMLs; a [PR #113](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/113) implementa downloads de XMLs separados e cópia da chave da NF-e. A presença dessas novas ações depende de a versão instalada incluir a PR #113.
 
-## Mini-IA local (P0–P5 experimentais, integrados ao piloto)
+## Mini-IA local (P0–P5, integrados em modo de observação)
 
-A Mini-IA P0–P5 foi integrada à branch experimental `nfe-agendamento` pela PR #108 em 26/10/2026. Ela ainda não faz parte da `main`. O motor de inteligência da extensão está implementado em modo de observação. Há um pequeno classificador neural feed-forward em JavaScript nativo que **observa** possíveis controles de download sem executar cliques. Na P1, os pesos passaram a ser **treinados de forma reproduzível com exemplos sintéticos**, com checagem automática de regressão. Isso **não equivale a validação em páginas reais**.
+A Mini-IA P0–P5 entrou na branch `nfe-agendamento` pela PR #108 (26/10/2026) e chegou à `main` com o merge da PR #107 (27/10/2026). A integração de código não representa homologação física. O motor de inteligência da extensão está implementado em modo de observação. Há um pequeno classificador neural feed-forward em JavaScript nativo que **observa** possíveis controles de download sem executar cliques. Na P1, os pesos passaram a ser **treinados de forma reproduzível com exemplos sintéticos**, com checagem automática de regressão. Isso **não equivale a validação em páginas reais**.
 
 Quando a interface convencional não reconhece um controle, o classificador pode registrar uma hipótese local com código, estado, versão e pontuação. Falhas de operação também geram registros categorizados. O usuário encontra **Exportar relatório JSON** e **Apagar diagnósticos** na página de opções. No máximo 100 registros locais dos últimos 14 dias são recuperados, sem telemetria, chave NF-e, XML, URL ou texto da página. O usuário decide se compartilha o arquivo para revisão técnica.
 
@@ -28,7 +28,7 @@ Na P4, adicionamos um **corpus adversarial independente do treinamento** para bl
 
 Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromium automatizado**, conferir service worker, permissões, tela de opções e privacidade do JSON exportado. O mesmo job executa os testes Playwright de consulta simulada/DANFE e publica um artefato experimental por 7 dias (não é release): [GitHub Actions P5](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711). O roteiro físico para Chrome e Edge fica em [Homologação P5](docs/testing/mini-ai-p5-manual.md). **O CI não executa consultas reais, hCaptcha, certificado nem testes físicos Windows.**
 
-Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. Esta fase não altera a `main`, a produção ou a extensão já homologada. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
+Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas ou para publicação estável. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
 
 ## Compilar e verificar
@@ -55,17 +55,19 @@ O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agen
 
 O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
 
-O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI, e a publicação estável só deve ocorrer após homologação.
+O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI; a decisão de distribuição estável é separada da homologação física dispensada.
 
 Não instale o piloto sobre a versão antiga durante uma operação fiscal; prefira um perfil separado no navegador. O armazenamento das regras de fornecedores é local (`chrome.storage.local`), sem exposição de dados fiscais ao GitHub.
 
-## Critérios para integração à main
+## Validação e decisão de distribuição
 
-- Testes de UI e extensão, cobertura, impressão e auditoria de dependências aprovados no CI.
-- Testes físicos de Chrome e Edge com Portal oficial, XML, DANFE, lote, cancelamento, reabertura de janela e impressão.
-- Evidências registradas no [checklist](docs/testing/extension-only-acceptance.md) e na [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107).
+- **Integração à `main`: realizada** na [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107), commit `a0a586c` (27/10/2026).
+- **CI da `main`: aprovado** no [workflow 40573677508](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508), jobs `web`, `extension`, `danfe-print` e `security-audit`.
+- **Homologação física: dispensada por decisão do responsável em 28/10/2026**. Os cenários reais de Chrome/Edge, Portal, hCaptcha manual, certificado, XML, DANFE, lote, cancelamento e impressão **não foram executados ou comprovados**. A dispensa não equivale a aprovação nem elimina o risco de falhas em uso real.
+- Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
+- Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
 
-**A branch `main` e a infraestrutura anterior não foram alteradas.** Não desligar serviços nem mesclar o piloto antes da aceitação física.
+A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento**. A dispensa de homologação física não publica uma release estável nem autoriza merge adicional. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer outra implantação ou alteração de infraestrutura depende de decisão separada.
 
 ## Documentação
 
