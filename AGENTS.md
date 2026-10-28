@@ -28,7 +28,7 @@
 - O código próprio deve utilizar JavaScript, Python ou C# quando necessário; HTML, CSS e SQL também são permitidos.
 - A aplicação atual utiliza JavaScript ES Modules, HTML e CSS puros, sem Vite, React ou bundler de site. Evite reintroduzir TypeScript ou outra linguagem de código.
 - Scripts Node.js são permitidos para copiar arquivos e empacotar a extensão; não introduzir frameworks do frontend sem autorização.
-- Na `main` e na branch de piloto `nfe-agendamento`, preserve a arquitetura **UI local em `apps/ui` + extensão Chromium MV3 em `apps/extension` + Portal Nacional**, sem site hospedado, Worker, D1 ou Bridge de Windows. A PR #107 integrou o piloto à `main` em 27/10/2026; os testes físicos Chrome/Edge permanecem não executados (dispensados em 28/10/2026); a `v0.3.0` estável foi publicada em 28/10/2026, e a `v0.3.1` depende de nova validação/publicação.
+- Na `main` e na branch de piloto `nfe-agendamento`, preserve a arquitetura **UI local em `apps/ui` + extensão Chromium MV3 em `apps/extension` + Portal Nacional**, sem site hospedado, Worker, D1 ou Bridge de Windows. A PR #107 integrou o piloto à `main` em 27/10/2026; os testes físicos Chrome/Edge permanecem não executados (dispensados em 28/10/2026); a `v0.3.0` estável foi publicada em 28/10/2026, e a `v0.3.1` foi publicada após CI aprovado em 28/10/2026, sem homologação física.
 
 ## Validação
 
