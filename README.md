@@ -1,6 +1,6 @@
 # NFe Agendamento 2.0 — extensão independente
 
-**Branch principal:** `main` · **Manifest V3 (próxima versão):** `0.3.1` · **Última release publicada:** `v0.3.0` · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
+**Branch principal:** `main` · **Manifest V3:** `0.3.1` · **Última release publicada:** [`v0.3.1`](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.1) · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
 
 O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
@@ -51,7 +51,7 @@ O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge:/
 
 ## Releases
 
-A [release estável `v0.3.0`](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0) foi publicada em 28/10/2026, após aprovação do CI. Ela não constitui homologação física. A **`v0.3.1` está em preparação**, reunindo tema petróleo suave, atualização de dependências de testes e documentação; consulte `docs/releases/v0.3.1.md` antes de afirmar que foi publicada.
+A [release estável **`v0.3.1`**](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.1) foi publicada em 28/10/2026 no commit `308a53b`, após [CI aprovado](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723503436) e [workflow de release bem-sucedido](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723614299). Inclui o tema petróleo suave, Vitest/cobertura 5.0.5 e Playwright 1.64.1; veja [notas v0.3.1](docs/releases/v0.3.1.md). A publicação não constitui homologação física. A [v0.3.0](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0) permanece disponível como versão anterior.
 
 O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) reúne as últimas correções e **remove o botão “Relatório CSV”** e seu acionamento, mantendo consulta unitária/em lote, DANFE, XML individual e ZIP de XMLs. O workflow bloqueia a publicação caso o botão ainda apareça no pacote. É um pré-lançamento de avaliação, **não uma release estável nem um aceite físico**.
 
@@ -64,7 +64,7 @@ Não instale o piloto sobre a versão antiga durante uma operação fiscal; pref
 ## Validação e decisão de distribuição
 
 - **Integração à `main`: realizada** na [PR #107](https://github.com/joaoldsxyzbr/Nfe-agendamento/pull/107), commit `a0a586c` (27/10/2026).
-- **CI da `main`: aprovado** no [workflow 40573677508](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40573677508), jobs `web`, `extension`, `danfe-print` e `security-audit`.
+- **CI da `main` (`v0.3.1`): aprovado** no [workflow 40723503436](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723503436), jobs `web`, `extension`, `danfe-print` e `security-audit`. O [workflow de release 40723614299](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723614299) também foi aprovado.
 - **Homologação física: dispensada por decisão do responsável em 28/10/2026**. Os cenários reais de Chrome/Edge, Portal, hCaptcha manual, certificado, XML, DANFE, lote, cancelamento e impressão **não foram executados ou comprovados**. A dispensa não equivale a aprovação nem elimina o risco de falhas em uso real.
 - Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
 - Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
