@@ -35,10 +35,11 @@ Existe um único campo de chaves.
 - cancelamento interrompe a sequência;
 - a lista de resultados e o progresso só aparecem após iniciar a consulta;
 - resultados concluídos liberam visualizar DANFE, imprimir DANFE e baixar XML por nota;
-- múltiplos resultados concluídos liberam ZIP e impressão conjunta;
+- múltiplos resultados concluídos liberam downloads individuais de todos os XMLs e impressão conjunta;
 - estados sem XML não mostram ações desabilitadas de DANFE/XML;
 - os botões **Nova consulta** e **Consultar nota** permanecem lado a lado desde o início, com tamanho uniforme e ícones;
-- uma NF-e concluída mostra **Visualizar**, **Imprimir** e **XML** em três botões baixos, com ícone ao lado do texto; os nomes acessíveis completos continuam **Visualizar DANFE** e **Baixar XML**;
+- uma NF-e concluída apresenta quatro botões compactos **somente com ícones**: visualizar DANFE, imprimir DANFE, baixar XML e copiar chave completa de acesso; cada botão mantém `title`, `aria-label` e foco visível;
+- o botão **Copiar chave da NF-e** também aparece para a chave válida em linhas com falha no Portal, permitindo reutilizar a chave sem reconsulta; a cópia oferece aviso discreto de sucesso ou falha, sem expor a chave no aviso;
 - o lote exibe as mesmas ações compactas por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
 - a nota individual não abre mais uma faixa extra de botões abaixo da linha; o cabeçalho da lista é omitido quando só há uma NF-e;
 - botões de recuperação de erro seguem o mesmo padrão de ícones;
@@ -55,15 +56,15 @@ O tema padrão é escuro. `Ctrl+Shift+T` percorre escuro → claro → sistema; 
 - `Ctrl+Enter`: consultar;
 - `Ctrl+N`: nova consulta;
 - `Ctrl+P`: imprimir DANFE(s);
-- `Ctrl+D`: baixar ZIP;
+- `Ctrl+D`: solicitar download de cada XML concluído separadamente (o navegador pode pedir permissão para vários arquivos);
 - `Ctrl+Shift+T`: alternar tema;
 - `Escape`: cancelar consulta ou fechar o visualizador de DANFE.
 
 Dentro do campo de entrada, os atalhos se limitam a consultar e nova consulta, para não interceptar digitação.
 
-## Relatório CSV
+## Download de XMLs
 
-Com itens na lista, o botão **Relatório CSV** exporta chave, número, série, modelo, emitente, destinatário, data de emissão, valor total, status, origem e mensagem em CSV com BOM UTF-8 e formatação BRL. O relatório reflete o estado atual de cada item, sem reconsultar o Portal. Valores de texto são escapados conforme RFC 4180.
+O botão coletivo **Baixar todos os XMLs** solicita um arquivo `.xml` individual por nota concluída e com XML validado, sem criar ZIP e sem reconsultar o Portal. Notas com erro/sem XML não geram arquivo. A interface informa **quantos downloads foram solicitados**, não presume que o navegador os salvou: o Chrome ou Edge pode solicitar autorização para downloads múltiplos. O botão antigo **Relatório CSV** não faz parte da interface atual.
 
 ## Depuração
 
