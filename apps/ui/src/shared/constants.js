@@ -21,4 +21,4 @@ export const MESSAGE_RETRY_DELAY_MS = 200;
 
 export const MAX_XML_BYTES = 10 * 1024 * 1024;
 
-export const ZIP_DOWNLOAD_DELAY_MS = 0;
+export const DOWNLOAD_URL_REVOKE_DELAY_MS = 0;

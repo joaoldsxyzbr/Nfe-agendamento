@@ -7,7 +7,7 @@ describe('batch outcome regression', () => {
         const input = { value: `${A}\n${B}`, disabled: false, focus() { } };
         const route = { textContent: '' };
         const progress = { textContent: '' };
-        const zip = { disabled: true, hidden: true };
+        const downloadAll = { disabled: true, hidden: true };
         const starts = [];
         const controller = createBatchController({
             elements: {
@@ -16,7 +16,7 @@ describe('batch outcome regression', () => {
                 startButton: { disabled: false, hidden: false },
                 cancelButton: { hidden: true },
                 resetButton: { hidden: false, disabled: false },
-                zipButton: zip,
+                downloadAllButton: downloadAll,
                 printButton: { disabled: true, hidden: true },
                 progress,
                 routeText: route,
@@ -46,8 +46,6 @@ describe('batch outcome regression', () => {
                 number: '1',
                 series: '1',
             }),
-            createZip: () => new Blob(),
-            downloadBlob: () => { },
             openDanfe: () => { },
             downloadXml: () => { },
             openDanfeDocuments: () => { },
@@ -58,7 +56,7 @@ describe('batch outcome regression', () => {
         controller.syncDraft();
         await controller.start();
         expect(route.textContent).toContain('1 concluída(s) · 1 com erro');
-        expect(zip.disabled).toBe(false);
+        expect(downloadAll.disabled).toBe(false);
         await controller.retryPortal(1);
         expect(starts).toEqual([A, B, B]);
         expect(route.textContent).toContain('2 concluída(s) · 0 com erro');

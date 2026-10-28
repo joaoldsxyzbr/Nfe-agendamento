@@ -41,15 +41,15 @@ describe('application shell', () => {
         expect(main).not.toContain('id="mode-single"');
         expect(main).not.toContain('id="mode-batch"');
         expect(batch).toContain('Visualizar DANFE');
-        expect(batch).toContain("preview.textContent = 'Visualizar'");
-        expect(batch).toContain("download.textContent = 'XML'");
+        expect(batch).not.toContain("preview.textContent = 'Visualizar'");
+        expect(batch).not.toContain("download.textContent = 'XML'");
         expect(batch).toContain("information.append(details, key);");
-        expect(batch).toContain("print.textContent = 'Imprimir'");
+        expect(batch).not.toContain("print.textContent = 'Imprimir'");
         expect(batch).toContain('row.preview.hidden = item.parsed === null');
         expect(batch).toContain('elements.list.hidden = !hasRun');
         expect(batch).toContain('Baixar XML');
         expect(batch).toContain('Importar XML');
-        expect(main).toContain('Baixar XMLs (.zip)');
+        expect(main).toContain('Baixar todos os XMLs');
         expect(main).toContain('Imprimir DANFEs');
     });
     it('keeps consultation actions focused on XML and DANFE without a CSV report', () => {
@@ -60,9 +60,14 @@ describe('application shell', () => {
         expect(main).not.toContain('downloadCsv');
         expect(batch).not.toContain('csvButton');
         expect(batch).not.toContain('downloadCsvReport');
-        expect(main).toContain('id="batch-zip"');
+        expect(main).toContain('id="batch-download-all"');
         expect(main).toContain('id="batch-print"');
-        expect(batch).toContain('downloadZip,');
+        expect(batch).toContain('downloadAllXml,');
+        expect(batch).toContain("actionIconMarkup('copy')");
+        expect(batch).toContain("'Copiar chave da NF-e'");
+        expect(main).not.toContain('createStoredZip');
+        expect(main).not.toContain('Baixar XMLs (.zip)');
+        expect(main).not.toContain('id="batch-zip"');
         expect(batch).toContain('printDanfes,');
     });
 });

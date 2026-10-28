@@ -35,13 +35,14 @@ Existe um único campo de chaves.
 - cancelamento interrompe a sequência;
 - a lista de resultados e o progresso só aparecem após iniciar a consulta;
 - resultados concluídos liberam visualizar DANFE, imprimir DANFE e baixar XML por nota;
-- múltiplos resultados concluídos liberam ZIP e impressão conjunta;
+- múltiplos resultados concluídos liberam downloads individuais de todos os XMLs e impressão conjunta;
 - estados sem XML não mostram ações desabilitadas de DANFE/XML;
 - os botões **Nova consulta** e **Consultar nota** permanecem lado a lado desde o início, com tamanho uniforme e ícones;
-- uma NF-e concluída mostra **Visualizar**, **Imprimir** e **XML** em três botões baixos, com ícone ao lado do texto; os nomes acessíveis completos continuam **Visualizar DANFE** e **Baixar XML**;
+- uma NF-e concluída apresenta quatro botões compactos **somente com ícones**: visualizar DANFE, imprimir DANFE, baixar XML e copiar chave completa de acesso; cada botão mantém `title`, `aria-label` e foco visível;
+- o botão **Copiar chave da NF-e** também aparece para a chave válida em linhas com falha no Portal, permitindo reutilizar a chave sem reconsulta; a cópia oferece aviso discreto de sucesso ou falha, sem expor a chave no aviso;
 - o lote exibe as mesmas ações compactas por linha, e as ações coletivas continuam disponíveis conforme os itens concluídos;
 - a nota individual não abre mais uma faixa extra de botões abaixo da linha; o cabeçalho da lista é omitido quando só há uma NF-e;
-- botões de recuperação de erro seguem o mesmo padrão de ícones;
+- em erro do Portal, **Copiar chave** continua somente com ícone; **Tentar novamente** e **Importar XML** preservam texto visível para distinguir as ações de recuperação;
 - o padrão de botões toma apenas **layout/ícones/tipografia** como inspiração do FSist: mantém as cores próprias do sistema (verde já existente na ação principal, azul nos focos e superfícies escuras nas ações secundárias).
 
 A tela mantém a mesma estrutura visual com uma ou várias chaves. Não existe troca automática entre apresentação compacta e apresentação em lote; quantidade de chaves altera somente os dados e o progresso exibidos.
@@ -55,19 +56,19 @@ O tema padrão é escuro. `Ctrl+Shift+T` percorre escuro → claro → sistema; 
 - `Ctrl+Enter`: consultar;
 - `Ctrl+N`: nova consulta;
 - `Ctrl+P`: imprimir DANFE(s);
-- `Ctrl+D`: baixar ZIP;
+- `Ctrl+D`: solicitar download de cada XML concluído separadamente (o navegador pode pedir permissão para vários arquivos);
 - `Ctrl+Shift+T`: alternar tema;
 - `Escape`: cancelar consulta ou fechar o visualizador de DANFE.
 
 Dentro do campo de entrada, os atalhos se limitam a consultar e nova consulta, para não interceptar digitação.
 
-## Relatório CSV
+## Download de XMLs
 
-Com itens na lista, o botão **Relatório CSV** exporta chave, número, série, modelo, emitente, destinatário, data de emissão, valor total, status, origem e mensagem em CSV com BOM UTF-8 e formatação BRL. O relatório reflete o estado atual de cada item, sem reconsultar o Portal. Valores de texto são escapados conforme RFC 4180.
+O botão coletivo **Baixar todos os XMLs** solicita um arquivo `.xml` individual por nota concluída e com XML validado, sem criar ZIP e sem reconsultar o Portal. Notas com erro/sem XML não geram arquivo. A interface informa **quantos downloads foram solicitados**, não presume que o navegador os salvou: o Chrome ou Edge pode solicitar autorização para downloads múltiplos. O botão antigo **Relatório CSV** não faz parte da interface atual.
 
 ## Depuração
 
-O parâmetro `?nfe-debug` na URL ativa registro detalhado no console do site. Mensagens não incluem chave fiscal completa, XML, CNPJ/CPF ou certificado.
+O parâmetro `?nfe-debug` na URL da interface local da extensão ativa registro detalhado no console da extensão. Mensagens não incluem chave fiscal completa, XML, CNPJ/CPF ou certificado.
 
 ## Recuperação por XML
 
@@ -90,10 +91,10 @@ Nenhuma UI pede PFX/P12, senha ou chave privada. Chrome/Edge e Windows tratam o 
 
 - tema escuro padrão, com tema claro e do sistema disponíveis;
 - controles e foco padronizados;
-- botões de cantos discretos e ícones locais em SVG; rótulos centrais nos comandos de consulta e rótulos curtos nas ações de cada NF-e;
+- botões de cantos discretos e ícones locais em SVG; comandos principais exibem texto, enquanto visualizar/imprimir/XML/copiar em cada NF-e concluída exibem apenas ícones com nomes acessíveis;
 - cabeçalho reduzido, campo de uma linha que cresce com lote, barra de progresso compacta, informações prioritárias acima da chave abreviada;
 - tooltip nativo com informação completa em detalhes truncados, botões acessíveis por nome completo;
-- botões mantêm altura mínima confortável e layout responsivo (ícone acima do rótulo apenas até 420 px), sem criar rolagem horizontal;
+- botões mantêm altura mínima confortável e layout responsivo; ações concluídas usam quatro ícones alinhados, inclusive em até 420 px, sem criar rolagem horizontal;
 - consulta como ação protagonista, destacada em verde;
 - geometria estável entre os estados da consulta, sem recentralização do card ou mudança de largura por scrollbar;
 - menos camadas de compatibilidade no DOM;

@@ -66,6 +66,12 @@ async function installMockExtension(page, { xmlPayload = '', failed = false }) {
 }
 
 test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
+    await page.addInitScript(() => {
+        window.__copiedKeys = [];
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+            writeText: async (value) => { window.__copiedKeys.push(value); },
+        } });
+    });
     await installMockExtension(page, { xmlPayload: xml });
     await page.goto('/');
     await expect(page.locator('#batch-run-toolbar')).toBeHidden();
@@ -91,9 +97,14 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
     await expect(cancel).toBeHidden();
     await expect(row.getByRole('button', { name: 'Visualizar DANFE' })).toBeEnabled();
     await expect(row.getByRole('button', { name: 'Baixar XML' })).toBeEnabled();
-    await expect(row.getByRole('button', { name: 'Imprimir', exact: true })).toBeEnabled();
+    await expect(row.getByRole('button', { name: 'Imprimir DANFE' })).toBeEnabled();
+    await expect(row.getByRole('button', { name: 'Copiar chave da NF-e' })).toBeEnabled();
+    await row.getByRole('button', { name: 'Copiar chave da NF-e' }).click();
+    await expect(page.locator('.theme-toast')).toContainText('Chave copiada');
+    expect(await page.evaluate(() => window.__copiedKeys)).toEqual([ACCESS_KEY]);
     await expect(row.locator('.batch-item-actions')).toHaveCSS('display', 'grid');
-    await expect(row.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(3);
+    await expect(row.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(4);
+    expect(await row.locator('.batch-action:not([hidden])').allTextContents()).toEqual(['', '', '', '']);
     await expect(page.locator('#batch-list')).toHaveAttribute('data-count', '1');
     const desktopRow = await row.boundingBox();
     expect(desktopRow).not.toBeNull();
@@ -105,7 +116,7 @@ test('consulta unitária usa somente o Portal Nacional', async ({ page }) => {
     await expect(row.getByRole('button', { name: 'Visualizar DANFE' })).toBeVisible();
     await expect(row.getByRole('button', { name: 'Baixar XML' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    await expect(page.locator('#batch-zip')).toBeHidden();
+    await expect(page.locator('#batch-download-all')).toBeHidden();
     const reset = page.locator('#batch-reset');
     await expect(reset).toBeVisible();
     await reset.click();
@@ -129,10 +140,13 @@ test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ pag
     await page.locator('#settings-close').click();
     await page.setViewportSize({ width: 390, height: 780 });
     await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
+    await assertRecoveryActionWidths(failedRow);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.setViewportSize({ width: 1280, height: 800 });
     await expect(failedRow.getByRole('button', { name: 'Importar XML' })).toBeVisible();
-    await expect(failedRow.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(2);
+    await assertRecoveryActionWidths(failedRow);
+    await expect(failedRow.locator('.batch-action:not([hidden]) .action-icon')).toHaveCount(3);
+    await expect(failedRow.getByRole('button', { name: 'Copiar chave da NF-e' })).toBeVisible();
     const chooserPromise = page.waitForEvent('filechooser');
     await failedRow.getByRole('button', { name: 'Importar XML' }).click();
     const chooser = await chooserPromise;
@@ -143,3 +157,36 @@ test('erro do Portal permite recuperar a mesma NF-e por XML local', async ({ pag
     await expect(recoveredRow.getByRole('button', { name: 'Visualizar DANFE' })).toBeEnabled();
     await expect(recoveredRow.getByRole('button', { name: 'Baixar XML' })).toBeEnabled();
 });
+test('copiar chave falha com aviso, sem afirmar sucesso', async ({ page }) => {
+    await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+            writeText: async () => { throw new Error('not allowed'); },
+        } });
+    });
+    await installMockExtension(page, { failed: true });
+    await page.goto('/');
+    await page.locator('#batch-keys').fill(ACCESS_KEY);
+    await page.locator('#batch-start').click();
+    const failedRow = page.locator('.batch-item[data-state="portal_error"]');
+    await failedRow.getByRole('button', { name: 'Copiar chave da NF-e' }).click();
+    await expect(page.locator('.theme-toast')).toContainText('Não foi possível copiar a chave');
+});
+
+async function assertRecoveryActionWidths(failedRow) {
+    const actions = failedRow.locator('.batch-item-actions');
+    const copy = failedRow.getByRole('button', { name: 'Copiar chave da NF-e' });
+    const retry = failedRow.getByRole('button', { name: 'Tentar novamente' });
+    const importXml = failedRow.getByRole('button', { name: 'Importar XML' });
+    const containerBox = await actions.boundingBox();
+    const [copyBox, retryBox, importBox] = await Promise.all([
+        copy.boundingBox(), retry.boundingBox(), importXml.boundingBox(),
+    ]);
+    expect(containerBox).not.toBeNull();
+    for (const box of [copyBox, retryBox, importBox]) {
+        expect(box).not.toBeNull();
+        expect(box.x).toBeGreaterThanOrEqual(containerBox.x - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(containerBox.x + containerBox.width + 1);
+    }
+    expect(copyBox.width).toBeLessThan(retryBox.width);
+    expect(copyBox.width).toBeLessThan(importBox.width);
+}

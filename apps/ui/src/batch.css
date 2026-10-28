@@ -189,7 +189,7 @@
 
 .batch-item-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   min-width: 0;
 }
@@ -227,12 +227,17 @@
 }
 
 .batch-item-actions .batch-action .action-icon {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
+}
+
+.batch-item-actions .batch-action:focus-visible {
+  outline: 2px solid #80c3ff;
+  outline-offset: 2px;
 }
 
 .batch-item[data-state='portal_error'] .batch-item-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 40px repeat(2, minmax(0, 1fr));
 }
 
 /* A apresentação de uma NF-e usa a mesma linha do lote, sem faixa extra de ações. */
@@ -487,7 +492,7 @@
 
   .batch-item-actions {
     width: 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     justify-self: stretch;
   }
 
@@ -503,7 +508,7 @@
   }
 
   .batch-item[data-state='portal_error'] .batch-item-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 40px repeat(2, minmax(0, 1fr));
   }
 
   .batch-item-actions button {
@@ -517,9 +522,9 @@
 
 @media (max-width: 420px) {
   .batch-item-actions .batch-action {
-    flex-direction: column;
+    flex-direction: row;
     gap: 2px;
-    min-height: 44px;
+    min-height: 40px;
     padding: 4px 2px;
     font-size: 9.5px;
   }

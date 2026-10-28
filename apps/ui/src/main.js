@@ -1,13 +1,12 @@
 import { createBatchController } from './batch/controller.js';
 import { actionIconMarkup } from './ui/action-icons.js';
 import { parseBatchInput } from './batch/input.js';
-import { createStoredZip } from './batch/zip.js';
 import { attachDanfeZoom, renderDanfe } from './danfe/render.js';
 import { createDanfeViewer } from './danfe/viewer.js';
 import { validateManualNfeXml } from './nfe/manual-xml-import.js';
 import { parseNfeXml } from './nfe/xml.js';
 import { BrowserPortalExtensionClient } from './portal/extension-client.js';
-import { BATCH_DRAFT_DEBOUNCE_MS, ZIP_DOWNLOAD_DELAY_MS } from './shared/constants.js';
+import { BATCH_DRAFT_DEBOUNCE_MS, DOWNLOAD_URL_REVOKE_DELAY_MS } from './shared/constants.js';
 import { logger } from './shared/logger.js';
 import { metrics } from './shared/metrics.js';
 import { initTheme, cycleTheme } from './shared/theme.js';
@@ -77,7 +76,7 @@ app.innerHTML = `
           </div>
           <div class="batch-toolbar-actions">
             <button id="batch-cancel" class="secondary-button" type="button" hidden>${actionIconMarkup('cancel')}<span>Cancelar consulta</span></button>
-            <button id="batch-zip" class="secondary-button" type="button" disabled>${actionIconMarkup('zip')}<span>Baixar XMLs (.zip)</span></button>
+            <button id="batch-download-all" class="secondary-button" type="button" disabled>${actionIconMarkup('download')}<span>Baixar todos os XMLs</span></button>
             <button id="batch-print" class="secondary-button" type="button" disabled>${actionIconMarkup('print')}<span>Imprimir DANFEs</span></button>
           </div>
         </div>
@@ -116,7 +115,7 @@ const batchReset = requireElement('#batch-reset');
 const batchProgress = requireElement('#batch-progress');
 const batchRouteText = requireElement('#batch-route');
 const batchCancel = requireElement('#batch-cancel');
-const batchZip = requireElement('#batch-zip');
+const batchDownloadAll = requireElement('#batch-download-all');
 const batchPrint = requireElement('#batch-print');
 const batchList = requireElement('#batch-list');
 const danfeViewer = requireElement('#danfe-viewer');
@@ -150,7 +149,7 @@ const batchController = createBatchController({
         startButton: batchStart,
         resetButton: batchReset,
         cancelButton: batchCancel,
-        zipButton: batchZip,
+        downloadAllButton: batchDownloadAll,
         printButton: batchPrint,
         progress: batchProgress,
         routeText: batchRouteText,
@@ -159,10 +158,10 @@ const batchController = createBatchController({
     },
     portal: portalExtension,
     parseXml: parseNfeXml,
-    createZip: createStoredZip,
-    downloadBlob,
     openDanfe: (parsed) => danfeViewerController.open(parsed),
     downloadXml,
+    copyAccessKey: (value) => navigator.clipboard.writeText(value),
+    notify: showNotice,
     openDanfeDocuments: (documents, title) => danfeViewerController.openMany(documents, title),
     printWindow: () => danfeViewerController.print(),
     importManualXml: selectManualXml,
@@ -189,7 +188,7 @@ batchReset.addEventListener('click', () => {
 batchCancel.addEventListener('click', () => {
     void batchController.cancel();
 });
-batchZip.addEventListener('click', () => batchController.downloadZip());
+batchDownloadAll.addEventListener('click', () => batchController.downloadAllXml());
 batchPrint.addEventListener('click', () => batchController.printDanfes());
 
 const shortcuts = createKeyboardShortcuts({
@@ -213,9 +212,9 @@ const shortcuts = createKeyboardShortcuts({
             batchController.printDanfes();
         }
     },
-    onZip: () => {
-        if (!batchZip.disabled) {
-            batchController.downloadZip();
+    onDownloads: () => {
+        if (!batchDownloadAll.disabled) {
+            batchController.downloadAllXml();
         }
     },
     onTheme: () => {
@@ -227,6 +226,9 @@ const shortcuts = createKeyboardShortcuts({
 
 function showThemeToast(theme) {
     const labels = { dark: 'Escuro', light: 'Claro', system: 'Sistema' };
+    showNotice(`Tema: ${labels[theme] ?? theme}`);
+}
+function showNotice(message) {
     let toast = document.querySelector('.theme-toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -235,7 +237,7 @@ function showThemeToast(theme) {
         toast.setAttribute('aria-live', 'polite');
         document.body.append(toast);
     }
-    toast.textContent = `Tema: ${labels[theme] ?? theme}`;
+    toast.textContent = message;
     toast.classList.add('visible');
     setTimeout(() => toast.classList.remove('visible'), 2000);
 }
@@ -331,7 +333,7 @@ function downloadBlob(blob, fileName) {
     document.body.append(link);
     link.click();
     link.remove();
-    globalThis.setTimeout(() => URL.revokeObjectURL(url), ZIP_DOWNLOAD_DELAY_MS);
+    globalThis.setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
 }
 function requireElement(selector) {
     const element = document.querySelector(selector);
