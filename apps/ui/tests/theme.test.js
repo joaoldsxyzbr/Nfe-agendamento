@@ -25,7 +25,7 @@ describe('site theme', () => {
         expect(batchStyles).toContain('background: #259e53');
         expect(batchStyles).toContain('background: #1a232d');
         expect(batchStyles).toContain('grid-template-columns: repeat(2, minmax(0, 1fr))');
-        expect(batchStyles).toContain('grid-template-columns: repeat(3, minmax(0, 1fr))');
+        expect(batchStyles).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))');
         expect(batchStyles).toContain(".batch-list[data-count='1'] .batch-list-header");
         expect(batchStyles).not.toContain("grid-row: 2;");
         expect(batchStyles).toContain('min-height: 34px');
