@@ -10,7 +10,7 @@ A implementação não presume que todo campo novo da Reforma Tributária deva a
 
 ## Modelo implementado
 
-`apps/web/src/nfe/rtc.ts` adiciona uma camada fiscal complementar e não destrutiva sobre o parser existente. Ela modela os campos centrais encontrados em XML NF-e:
+`apps/ui/src/nfe/rtc.js` adiciona uma camada fiscal complementar e não destrutiva sobre o parser existente. Ela modela os campos centrais encontrados em XML NF-e:
 
 - `IBSCBS/CST`;
 - `IBSCBS/cClassTrib`;
@@ -22,7 +22,7 @@ A implementação não presume que todo campo novo da Reforma Tributária deva a
 - `IS/vIS`;
 - totais de `IBSCBSTot`, `ISTot` e `vNFTot`.
 
-O XML original continua preservado integralmente no objeto principal da NF-e.
+O XML original continua preservado integralmente no objeto principal da NF-e. Quando um campo RTC opcional está **ausente**, mantém-se o valor de apresentação `0` por compatibilidade; quando o campo existe e seu conteúdo está inválido, a leitura falha explicitamente. Não há validação criptográfica de XMLDSig nem consulta da situação fiscal atual à SEFAZ.
 
 ## Grupos estendidos
 
@@ -36,14 +36,14 @@ Isso evita tratar silenciosamente um documento mais complexo como se contivesse 
 
 ## API
 
-- `parseRtcNfeXml(xml, expectedAccessKey)` — lê apenas a camada RTC e valida a correspondência da chave;
+- `parseRtcNfeXml(xml, expectedAccessKey)` — extrai a camada RTC somente após exigir envelope NF-e com protocolo autorizado e chave correspondente, bloqueando DTD;
 - `parseNfeXmlWithRtc(xml, expectedAccessKey)` — combina o parser NF-e existente com a camada RTC em um único objeto, preservando compatibilidade estrutural com `ParsedNfe`.
 
-A interface principal ainda pode continuar usando o parser legado enquanto a camada RTC é validada. O novo wrapper existe para adoção incremental sem alterar o DANFE antes da definição fiscal de impressão.
+A interface principal continua usando o parser NF-e principal enquanto a camada RTC é validada. O novo wrapper existe para adoção incremental sem alterar o DANFE antes da definição fiscal de impressão.
 
 ## Testes
 
-`apps/web/tests/rtc.test.ts` usa `apps/web/tests/fixtures/nfe-rtc.xml`, uma fixture sintética sem dados pessoais reais, e cobre:
+`apps/ui/tests/rtc.test.js` usa `apps/ui/tests/fixtures/nfe-rtc.xml`, uma fixture sintética sem dados pessoais reais, e cobre:
 
 - CST/classificação tributária;
 - base e valores IBS UF/municipal;
@@ -53,10 +53,12 @@ A interface principal ainda pode continuar usando o parser legado enquanto a cam
 - totais RTC;
 - preservação integral do XML;
 - compatibilidade com NF-e sem RTC;
-- rejeição de chave divergente;
+- rejeição de chave divergente, protocolo de autorização inconsistente e DTD;
+- rejeição de valores numéricos inválidos/ausentes no elemento RTC presente, sem convertê-los silenciosamente em zero;
+- validação positiva do número do item RTC;
 - sinalização de grupo monofásico estendido.
 
-O CI vigente valida essa camada pelos testes TypeScript do parser e pelas regressões DANFE/Playwright. O antigo POC com `Unimake.DFe` foi retirado do caminho ativo junto com a arquitetura .NET e permanece apenas como registro histórico em `docs/architecture/unimake-poc.md`.
+O CI vigente valida essa camada pelos testes JavaScript do parser e pelas regressões DANFE/Playwright. O antigo POC com `Unimake.DFe` foi retirado do caminho ativo junto com a arquitetura .NET e permanece apenas como registro histórico em `docs/architecture/unimake-poc.md`.
 
 ## Próximas etapas
 
