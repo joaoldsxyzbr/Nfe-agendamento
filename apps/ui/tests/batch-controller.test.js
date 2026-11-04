@@ -6,7 +6,7 @@ const A = '42260912345678000195550010000000011123456786';
 const B = '35260812345678000195550010000000011000000018';
 const C = '42260812345678000123550010000012341000012342';
 const el = (value) => value;
-function harness(overrides = {}, importManualXml = async () => null) {
+function harness(overrides = {}, importManualXml = async () => null, options = {}) {
     const snapshots = [];
     const portalStarts = [];
     const downloads = [];
@@ -35,6 +35,7 @@ function harness(overrides = {}, importManualXml = async () => null) {
         ...overrides,
     };
     const controller = createBatchController({
+        maxRetainedXmlBytes: options.maxRetainedXmlBytes,
         elements: {
             keysInput: input,
             inputSummary: el({ textContent: '' }),
@@ -135,6 +136,31 @@ describe('batch controller Portal-only', () => {
         await h.controller.importManual(0);
         await vi.waitFor(() => expect(reports).toHaveLength(1));
         expect(reports[0].code).toBe('batch_completed');
+    });
+    it('stops when the aggregate XML budget is reached and keeps earlier downloads available', async () => {
+        const h = harness({
+            waitForResult: async (operationId) => ({
+                operationId, state: 'completed', xml: '<xml-12345/>',
+            }),
+        }, async () => null, { maxRetainedXmlBytes: 15 });
+        h.input.value = `${A}\n${B}\n${C}`;
+        h.controller.syncDraft();
+        await h.controller.start();
+        expect(h.portalStarts).toEqual([A, B]);
+        const rows = h.snapshots.at(-1);
+        expect(rows.map((item) => item.status)).toEqual(['success', 'portal_error', 'cancelled']);
+        expect(rows[1].errorCode).toBe('batch_memory_limit');
+        expect(rows[1].message).toContain('Limite seguro');
+        expect(rows[2].message).toContain('limite de memória');
+        h.controller.downloadAllXml();
+        expect(h.downloads).toEqual([A]);
+        await h.controller.retryPortal(1);
+        expect(h.portalStarts).toEqual([A, B]);
+        h.controller.reset();
+        h.input.value = C;
+        h.controller.syncDraft();
+        await h.controller.start();
+        expect(h.snapshots.at(-1)?.[0]?.status).toBe('success');
     });
     it('processes every item sequentially through the Portal', async () => {
         const h = harness();
@@ -336,7 +362,7 @@ describe('batch controller Portal-only', () => {
 describe('batch preflight action guards', () => {
     it('locks Portal retry while preflight is pending', () => {
         const source = readFileSync(new URL('../src/batch/controller.js', import.meta.url), 'utf8');
-        expect(source).toContain("item.status !== 'portal_error' || preflighting || running || manualActionBusy");
+        expect(source).toContain("item.status !== 'portal_error' || item.errorCode === 'batch_memory_limit'");
         expect(source).toContain('row.retry.disabled = disabled');
         expect(source).toContain('row.importManual.disabled = disabled');
         expect(source).toContain('refreshResultActions();');
