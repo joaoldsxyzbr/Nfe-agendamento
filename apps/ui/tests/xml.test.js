@@ -24,7 +24,7 @@ describe('parseNfeXml', () => {
         const { parseNfeXml } = await import('../src/nfe/xml');
         expect(() => parseNfeXml(fixture.replace('<cStat>100</cStat>', '<cStat>110</cStat>'), VALID_KEY))
             .toThrow('não informa autorização');
-        expect(() => parseNfeXml(fixture.replace(/<protNFe[\\s\\S]*?<\\/protNFe>/, ''), VALID_KEY))
+        expect(() => parseNfeXml(fixture.replace(/<protNFe[\s\S]*?<\/protNFe>/, ''), VALID_KEY))
             .toThrow('não contém o protocolo');
         expect(() => parseNfeXml(fixture.replace('<nProt>342260000000001</nProt>', '<nProt></nProt>'), VALID_KEY))
             .toThrow('número do protocolo');
