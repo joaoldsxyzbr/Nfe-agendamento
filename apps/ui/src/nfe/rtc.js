@@ -9,10 +9,15 @@ export function parseNfeXmlWithRtc(xml, expectedAccessKey) {
     const nfe = parseNfeXml(xml, expectedAccessKey);
     return Object.freeze({
         ...nfe,
-        rtc: parseRtcNfeXml(xml, expectedAccessKey),
+        rtc: parseRtcFields(xml, expectedAccessKey),
     });
 }
 export function parseRtcNfeXml(xml, expectedAccessKey) {
+    // Entrada pública isolada: nunca extrair impostos de NF-e sem protocolo autorizado.
+    parseNfeXml(xml, expectedAccessKey);
+    return parseRtcFields(xml, expectedAccessKey);
+}
+function parseRtcFields(xml, expectedAccessKey) {
     const document = parseDocument(xml);
     const infNFe = first(document, 'infNFe');
     if (!infNFe) {
@@ -60,7 +65,7 @@ function parseRtcItem(det) {
     const cbs = first(group, 'gCBS');
     const extendedGroups = EXTENDED_RTC_GROUPS.filter((groupName) => first(ibsCbs, groupName) !== null);
     return Object.freeze({
-        itemNumber: Number(det.getAttribute('nItem') ?? '0'),
+        itemNumber: itemNumber(det),
         cst: text(ibsCbs, 'CST'),
         taxClassification: text(ibsCbs, 'cClassTrib'),
         base: number(group, 'vBC'),
@@ -74,6 +79,13 @@ function parseRtcItem(det) {
         selectiveTax: number(selectiveTax, 'vIS'),
         extendedGroups: Object.freeze(extendedGroups),
     });
+}
+function itemNumber(det) {
+    const raw = det.getAttribute('nItem') ?? '';
+    const value = /^\d+$/.test(raw) ? Number(raw) : NaN;
+    if (!Number.isSafeInteger(value) || value < 1)
+        throw new Error('Número do item RTC inválido.');
+    return value;
 }
 function parseDocument(xml) {
     const parseErrors = [];
@@ -116,9 +128,12 @@ function text(root, localName) {
     return first(root, localName)?.textContent?.trim() ?? '';
 }
 function number(root, localName) {
-    const value = text(root, localName);
-    if (!value)
-        return 0;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
+    const field = first(root, localName);
+    // Campos inteiramente ausentes são opcionais, inclusive em NF-e anterior à RTC.
+    if (!field) return 0;
+    const value = field.textContent?.trim() ?? '';
+    const parsed = /^-?\d+(?:\.\d+)?$/.test(value) ? Number(value) : NaN;
+    if (!Number.isFinite(parsed))
+        throw new Error(`Valor numérico inválido em <${localName}>.`);
+    return parsed;
 }
