@@ -2,12 +2,17 @@ import { MAX_BATCH_ITEMS, parseBatchInput } from './input.js';
 import { actionIconMarkup } from '../ui/action-icons.js';
 import { portalErrorGuidance } from '../portal/error-guidance.js';
 import { logger } from '../shared/logger.js';
+import { MAX_BATCH_RETAINED_XML_BYTES } from '../shared/constants.js';
 const BRL_CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
 });
 export function createBatchController(deps) {
     const { elements } = deps;
+    const maxRetainedXmlBytes = deps.maxRetainedXmlBytes ?? MAX_BATCH_RETAINED_XML_BYTES;
+    const memoryLimitMessage = 'Limite seguro de XMLs em memória atingido. Baixe os documentos concluídos e comece um lote menor.';
+    let retainedXmlBytes = 0;
+    let memoryLimitReached = false;
     let items = [];
     let running = false;
     let hasRun = false;
@@ -42,6 +47,8 @@ export function createBatchController(deps) {
         elements.startButton.hidden = false;
         elements.resetButton.hidden = false;
         items = summary.validKeys.map(createBatchItem);
+        retainedXmlBytes = 0;
+        memoryLimitReached = false;
         renderState('Aguardando início', undefined, true);
     }
     async function start() {
@@ -86,6 +93,8 @@ export function createBatchController(deps) {
             refreshResultActions();
         }
         items = summary.validKeys.map(createBatchItem);
+        retainedXmlBytes = 0;
+        memoryLimitReached = false;
         running = true;
         cancelled = false;
         abortController = new AbortController();
@@ -97,6 +106,10 @@ export function createBatchController(deps) {
                 if (cancelled)
                     break;
                 await processPortalItem(item, abortController.signal);
+                if (memoryLimitReached) {
+                    markQueuedItems('cancelled', 'Não consultada: limite de memória do lote atingido.');
+                    break;
+                }
             }
         }
         catch (error) {
@@ -175,8 +188,24 @@ export function createBatchController(deps) {
             renderState('Consultando pelo Portal', item);
         }
     }
+    function xmlBytesWithinBudget(xml) {
+        const bytes = new TextEncoder().encode(xml).byteLength;
+        if (retainedXmlBytes + bytes > maxRetainedXmlBytes) return null;
+        return bytes;
+    }
+    function rejectMemoryOverflow(item) {
+        memoryLimitReached = true;
+        item.status = 'portal_error';
+        item.errorCode = 'batch_memory_limit';
+        item.message = memoryLimitMessage;
+    }
     async function completeItem(item, xml) {
         try {
+            const bytes = xmlBytesWithinBudget(xml);
+            if (bytes === null) {
+                rejectMemoryOverflow(item);
+                return;
+            }
             const parsed = deps.parseXml(xml, item.accessKey);
             let supplierRuleId = null;
             try {
@@ -185,6 +214,7 @@ export function createBatchController(deps) {
             catch {
                 supplierRuleId = null;
             }
+            retainedXmlBytes += bytes;
             item.parsed = { ...parsed, supplierRuleId };
             item.source = 'Portal';
             item.errorCode = null;
@@ -214,7 +244,8 @@ export function createBatchController(deps) {
     }
     async function retryPortal(index) {
         const item = items[index];
-        if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy)
+        if (!item || item.status !== 'portal_error' || item.errorCode === 'batch_memory_limit' ||
+            preflighting || running || manualActionBusy)
             return;
         manualActionBusy = true;
         setControlsLocked(true);
@@ -234,7 +265,8 @@ export function createBatchController(deps) {
     async function importManual(index) {
         let selectedFile = false;
         const item = items[index];
-        if (!item || item.status !== 'portal_error' || preflighting || running || manualActionBusy)
+        if (!item || item.status !== 'portal_error' || item.errorCode === 'batch_memory_limit' ||
+            preflighting || running || manualActionBusy)
             return;
         manualActionBusy = true;
         setControlsLocked(true);
@@ -243,6 +275,11 @@ export function createBatchController(deps) {
             if (!parsed)
                 return;
             selectedFile = true;
+            const bytes = xmlBytesWithinBudget(parsed.originalXml);
+            if (bytes === null) {
+                rejectMemoryOverflow(item);
+                return;
+            }
             let supplierRuleId = null;
             try {
                 supplierRuleId = (await deps.portal.resolveSupplier(parsed.issuer.taxId)).supplierId;
@@ -250,6 +287,7 @@ export function createBatchController(deps) {
             catch {
                 supplierRuleId = null;
             }
+            retainedXmlBytes += bytes;
             item.parsed = { ...parsed, supplierRuleId };
             item.source = 'XML manual';
             item.errorCode = null;
@@ -467,9 +505,9 @@ export function createBatchController(deps) {
         row.download.disabled = item.parsed === null;
         row.download.hidden = item.parsed === null;
         row.copy.disabled = !item.accessKey;
-        row.retry.hidden = item.status !== 'portal_error';
+        row.retry.hidden = item.status !== 'portal_error' || item.errorCode === 'batch_memory_limit';
         row.retry.disabled = preflighting || running || manualActionBusy;
-        row.importManual.hidden = item.status !== 'portal_error';
+        row.importManual.hidden = item.status !== 'portal_error' || item.errorCode === 'batch_memory_limit';
         row.importManual.disabled = preflighting || running || manualActionBusy;
     }
     function updateRenderedRow(item) {
