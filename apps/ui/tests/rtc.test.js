@@ -65,7 +65,7 @@ describe('RTC / IBS / CBS parser', () => {
         }
     });
     it('rejects invalid item numbering in the RTC groups', () => {
-        const invalid = rtcXml.replace('<det nItem="1">', '<det nItem="1x">');
+        const invalid = rtcXml.replace('<det nItem="1">', '<det nItem="0">');
         expect(() => parseRtcNfeXml(invalid, rtcKey)).toThrow('Número do item RTC inválido.');
     });
     it('requires an authorized protocol even when parsing RTC fields alone', () => {
