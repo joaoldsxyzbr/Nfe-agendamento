@@ -3,6 +3,7 @@ import { actionIconMarkup } from '../ui/action-icons.js';
 import { portalErrorGuidance } from '../portal/error-guidance.js';
 import { logger } from '../shared/logger.js';
 import { MAX_BATCH_RETAINED_XML_BYTES } from '../shared/constants.js';
+import { utf8BytesWithinBudget } from '../shared/utf8-budget.js';
 const BRL_CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -189,9 +190,7 @@ export function createBatchController(deps) {
         }
     }
     function xmlBytesWithinBudget(xml) {
-        const bytes = new TextEncoder().encode(xml).byteLength;
-        if (retainedXmlBytes + bytes > maxRetainedXmlBytes) return null;
-        return bytes;
+        return utf8BytesWithinBudget(xml, maxRetainedXmlBytes - retainedXmlBytes);
     }
     function rejectMemoryOverflow(item) {
         memoryLimitReached = true;

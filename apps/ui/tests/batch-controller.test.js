@@ -178,6 +178,24 @@ describe('batch controller Portal-only', () => {
             status: 'portal_error', errorCode: 'batch_memory_limit', parsed: null,
         });
     });
+    it('processa 100 XMLs sintéticos de médio porte respeitando o orçamento total', async () => {
+        const xml = '<nfeProc>' + 'X'.repeat(96 * 1024) + '</nfeProc>';
+        const keys = Array.from({ length: 100 }, (_, index) => generateAccessKey({
+            uf: '42', year: 2026, month: 11, cnpj: '12345678000195',
+            model: '55', series: 1, number: index + 1,
+        }));
+        const h = harness({
+            waitForResult: async (operationId) => ({ operationId, state: 'completed', xml }),
+        });
+        h.input.value = keys.join('\n');
+        h.controller.syncDraft();
+        await h.controller.start();
+        expect(h.portalStarts).toEqual(keys);
+        expect(h.snapshots.at(-1)?.map((item) => item.status)).toEqual(
+            Array.from({ length: 100 }, () => 'success'));
+        h.controller.downloadAllXml();
+        expect(h.downloads).toEqual(keys);
+    });
     it('processes every item sequentially through the Portal', async () => {
         const h = harness();
         h.input.value = `${A}\n${B}`;
