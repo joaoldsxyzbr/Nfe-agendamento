@@ -47,6 +47,7 @@ describe('extension-only distribution boundaries', () => {
         for (const command of [
             'node scripts/train-mini-ai.mjs --check',
             'node scripts/evaluate-mini-ai-adversarial.mjs',
+            'node scripts/evaluate-mini-ai-utility.mjs',
             'node --test scripts/tests/review-mini-ai-report.test.mjs',
             'npm run test:extension', 'npm run coverage:extension', 'npm run build:extension',
         ])

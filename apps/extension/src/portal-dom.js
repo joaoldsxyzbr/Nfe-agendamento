@@ -1,4 +1,4 @@
-import { PORTAL_ORIGIN } from './protocol';
+import { PORTAL_ORIGIN } from './shared/constants.js';
 export const accessKeySelector = '#ctl00_ContentPlaceHolder1_txtChaveAcessoResumo, input[id$="txtChaveAcessoResumo"]';
 export const consultButtonSelector = '#ctl00_ContentPlaceHolder1_btnConsultarHCaptcha, #ctl00_ContentPlaceHolder1_btnConsultar';
 export function isOfficialConsultUrl(value) {
@@ -57,6 +57,20 @@ export function isSafeDownloadControl(control) {
     if (typeof control.href === 'string' && control.href) return false;
     const label = tag === 'INPUT' ? control.value : control.textContent;
     return isDownloadLabel(label);
+}
+
+/**
+ * Retorna um único alvo seguro conhecido; não interpreta propostas neurais.
+ * Extrai a seleção utilizada pelo content script para permitir comparação
+ * independente e fiel com o modelo em modo de observação.
+ */
+export function selectDownloadControl(controls) {
+    const candidates = Array.from(controls ?? []).filter(isSafeDownloadControl);
+    const officialLinks = candidates.filter((control) =>
+        String(control.tagName ?? '').toUpperCase() === 'A');
+    if (officialLinks.length > 0)
+        return officialLinks.length === 1 ? officialLinks[0] : null;
+    return candidates.length === 1 ? candidates[0] : null;
 }
 
 export function isCaptchaResponseReady(value) {

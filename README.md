@@ -28,6 +28,8 @@ Na P4, adicionamos um **corpus adversarial independente do treinamento** para bl
 
 Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromium automatizado**, conferir service worker, permissões, tela de opções e privacidade do JSON exportado. O mesmo job executa os testes Playwright de consulta simulada/DANFE e publica um artefato experimental por 7 dias (não é release): [GitHub Actions P5](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40400199711). O roteiro físico para Chrome e Edge fica em [Homologação P5](docs/testing/mini-ai-p5-manual.md). **O CI não executa consultas reais, hCaptcha, certificado nem testes físicos Windows.**
 
+O CI também compara a mini-IA ao seletor determinístico **realmente usado pelo Portal** com exemplos sintéticos independentes. Esse comparativo mede apenas sugestões para revisão (sem cliques) e não demonstra ganhos em páginas reais. Veja [avaliação de utilidade e limites](docs/operations/mini-ai-utility-evaluation-2026-11-04.md).
+
 Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas. A publicação estável de `v0.3.0` não altera o limite de observação da Mini-IA. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
 

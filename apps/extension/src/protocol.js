@@ -1,8 +1,7 @@
 import { normalizeTaxId } from './supplier-store';
 import { ACCESS_KEY_PATTERN } from './shared/access-key.js';
-import { MAX_XML_BYTES } from './shared/constants.js';
-export const PORTAL_ORIGIN = 'https://www.nfe.fazenda.gov.br';
-export { ACCESS_KEY_PATTERN, MAX_XML_BYTES };
+import { MAX_XML_BYTES, PORTAL_ORIGIN } from './shared/constants.js';
+export { ACCESS_KEY_PATTERN, MAX_XML_BYTES, PORTAL_ORIGIN };
 export function parseAppCommand(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error('Comando inválido.');

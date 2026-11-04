@@ -1,3 +1,4 @@
+export const PORTAL_ORIGIN = 'https://www.nfe.fazenda.gov.br';
 export const PORTAL_POPUP_WIDTH = 1100;
 export const PORTAL_POPUP_HEIGHT = 800;
 
