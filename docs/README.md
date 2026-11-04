@@ -24,6 +24,7 @@ Leia nesta ordem:
 16. [Recuperação de resultado perdido no MV3](operations/terminal-replay-2026-11-04.md)
 17. [Limite agregado de memória XML por lote](operations/batch-xml-memory-2026-11-04.md)
 18. [Medição independente da utilidade sintética da mini-IA](operations/mini-ai-utility-evaluation-2026-11-04.md)
+19. [Notas e limites da versão v0.3.2](releases/v0.3.2.md) e [registro de aceite físico](testing/acceptance-results/v0.3.2.md)
 
 ## Histórico
 
@@ -33,4 +34,4 @@ Os workflows exclusivos das branches antigas `nfe-agendamento` e `feat/nfe-mini-
 
 ## Escopo e publicação
 
-A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico não foi executado e foi dispensado pelo responsável em 28/10/2026, sem declarar aprovação. A release estável `v0.3.0` foi publicada em 28/10/2026 com CI aprovado; a `v0.3.1` foi publicada em 28/10/2026 após CI aprovado, sem que isso constitua aceite físico.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).
+A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico não foi executado e foi dispensado pelo responsável em 28/10/2026, sem declarar aprovação. A release estável `v0.3.0` foi publicada em 28/10/2026 com CI aprovado; a `v0.3.1` foi publicada em 28/10/2026 após CI aprovado, sem que isso constitua aceite físico. A versão-alvo `v0.3.2` consolida as correções posteriores; sua publicação só é confirmada pelos workflows CI/Release do GitHub, sem alterar o estado não executado dos testes físicos.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).
