@@ -25,7 +25,7 @@ A extensão aceita o casing legado compatível já suportado na 0.2.x, rejeita a
 
 ## Resolução
 
-Depois de validar o XML, o site envia somente o identificador fiscal do emitente para o content bridge da extensão. A extensão compara localmente e devolve apenas:
+Depois de validar o XML, a interface interna `app.html` envia somente o identificador fiscal do emitente ao service worker da própria extensão por mensagens `chrome.runtime`. A extensão compara localmente e devolve apenas:
 
 ```ts
 { supplierId: string | null }
@@ -37,16 +37,16 @@ Para evitar releitura e revalidação a cada NF-e, o service worker mantém a co
 
 ## Apresentação
 
-As regras públicas de apresentação continuam em `apps/web/src/nfe/supplier-rules.js`. Elas podem definir catálogo, aliases e conversões visuais, sem alterar o XML original.
+As regras públicas de apresentação continuam em `apps/ui/src/nfe/supplier-rules.js`. Elas podem definir catálogo, aliases e conversões visuais, sem alterar o XML original.
 
 ## Testes
 
 - `apps/extension/tests/supplier-store.test.js`;
 - `apps/extension/tests/options.test.js`;
-- `apps/web/tests/supplier-rules.test.js`;
-- `apps/web/tests/product-mapping.test.js`;
-- `apps/web/tests/supplier-quantity.test.js`;
-- `apps/web/tests/supplier-quantity-render.test.js`;
-- `apps/web/tests/batch-controller.test.js`.
+- `apps/ui/tests/supplier-rules.test.js`;
+- `apps/ui/tests/product-mapping.test.js`;
+- `apps/ui/tests/supplier-quantity.test.js`;
+- `apps/ui/tests/supplier-quantity-render.test.js`;
+- `apps/ui/tests/batch-controller.test.js`.
 
 Testes usam somente identificadores sintéticos.
