@@ -1,6 +1,6 @@
 # NFe Agendamento 2.0 — extensão independente
 
-**Branch principal:** `main` · **Manifest V3:** `0.3.1` · **Última release publicada:** [`v0.3.1`](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.1) · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
+**Branch principal:** `main` · **Manifest V3:** `0.3.2` · **Release alvo:** [`v0.3.2`](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.2), publicada apenas após CI aprovado · **Chrome / Edge desktop** · **Homologação física: não executada, dispensada por decisão do responsável em 28/10/2026**
 
 O NFe Agendamento funciona dentro de uma **janela popup própria**, com aproximadamente metade da largura do navegador. A consulta continua no Portal Nacional da NF-e, com **hCaptcha manual** e certificado digital do navegador quando necessário. Nenhum servidor próprio, Cloudflare Worker, D1 ou site hospedado é necessário para a execução.
 
@@ -62,6 +62,8 @@ O job de CI `web` mantém a compatibilidade com o ruleset `main-required-ci`, ma
 O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge://extensions`, ative o Modo do desenvolvedor → **Carregar sem compactação** → escolha essa pasta. Clique no ícone para abrir ou focar a janela popup. Nenhum Node.js fica em execução após a instalação.
 
 ## Releases
+
+A **v0.3.2** consolida correções de segurança do release/Portal, validação dos XMLs e campos RTC, recuperação de respostas MV3 sem polling, limite agregado de XML por lote, otimização de contagem UTF-8 e avaliação **sintética** da mini-IA (sem cliques autônomos). Veja as [notas da v0.3.2](docs/releases/v0.3.2.md) e [registro de aceitação não executada](docs/testing/acceptance-results/v0.3.2.md). O pacote e a tag só existem após o workflow de release completar com sucesso; confira em [Releases](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases).
 
 A [release estável **`v0.3.1`**](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.1) foi publicada em 28/10/2026 no commit `308a53b`, após [CI aprovado](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723503436) e [workflow de release bem-sucedido](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723614299). Inclui o tema petróleo suave, Vitest/cobertura 5.0.5 e Playwright 1.64.1; veja [notas v0.3.1](docs/releases/v0.3.1.md). A publicação não constitui homologação física. A [v0.3.0](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0) permanece disponível como versão anterior.
 
