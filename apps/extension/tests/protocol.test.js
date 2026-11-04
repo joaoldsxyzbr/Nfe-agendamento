@@ -25,6 +25,9 @@ describe('portal extension protocol', () => {
             requestId: 'req-2',
             accessKey: KEY,
         });
+        expect(parseAppCommand({ type: 'ack_result', requestId: 'ack', operationId: 'op-1' })).toEqual({
+            type: 'ack_result', requestId: 'ack', operationId: 'op-1',
+        });
         expect(parseAppCommand({ type: 'status', requestId: 'req-status', operationId: 'op-1' })).toEqual({
             type: 'status',
             requestId: 'req-status',
