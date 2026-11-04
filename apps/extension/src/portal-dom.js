@@ -1,4 +1,4 @@
-import { PORTAL_ORIGIN } from './protocol';
+import { PORTAL_ORIGIN } from './shared/constants.js';
 export const accessKeySelector = '#ctl00_ContentPlaceHolder1_txtChaveAcessoResumo, input[id$="txtChaveAcessoResumo"]';
 export const consultButtonSelector = '#ctl00_ContentPlaceHolder1_btnConsultarHCaptcha, #ctl00_ContentPlaceHolder1_btnConsultar';
 export function isOfficialConsultUrl(value) {
