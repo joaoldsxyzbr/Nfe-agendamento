@@ -20,6 +20,7 @@ Leia nesta ordem:
 12. [Corpus adversarial e triagem privada — P4](plans/2026-10-26-mini-ia-nfe-p4.md)
 13. [P5 — Testes reais do pacote MV3 em Chromium e preparação da homologação](plans/2026-10-26-mini-ia-nfe-p5.md)
 14. [Roteiro manual P5 — Chrome e Edge](testing/mini-ai-p5-manual.md)
+15. [Endurecimento P0: segurança, seleção do Portal e integridade do XML](operations/p0-hardening-2026-11-04.md)
 
 ## Histórico
 

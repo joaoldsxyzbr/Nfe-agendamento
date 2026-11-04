@@ -14,6 +14,10 @@ describe('release quality gate', () => {
     });
     it('publishes normal releases after CI while keeping physical acceptance traceable', async () => {
         const release = await readFile(releaseUrl, 'utf8');
+        expect(release).toContain("github.event.workflow_run.event == 'push'");
+        expect(release).toContain('github.event.workflow_run.head_repository.full_name == github.repository');
+        expect(release).toContain("github.event.workflow_run.head_branch == 'main'");
+        expect(release).toContain("github.event.workflow_run.conclusion == 'success'");
         expect(release).toContain('docs/testing/acceptance-results/v${version}.md');
         expect(release).toContain('Release: v${version}');
         expect(release).toContain('Extension: ${extension_version}');

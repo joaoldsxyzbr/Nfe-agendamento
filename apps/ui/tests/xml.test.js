@@ -14,6 +14,33 @@ describe('parseNfeXml', () => {
         const mismatched = fixture.replace('NFe42260812345678000123550010000012341000012342', 'NFe42260812345678000123550010000012341000012359');
         await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(mismatched, VALID_KEY))).rejects.toThrow('A chave do XML não corresponde à NF-e consultada.');
     });
+    it('rejects a protocol from another NF-e', async () => {
+        const altered = fixture.replace('<chNFe>42260812345678000123550010000012341000012342</chNFe>',
+            '<chNFe>42260812345678000123550010000012341000012359</chNFe>');
+        const { parseNfeXml } = await import('../src/nfe/xml');
+        expect(() => parseNfeXml(altered, VALID_KEY)).toThrow('A chave do protocolo não corresponde');
+    });
+    it('rejects a denied or missing authorization protocol', async () => {
+        const { parseNfeXml } = await import('../src/nfe/xml');
+        expect(() => parseNfeXml(fixture.replace('<cStat>100</cStat>', '<cStat>110</cStat>'), VALID_KEY))
+            .toThrow('não informa autorização');
+        expect(() => parseNfeXml(fixture.replace(/<protNFe[\s\S]*?<\/protNFe>/, ''), VALID_KEY))
+            .toThrow('não contém o protocolo');
+        expect(() => parseNfeXml(fixture.replace('<nProt>342260000000001</nProt>', '<nProt></nProt>'), VALID_KEY))
+            .toThrow('número do protocolo');
+    });
+    it('accepts authorization granted outside the regular deadline (cStat 150)', async () => {
+        const { parseNfeXml } = await import('../src/nfe/xml');
+        expect(parseNfeXml(fixture.replace('<cStat>100</cStat>', '<cStat>150</cStat>'), VALID_KEY)
+            .protocol.statusCode).toBe('150');
+    });
+    it('rejects a missing mandatory invoice amount rather than displaying zero', async () => {
+        const { parseNfeXml } = await import('../src/nfe/xml');
+        expect(() => parseNfeXml(fixture.replace('<vNF>25.00</vNF>', ''), VALID_KEY))
+            .toThrow('Campo numérico obrigatório ausente: <vNF>');
+        expect(() => parseNfeXml(fixture.replace('<vNF>25.00</vNF>', '<vNF>0x19</vNF>'), VALID_KEY))
+            .toThrow('Valor numérico inválido em <vNF>');
+    });
     it('extracts fiscal fields needed by the DANFE and preserves the original XML', async () => {
         await expect(import('../src/nfe/xml').then(({ parseNfeXml }) => parseNfeXml(fixture, VALID_KEY))).resolves.toMatchObject({
             accessKey: VALID_KEY,

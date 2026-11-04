@@ -1,4 +1,4 @@
-import { accessKeySelector, consultButtonSelector, isCaptchaResponseReady, isDownloadLabel, isOfficialConsultUrl, isOfficialDownloadUrl, } from './portal-dom';
+import { accessKeySelector, consultButtonSelector, isCaptchaResponseReady, isOfficialConsultUrl, isSafeDownloadControl, } from './portal-dom';
 import { PORTAL_ORIGIN } from './protocol';
 import { createEventDrivenScheduler } from './portal-scheduler';
 import { evaluateNavigationProposal } from './intelligence/navigation-policy.js';
@@ -245,16 +245,12 @@ function fillAccessKey() {
     input.focus();
 }
 function findDownloadControl() {
-    const controls = Array.from(document.querySelectorAll('a[href], button, input[type="button"], input[type="submit"]'));
-    for (const control of controls) {
-        if (control instanceof HTMLAnchorElement && control.href && isOfficialDownloadUrl(control.href)) {
-            return control;
-        }
-    }
-    return controls.find((control) => {
-        const candidate = control instanceof HTMLInputElement ? control.value : control.textContent;
-        return isDownloadLabel(candidate);
-    }) ?? null;
+    const controls = Array.from(document.querySelectorAll('a[href], button, input[type="button"], input[type="submit"]'))
+        .filter(isSafeDownloadControl);
+    const officialLinks = controls.filter((control) => control.tagName === 'A');
+    // Não clicar quando houver mais de um destino plausível (nem escolher pelo primeiro).
+    if (officialLinks.length > 0) return officialLinks.length === 1 ? officialLinks[0] : null;
+    return controls.length === 1 ? controls[0] : null;
 }
 function isDisabled(element) {
     return element instanceof HTMLButtonElement || element instanceof HTMLInputElement

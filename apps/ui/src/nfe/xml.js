@@ -1,5 +1,6 @@
 const NFE_NAMESPACE = 'http://www.portalfiscal.inf.br/nfe';
 export function parseNfeXml(xml, expectedAccessKey) {
+    if (/<\s*!DOCTYPE\b/i.test(xml)) throw new Error('XML com DTD não é permitido.');
     const parseErrors = [];
     let document = null;
     try {
@@ -25,6 +26,7 @@ export function parseNfeXml(xml, expectedAccessKey) {
     if (accessKey !== expectedAccessKey) {
         throw new Error('A chave do XML não corresponde à NF-e consultada.');
     }
+    assertAuthorizedProtocol(document, infNFe, expectedAccessKey);
     const ide = first(infNFe, 'ide');
     const issuerElement = first(infNFe, 'emit');
     if (!issuerElement) {
@@ -79,6 +81,36 @@ export function parseNfeXml(xml, expectedAccessKey) {
             }
             : null,
     };
+}
+function assertAuthorizedProtocol(document, infNFe, accessKey) {
+    const root = document.documentElement;
+    if (!root || root.localName !== 'nfeProc' || root.namespaceURI !== NFE_NAMESPACE ||
+        document.getElementsByTagNameNS(NFE_NAMESPACE, 'infNFe').length !== 1) {
+        throw new Error('Estrutura do processo de NF-e inválida.');
+    }
+    const nfe = directChild(root, 'NFe');
+    const protocol = directChild(root, 'protNFe');
+    if (!nfe || directChild(nfe, 'infNFe') !== infNFe || !protocol) {
+        throw new Error('XML não contém o protocolo da NF-e na estrutura esperada.');
+    }
+    const infProt = directChild(protocol, 'infProt');
+    if (!infProt || text(infProt, 'chNFe') !== accessKey) {
+        throw new Error('A chave do protocolo não corresponde à NF-e consultada.');
+    }
+    if (!['100', '150'].includes(text(infProt, 'cStat'))) {
+        throw new Error('O protocolo não informa autorização de uso da NF-e.');
+    }
+    if (!/^\d{15}$/.test(text(infProt, 'nProt'))) {
+        throw new Error('O número do protocolo de autorização é inválido.');
+    }
+}
+function directChild(root, localName) {
+    if (!root) return null;
+    for (let index = 0; index < root.childNodes.length; index += 1) {
+        const node = root.childNodes.item(index);
+        if (node?.nodeType === 1 && node.localName === localName && node.namespaceURI === NFE_NAMESPACE) return node;
+    }
+    return null;
 }
 function parseParty(element, addressTag) {
     const addressElement = first(element, addressTag);
@@ -135,12 +167,12 @@ function parseAddress(element) {
 }
 function parseTotals(total) {
     return {
-        products: number(total, 'vProd'),
+        products: number(total, 'vProd', true),
         freight: number(total, 'vFrete'),
         insurance: number(total, 'vSeg'),
         discount: number(total, 'vDesc'),
         other: number(total, 'vOutro'),
-        invoice: number(total, 'vNF'),
+        invoice: number(total, 'vNF', true),
         icmsBase: number(total, 'vBC'),
         icms: number(total, 'vICMS'),
         icmsStBase: number(total, 'vBCST'),
@@ -170,11 +202,11 @@ function parseProduct(det) {
         ncm: text(product, 'NCM'),
         cfop: text(product, 'CFOP'),
         unit: text(product, 'uCom'),
-        quantity: number(product, 'qCom'),
-        unitPrice: number(product, 'vUnCom'),
+        quantity: number(product, 'qCom', true),
+        unitPrice: number(product, 'vUnCom', true),
         tributaryUnit: text(product, 'uTrib'),
         tributaryQuantity: number(product, 'qTrib'),
-        totalPrice: number(product, 'vProd'),
+        totalPrice: number(product, 'vProd', true),
         discount: number(product, 'vDesc'),
         tax: parseProductTax(det),
     };
@@ -315,11 +347,14 @@ function nullableText(root, localName) {
     const value = text(root, localName);
     return value || null;
 }
-function number(root, localName) {
+function number(root, localName, required = false) {
     const value = text(root, localName);
-    if (!value)
+    if (!value) {
+        if (required) throw new Error(`Campo numérico obrigatório ausente: <${localName}>.`);
         return 0;
-    const parsed = Number(value);
+    }
+    // Tipos decimais do XML fiscal não admitem notação hexadecimal ou Infinity.
+    const parsed = /^-?\d+(?:\.\d+)?$/.test(value) ? Number(value) : NaN;
     if (!Number.isFinite(parsed))
         throw new Error(`Valor numérico inválido em <${localName}>.`);
     return parsed;
