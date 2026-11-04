@@ -31,6 +31,12 @@ Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromiu
 Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas. A publicação estável de `v0.3.0` não altera o limite de observação da Mini-IA. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
 
+## Recuperação de resultados em interrupções
+
+Se uma resposta terminar antes de a interface registrar o listener, a extensão conserva temporariamente o último resultado para a aba interna que iniciou a operação. O cliente tenta recuperá-lo por uma consulta **única** de estado, confirma o recebimento e não usa polling.
+
+O armazenamento usa `chrome.storage.session`, com expiração de cinco minutos e descarte após confirmação, fechamento da aba ou início de nova consulta. XMLs acima de 2 MiB continuam entregues por evento, mas não são retidos para recuperação; se a mensagem for perdida, o aplicativo informa a necessidade de nova consulta. Não há recuperação de XML após reinício completo do navegador nem retomada automática de lote. Veja [detalhes e limitações](docs/operations/terminal-replay-2026-11-04.md).
+
 ## Compilar e verificar
 
 Requer Node.js e npm:
