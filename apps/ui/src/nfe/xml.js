@@ -100,7 +100,7 @@ function assertAuthorizedProtocol(document, infNFe, accessKey) {
     if (!['100', '150'].includes(text(infProt, 'cStat'))) {
         throw new Error('O protocolo não informa autorização de uso da NF-e.');
     }
-    if (!/^\\d{15}$/.test(text(infProt, 'nProt'))) {
+    if (!/^\d{15}$/.test(text(infProt, 'nProt'))) {
         throw new Error('O número do protocolo de autorização é inválido.');
     }
 }
@@ -354,7 +354,7 @@ function number(root, localName, required = false) {
         return 0;
     }
     // Tipos decimais do XML fiscal não admitem notação hexadecimal ou Infinity.
-    const parsed = /^-?\\d+(?:\\.\\d+)?$/.test(value) ? Number(value) : NaN;
+    const parsed = /^-?\d+(?:\.\d+)?$/.test(value) ? Number(value) : NaN;
     if (!Number.isFinite(parsed))
         throw new Error(`Valor numérico inválido em <${localName}>.`);
     return parsed;
