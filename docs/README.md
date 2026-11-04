@@ -23,6 +23,7 @@ Leia nesta ordem:
 15. [Endurecimento P0: segurança, seleção do Portal e integridade do XML](operations/p0-hardening-2026-11-04.md)
 16. [Recuperação de resultado perdido no MV3](operations/terminal-replay-2026-11-04.md)
 17. [Limite agregado de memória XML por lote](operations/batch-xml-memory-2026-11-04.md)
+18. [Medição independente da utilidade sintética da mini-IA](operations/mini-ai-utility-evaluation-2026-11-04.md)
 
 ## Histórico
 
