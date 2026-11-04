@@ -29,6 +29,8 @@ Leia nesta ordem:
 
 Documentos antigos de site, Worker, Windows Bridge, consultador SEFAZ, Vite, projetos e provas de conceito ficam preservados para rastreabilidade, mas **não definem o runtime desta branch**. São históricos: `architecture/frontend-boundaries.md`, `architecture/site-estatico-sem-vite.md`, `architecture/bridge-security.md`, `superpowers/`, relatórios de releases anteriores e documentos em `operations/` anteriores à mudança.
 
+Os workflows exclusivos das branches antigas `nfe-agendamento` e `feat/nfe-mini-ia-*` foram aposentados em 04/11/2026: `.github/workflows/release-extension-pilot.yml` e `.github/workflows/mini-ai-ci.yml`. Suas notas, tags e evidências anteriores permanecem no histórico. As verificações vigentes estão em `.github/workflows/ci.yml`, e a publicação estável em `.github/workflows/release.yml`.
+
 ## Escopo e publicação
 
 A PR #107 integrou a extensão MV3 à `main` em 27/10/2026. A arquitetura dispensa hospedagem web e backend próprio para executar; nenhuma implantação Cloudflare foi necessária nesse merge. **O aceite físico não foi executado e foi dispensado pelo responsável em 28/10/2026, sem declarar aprovação. A release estável `v0.3.0` foi publicada em 28/10/2026 com CI aprovado; a `v0.3.1` foi publicada em 28/10/2026 após CI aprovado, sem que isso constitua aceite físico.** Consulte [resultado de homologação v0.3.0](testing/acceptance-results/v0.3.0-main.md).
