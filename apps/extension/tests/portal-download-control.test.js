@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSafeDownloadControl } from '../src/portal-dom.js';
+import { isSafeDownloadControl, selectDownloadControl } from '../src/portal-dom.js';
 
 const OFFICIAL = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
 function control(overrides = {}) {
@@ -37,4 +37,20 @@ describe('seleção determinística de controles do Portal', () => {
         expect(isSafeDownloadControl({ ...button, getAttribute: (name) => name === 'formaction' ? OFFICIAL : null })).toBe(false);
         expect(isSafeDownloadControl({ ...button, textContent: 'Cancelar' })).toBe(false);
     });
+    it('seleciona somente um link oficial e prefere link oficial a botões legados', () => {
+        const official = control();
+        const legacy = control({ tagName: 'BUTTON', href: undefined });
+        expect(selectDownloadControl([legacy])).toBe(legacy);
+        expect(selectDownloadControl([legacy, official])).toBe(official);
+        expect(selectDownloadControl([])).toBeNull();
+    });
+    it('falha fechado quando dois links ou dois botões igualmente plausíveis coexistem', () => {
+        const official = control();
+        const another = control();
+        const legacy = control({ tagName: 'BUTTON', href: undefined });
+        expect(selectDownloadControl([official, another])).toBeNull();
+        expect(selectDownloadControl([legacy, { ...legacy }])).toBeNull();
+        expect(selectDownloadControl([legacy, control({ href: 'https://evil.invalid/' })])).toBe(legacy);
+    });
+
 });
