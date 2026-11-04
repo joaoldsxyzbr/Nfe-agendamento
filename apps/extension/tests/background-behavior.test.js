@@ -202,7 +202,7 @@ describe('extension background behavior', () => {
         await fake.emitWindowRemoved(operation.portalWindowId);
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
         expect(fake.createdWindows).toHaveLength(1);
-        expect(fake.sentSiteEvents).toContainEqual({
+        await vi.waitFor(() => expect(fake.sentSiteEvents).toContainEqual({
             tabId: 10,
             message: {
                 source: 'background',
@@ -212,7 +212,7 @@ describe('extension background behavior', () => {
                     message: 'A janela do Portal foi fechada antes da conclusão.',
                 },
             },
-        });
+        }));
     });
     it('keeps a valid active operation after the service worker reloads', async () => {
         const operation = storedOperation();
@@ -507,11 +507,11 @@ describe('standalone app page', () => {
         const operation = fake.sessionState.get('activePortalOperation');
         expect(operation.clientType).toBe('app');
         await fake.emitWindowRemoved(operation.portalWindowId);
-        expect(fake.chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        await vi.waitFor(() => expect(fake.chrome.runtime.sendMessage).toHaveBeenCalledWith({
             source: 'background',
             siteTabId: 10,
             event: expect.objectContaining({ type: 'cancelled', operationId: started.operationId }),
-        });
+        }));
         expect(fake.sentSiteEvents).toContainEqual({
             tabId: 10,
             message: { source: 'background', event: expect.objectContaining({ type: 'cancelled' }) },
