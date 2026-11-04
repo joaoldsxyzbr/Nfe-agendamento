@@ -17,6 +17,7 @@ const KNOWN_GUIDANCE = {
     portal_tab_missing: 'A janela do Portal foi fechada. Inicie uma nova consulta.',
     portal_operation_lost: 'A operação do Portal foi interrompida. Inicie uma nova consulta.',
     portal_result_replay_unavailable: 'A nota foi recebida, mas seu XML não pôde ser recuperado após a interrupção. Consulte novamente ou importe o XML manualmente.',
+    batch_memory_limit: 'Limite de XMLs em memória atingido. Baixe as notas concluídas e inicie um lote menor.',
     portal_operation_active: 'Já existe uma consulta em andamento. Finalize ou cancele antes de iniciar outra.',
     portal_navigation_failed: 'Não foi possível navegar até o Portal. Verifique a conexão e tente novamente.',
     portal_dialog_arm_failed: 'Não foi possível preparar a consulta no Portal. Tente novamente.',
