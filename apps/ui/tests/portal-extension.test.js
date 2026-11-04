@@ -55,6 +55,38 @@ describe('BrowserPortalExtensionClient', () => {
         expect(result.state).toBe('completed');
         expect(result.xml).toContain('nfeProc');
     });
+    it('recovers a terminal result missed before subscription and acknowledges it', async () => {
+        const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+        const commands = [];
+        const client = new BrowserPortalExtensionClient({
+            request: async (command) => {
+                commands.push(command);
+                if (command.type === 'status') return {
+                    type: 'operation_status', operationId: 'op-lost', active: false,
+                    terminalEvent: { type: 'completed', operationId: 'op-lost', xml: '<nfeProc/>' },
+                };
+                if (command.type === 'ack_result') return { type: 'result_acknowledged', acknowledged: true };
+                throw new Error('unexpected');
+            },
+            subscribe: () => () => {},
+        });
+        await expect(client.waitForResult('op-lost')).resolves.toMatchObject({
+            state: 'completed', xml: '<nfeProc/>',
+        });
+        await Promise.resolve();
+        expect(commands.map((c) => c.type)).toEqual(['status', 'ack_result']);
+    });
+    it('does not replay a different operation ID', async () => {
+        const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
+        const client = new BrowserPortalExtensionClient({
+            request: async () => ({
+                type: 'operation_status', operationId: 'op-right', active: false,
+                terminalEvent: { type: 'completed', operationId: 'op-other', xml: '<nfeProc/>' },
+            }),
+            subscribe: () => () => {},
+        });
+        await expect(client.waitForResult('op-right')).rejects.toThrow('não está mais ativa');
+    });
     it('preserves the stable failure code from extension events for safe diagnostics', async () => {
         const { BrowserPortalExtensionClient } = await import('../src/portal/extension-client');
         const subscribers = new Set();

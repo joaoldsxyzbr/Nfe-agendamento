@@ -27,7 +27,7 @@ export function parseAppCommand(value) {
         }
         return { type, requestId, accessKey };
     }
-    if (type === 'status' || type === 'cancel') {
+    if (type === 'status' || type === 'cancel' || type === 'ack_result') {
         return { type, requestId, operationId: stringField(input, 'operationId') };
     }
     if (type === 'resolve_supplier') {

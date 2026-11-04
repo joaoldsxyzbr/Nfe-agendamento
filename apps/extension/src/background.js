@@ -6,6 +6,10 @@ import { SUPPLIER_CONFIG_KEY, invalidateSupplierConfigCache, loadSupplierConfig,
 import { PORTAL_POPUP_WIDTH, PORTAL_POPUP_HEIGHT } from './shared/constants.js';
 import { appendDiagnostic } from './intelligence/diagnostics.js';
 const ACTIVE_OPERATION_KEY = 'activePortalOperation';
+const PENDING_RESULT_KEY = 'pendingPortalResult';
+// Quota de chrome.storage.session: o replay retém no máximo um XML pequeno.
+const MAX_REPLAY_XML_BYTES = 2 * 1024 * 1024;
+const RESULT_RETENTION_MS = 5 * 60 * 1000;
 const PORTAL_URL = 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&tipoConteudo=7PhJ+gAVw2g%3D';
 const PORTAL_DOWNLOAD_FILTER = {
     urls: ['https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx*'],
@@ -150,13 +154,25 @@ async function handleAppCommand(commandValue, sender, claimedTabId) {
     if (command.type === 'status') {
         const operation = await getReconciledActiveOperation();
         const matches = operation?.operationId === command.operationId;
+        const pending = matches ? null : await getPendingResult(siteTabId, command.operationId);
         return {
             type: 'operation_status',
             requestId: command.requestId,
             operationId: command.operationId,
             active: matches,
             state: matches ? operation.state : null,
+            terminalEvent: pending?.event ?? null,
         };
+    }
+    if (command.type === 'ack_result') {
+        const acknowledged = await withOperationMutation(async () => {
+            const pending = await readPendingResult();
+            if (!pending || pending.siteTabId !== siteTabId || pending.operationId !== command.operationId)
+                return false;
+            await chrome.storage.session.remove(PENDING_RESULT_KEY);
+            return true;
+        });
+        return { type: 'result_acknowledged', requestId: command.requestId, acknowledged };
     }
     if (command.type === 'start') {
         await getReconciledActiveOperation();
@@ -208,6 +224,8 @@ async function handleAppCommand(commandValue, sender, claimedTabId) {
                 stateChangedAt: Date.now(),
             };
             try {
+                // Novo início descarta eventual replay anterior que não foi reconhecido.
+                await chrome.storage.session.remove(PENDING_RESULT_KEY);
                 await saveActiveOperation(operation);
             }
             catch {
@@ -437,6 +455,9 @@ async function handleWindowRemoved(windowId) {
     });
 }
 async function handleTabRemoved(tabId) {
+    const pending = await readPendingResult();
+    if (pending?.siteTabId === tabId)
+        await chrome.storage.session.remove(PENDING_RESULT_KEY);
     const operation = await getActiveOperation();
     if (!operation)
         return;
@@ -506,6 +527,8 @@ async function finishOperation(operation, event) {
         const active = await getActiveOperation();
         if (!active || active.operationId !== operation.operationId)
             return null;
+        // Persiste antes de remover a operação para evitar perder o evento terminal.
+        await savePendingResult(active, event);
         await clearActiveOperation();
         return active;
     });
@@ -535,6 +558,46 @@ async function pushToSite(siteTabId, event) {
     catch {
         // A janela pode ter sido fechada: o evento não tem destinatário.
     }
+}
+async function savePendingResult(operation, event) {
+    // O envio ao vivo permanece inalterado. O replay é limitado por quota.
+    const tooLarge = event.type === 'completed' && typeof event.xml === 'string' &&
+        new TextEncoder().encode(event.xml).byteLength > MAX_REPLAY_XML_BYTES;
+    const fallback = {
+        type: 'failed',
+        operationId: operation.operationId,
+        code: 'portal_result_replay_unavailable',
+        message: 'O resultado foi concluído, mas não pôde ser recuperado após a interrupção. Consulte novamente.',
+    };
+    const stored = {
+        operationId: operation.operationId,
+        siteTabId: operation.siteTabId,
+        expiresAt: Date.now() + RESULT_RETENTION_MS,
+        event: tooLarge ? fallback : event,
+    };
+    try {
+        await chrome.storage.session.set({ [PENDING_RESULT_KEY]: stored });
+    }
+    catch {
+        // Em quota excedida, registrar só a causa de recuperação indisponível.
+        await chrome.storage.session.set({ [PENDING_RESULT_KEY]: { ...stored, event: fallback } }).catch(() => {});
+    }
+}
+async function readPendingResult() {
+    const stored = (await chrome.storage.session.get(PENDING_RESULT_KEY))?.[PENDING_RESULT_KEY];
+    if (!stored) return null;
+    if (typeof stored !== 'object' || !Number.isInteger(stored.siteTabId) ||
+        typeof stored.operationId !== 'string' || !Number.isFinite(stored.expiresAt) ||
+        stored.expiresAt <= Date.now() || !stored.event ||
+        stored.event.operationId !== stored.operationId) {
+        await chrome.storage.session.remove(PENDING_RESULT_KEY);
+        return null;
+    }
+    return stored;
+}
+async function getPendingResult(siteTabId, operationId) {
+    const pending = await readPendingResult();
+    return pending?.siteTabId === siteTabId && pending.operationId === operationId ? pending : null;
 }
 async function getActiveOperation() {
     const stored = await chrome.storage.session.get(ACTIVE_OPERATION_KEY);
