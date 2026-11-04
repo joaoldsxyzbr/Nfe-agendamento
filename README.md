@@ -65,11 +65,7 @@ O resultado está em `apps/extension/dist/`. Em `chrome://extensions` ou `edge:/
 
 A [release estável **`v0.3.1`**](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.1) foi publicada em 28/10/2026 no commit `308a53b`, após [CI aprovado](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723503436) e [workflow de release bem-sucedido](https://github.com/joaoldsxyzbr/Nfe-agendamento/actions/runs/40723614299). Inclui o tema petróleo suave, Vitest/cobertura 5.0.5 e Playwright 1.64.1; veja [notas v0.3.1](docs/releases/v0.3.1.md). A publicação não constitui homologação física. A [v0.3.0](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0) permanece disponível como versão anterior.
 
-O [piloto 4 — interface simplificada](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) reúne as últimas correções e **remove o botão “Relatório CSV”** e seu acionamento, mantendo consulta unitária/em lote, DANFE, XML individual e ZIP de XMLs. O workflow bloqueia a publicação caso o botão ainda apareça no pacote. É um pré-lançamento de avaliação, **não uma release estável nem um aceite físico**.
-
-O [piloto 3 — extensão MV3 com Mini-IA local](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) reúne a arquitetura atual e a camada de diagnósticos experimentais. É um **pré-lançamento para testes**, não homologado com o Portal real em Chrome/Edge Windows; não substitui a versão oficial. A publicação depende da aprovação de todas as verificações do workflow específico de release.
-
-O [piloto 2 com popup](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2) foi publicado antes da reorganização da estrutura. **O ZIP dessa release não inclui automaticamente as alterações mais recentes da branch.** Os builds de teste são gerados pelo CI; a decisão de distribuição estável é separada da homologação física dispensada.
+Os pré-lançamentos [piloto 2](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.2), [piloto 3](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.3) e [piloto 4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) permanecem como **histórico**, não como versões atuais. Os workflows exclusivos da antiga branch de piloto foram retirados; a validação atual está no CI da `main` e a publicação estável no workflow `Release`.
 
 Não instale o piloto sobre a versão antiga durante uma operação fiscal; prefira um perfil separado no navegador. O armazenamento das regras de fornecedores é local (`chrome.storage.local`), sem exposição de dados fiscais ao GitHub.
 
@@ -81,7 +77,7 @@ Não instale o piloto sobre a versão antiga durante uma operação fiscal; pref
 - Os testes automatizados e as verificações de segurança do CI continuam necessários. Se surgir falha em uso, registrar sintoma e versão, sem compartilhar dados fiscais, e tratá-la em issue específica.
 - Preservar [checklist](docs/testing/extension-only-acceptance.md) e [resultado v0.3.0](docs/testing/acceptance-results/v0.3.0-main.md) como histórico fiel dos testes não executados.
 
-A [v0.3.0-pilot.4](https://github.com/joaoldsxyzbr/Nfe-agendamento/releases/tag/v0.3.0-pilot.4) continua um **pré-lançamento histórico**; a `v0.3.0` estável foi publicada em 28/10/2026. A dispensa de homologação física não constitui aceite nem autoriza merges adicionais. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer outra implantação ou alteração de infraestrutura depende de decisão separada.
+A dispensa da homologação física permanece registrada como **não executada**, sem equivaler a aprovação. A antiga integração GitHub → Cloudflare Builds foi desconectada com autorização, conforme [issue #114](https://github.com/joaoldsxyzbr/Nfe-agendamento/issues/114). Qualquer nova implantação ou alteração de infraestrutura requer decisão separada.
 
 ## Documentação
 
