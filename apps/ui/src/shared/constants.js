@@ -1,5 +1,7 @@
 export const BATCH_DRAFT_DEBOUNCE_MS = 120;
 export const MAX_BATCH_ITEMS = 100;
+// Limite agregado de XMLs retidos em uma única janela (não é limite por XML).
+export const MAX_BATCH_RETAINED_XML_BYTES = 24 * 1024 * 1024;
 
 export const HANDSHAKE_TIMEOUT_MS = 1200;
 export const HANDSHAKE_ATTEMPTS = 3;

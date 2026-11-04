@@ -37,6 +37,10 @@ Se uma resposta terminar antes de a interface registrar o listener, a extensão 
 
 O armazenamento usa `chrome.storage.session`, com expiração de cinco minutos e descarte após confirmação, fechamento da aba ou início de nova consulta. XMLs acima de 2 MiB continuam entregues por evento, mas não são retidos para recuperação; se a mensagem for perdida, o aplicativo informa a necessidade de nova consulta. Não há recuperação de XML após reinício completo do navegador nem retomada automática de lote. Veja [detalhes e limitações](docs/operations/terminal-replay-2026-11-04.md).
 
+## Limite de memória em lotes
+
+O aplicativo aceita até 100 chaves por lote, mas preserva no máximo 24 MiB (bytes UTF-8) de XMLs originais concluídos na memória da janela. Ao atingir esse limite, os XMLs já concluídos continuam disponíveis para download/DANFE; a nota excedente é marcada com erro, as chaves seguintes não são consultadas e o usuário pode iniciar um novo lote menor. Importações manuais também seguem o limite. Essa é uma proteção parcial contra crescimento de memória, **não** um limite de consumo total do navegador. Veja [regras do limite](docs/operations/batch-xml-memory-2026-11-04.md).
+
 ## Compilar e verificar
 
 Requer Node.js e npm:
