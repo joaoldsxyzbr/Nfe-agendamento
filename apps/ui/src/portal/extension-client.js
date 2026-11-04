@@ -28,8 +28,26 @@ export class ExtensionPageTransport {
                     listener(message.event);
             });
         };
-        this.api.runtime.onMessage.addListener(receive);
-        return () => this.api.runtime.onMessage.removeListener(receive);
+        // O namespace chrome.runtime pode desaparecer quando a extensão é
+        // recarregada ou a janela é encerrada. Preserve o evento registrado,
+        // em vez de consultar chrome.runtime novamente durante o pagehide.
+        const messageEvent = this.api?.runtime?.onMessage;
+        if (typeof messageEvent?.addListener !== 'function')
+            return () => {};
+        messageEvent.addListener(receive);
+        let subscribed = true;
+        return () => {
+            if (!subscribed)
+                return;
+            subscribed = false;
+            try {
+                messageEvent.removeListener?.(receive);
+            }
+            catch {
+                // O contexto da extensão já foi invalidado: o navegador
+                // descartará o listener. A limpeza não deve quebrar o app.
+            }
+        };
     }
 }
 
