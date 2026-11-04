@@ -162,6 +162,22 @@ describe('batch controller Portal-only', () => {
         await h.controller.start();
         expect(h.snapshots.at(-1)?.[0]?.status).toBe('success');
     });
+    it('rejects manual imports exceeding the retained XML budget', async () => {
+        const h = harness({
+            waitForResult: async () => ({ state: 'failed', code: 'portal_session_lost' }),
+        }, async () => ({
+            originalXml: 'large-xml-payload',
+            issuer: { taxId: '12345678000195', name: 'Emitente' },
+            totals: { invoice: 10 }, number: '1', series: '1',
+        }), { maxRetainedXmlBytes: 8 });
+        h.input.value = A;
+        h.controller.syncDraft();
+        await h.controller.start();
+        await h.controller.importManual(0);
+        expect(h.snapshots.at(-1)?.[0]).toMatchObject({
+            status: 'portal_error', errorCode: 'batch_memory_limit', parsed: null,
+        });
+    });
     it('processes every item sequentially through the Portal', async () => {
         const h = harness();
         h.input.value = `${A}\n${B}`;
