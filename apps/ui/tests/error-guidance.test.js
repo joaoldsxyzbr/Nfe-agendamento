@@ -6,6 +6,7 @@ describe('actionable privacy-safe Portal error guidance', () => {
         expect(portalErrorGuidance('Alguma mensagem', 'portal_session_lost')).toContain('Código: portal_session_lost');
         expect(portalErrorGuidance('Alguma mensagem', 'portal_download_not_found')).toContain('download');
         expect(portalErrorGuidance('Alguma mensagem', 'portal_xml_invalid')).toContain('XML');
+        expect(portalErrorGuidance('12345678901234567890123456789012345678901234', 'batch_memory_limit')).toContain('lote menor');
     });
     it('preserves safe HTTP status without echoing sensitive error payloads', () => {
         const key = '1'.repeat(44);
