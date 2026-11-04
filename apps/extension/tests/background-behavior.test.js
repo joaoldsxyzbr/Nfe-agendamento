@@ -284,6 +284,72 @@ describe('extension background behavior', () => {
         expect(fake.sessionState.has('activePortalOperation')).toBe(false);
         expect(fake.removedWindows).toContain(operation.portalWindowId);
     });
+    it('recovers missed XML only for its own app tab and clears on acknowledgment', async () => {
+        const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
+        const fake = await loadBackground({
+            executeScriptResults: [[], [{ result: {
+                ok: true, status: 200, redirected: false, url: responseUrl,
+                payload: portalXml(ACCESS_KEY_A), networkError: null,
+            } }]],
+        });
+        const { operation } = await startToWaitingResult(fake);
+        await fake.emitBeforeRequest({ url: responseUrl, method: 'GET', tabId: operation.portalTabId });
+        await fake.waitForWindowRemoval(operation.portalWindowId);
+        expect(fake.sessionState.get('pendingPortalResult').event.type).toBe('completed');
+        const command = { source: 'app', appTabId: 10, command: {
+            type: 'status', requestId: 'replay-status', operationId: operation.operationId,
+        } };
+        expect(await fake.emitRuntimeMessage(command, appSender())).toMatchObject({
+            type: 'operation_status', active: false,
+            terminalEvent: { type: 'completed', xml: portalXml(ACCESS_KEY_A) },
+        });
+        const otherTab = await fake.emitRuntimeMessage({ ...command, appTabId: 20 }, appSender(20));
+        expect(otherTab.terminalEvent).toBeNull();
+        const otherAck = await fake.emitRuntimeMessage({ source: 'app', appTabId: 20, command: {
+            type: 'ack_result', requestId: 'wrong-tab', operationId: operation.operationId,
+        } }, appSender(20));
+        expect(otherAck.acknowledged).toBe(false);
+        await fake.emitRuntimeMessage({ source: 'app', appTabId: 10, command: {
+            type: 'ack_result', requestId: 'ack', operationId: operation.operationId,
+        } }, appSender());
+        expect(fake.sessionState.has('pendingPortalResult')).toBe(false);
+        expect((await fake.emitRuntimeMessage(command, appSender())).terminalEvent).toBeNull();
+    });
+    it('recovers the previous worker result and clears it on tab close', async () => {
+        const operationId = 'operation-from-previous-worker';
+        const event = { type: 'completed', operationId, xml: portalXml(ACCESS_KEY_A) };
+        const fake = await loadBackground({
+            sessionState: { pendingPortalResult: {
+                operationId, siteTabId: 10, event, expiresAt: Date.now() + 60000,
+            } },
+            tabs: [{ id: 10, url: APP_URL }],
+        });
+        const result = await fake.emitRuntimeMessage({ source: 'app', appTabId: 10, command: {
+            type: 'status', requestId: 'resume', operationId,
+        } }, appSender());
+        expect(result.terminalEvent).toEqual(event);
+        await fake.emitTabRemoved(10);
+        expect(fake.sessionState.has('pendingPortalResult')).toBe(false);
+    });
+    it('does not retain oversized XML but reports explicit replay failure', async () => {
+        const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx';
+        const xml = portalXml(ACCESS_KEY_A) + 'X'.repeat(2 * 1024 * 1024);
+        const fake = await loadBackground({
+            executeScriptResults: [[], [{ result: {
+                ok: true, status: 200, redirected: false, url: responseUrl,
+                payload: xml, networkError: null,
+            } }]],
+        });
+        const { operation } = await startToWaitingResult(fake);
+        await fake.emitBeforeRequest({ url: responseUrl, method: 'GET', tabId: operation.portalTabId });
+        await fake.waitForWindowRemoval(operation.portalWindowId);
+        expect(fake.sentSiteEvents.some((x) => x.message.event.type === 'completed')).toBe(true);
+        const stored = fake.sessionState.get('pendingPortalResult');
+        expect(stored.event).toMatchObject({
+            type: 'failed', code: 'portal_result_replay_unavailable',
+        });
+        expect(JSON.stringify(stored)).not.toContain('X'.repeat(200));
+    });
     it('fails the operation when the Portal XML belongs to another access key', async () => {
         const responseUrl = 'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?id=test';
         const fake = await loadBackground({
