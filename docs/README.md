@@ -22,6 +22,7 @@ Leia nesta ordem:
 14. [Roteiro manual P5 — Chrome e Edge](testing/mini-ai-p5-manual.md)
 15. [Endurecimento P0: segurança, seleção do Portal e integridade do XML](operations/p0-hardening-2026-11-04.md)
 16. [Recuperação de resultado perdido no MV3](operations/terminal-replay-2026-11-04.md)
+17. [Limite agregado de memória XML por lote](operations/batch-xml-memory-2026-11-04.md)
 
 ## Histórico
 
