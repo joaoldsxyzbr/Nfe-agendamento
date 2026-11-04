@@ -187,7 +187,7 @@ describe('batch controller Portal-only', () => {
         const h = harness({
             waitForResult: async (operationId) => ({ operationId, state: 'completed', xml }),
         });
-        h.input.value = keys.join('\\n');
+        h.input.value = keys.join('\n');
         h.controller.syncDraft();
         await h.controller.start();
         expect(h.portalStarts).toEqual(keys);
