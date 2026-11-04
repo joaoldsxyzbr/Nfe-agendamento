@@ -55,6 +55,21 @@ describe('ExtensionPageTransport MV3', () => {
         expect(() => stop()).not.toThrow();
         expect(onMessage.removeListener).toHaveBeenCalledTimes(1);
     });
+    it('does not reread chrome.runtime after that namespace disappears on pagehide', () => {
+        const onMessage = {
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+        };
+        const api = {
+            tabs: { getCurrent: async () => ({ id: 22 }) },
+            runtime: { onMessage },
+        };
+        const stop = new ExtensionPageTransport(api).subscribe(vi.fn());
+        // Reproduz exatamente a exceção "reading 'onMessage'" do screenshot.
+        delete api.runtime;
+        expect(() => stop()).not.toThrow();
+        expect(onMessage.removeListener).toHaveBeenCalledTimes(1);
+    });
     it('does not crash while cleaning up an invalidated extension context', () => {
         const removeListener = vi.fn(() => {
             throw new Error('Extension context invalidated.');
