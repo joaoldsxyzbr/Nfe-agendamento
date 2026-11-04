@@ -152,12 +152,21 @@ export class BrowserPortalExtensionClient {
                 const event = parseTerminalEvent(value, operationId);
                 if (!event)
                     return;
-                finish(() => resolve(event));
+                finish(() => {
+                    resolve(event);
+                    void this.acknowledgeResult(operationId);
+                });
             });
             signal?.addEventListener('abort', onAbort, { once: true });
-            void this.isOperationActive(operationId, signal)
-                .then((active) => {
-                if (!active) {
+            void this.getOperationStatus(operationId, signal)
+                .then((status) => {
+                if (status.terminalEvent) {
+                    finish(() => {
+                        resolve(status.terminalEvent);
+                        void this.acknowledgeResult(operationId);
+                    });
+                }
+                else if (!status.active) {
                     finish(() => reject(new Error('A operação do Portal não está mais ativa. Feche qualquer popup antigo e tente novamente.')));
                 }
             })
@@ -169,6 +178,18 @@ export class BrowserPortalExtensionClient {
         });
     }
     async isOperationActive(operationId, signal) {
+        return (await this.getOperationStatus(operationId, signal)).active;
+    }
+    async acknowledgeResult(operationId) {
+        try {
+            const requestId = globalThis.crypto.randomUUID();
+            await this.transport.request({ type: 'ack_result', requestId, operationId });
+        }
+        catch {
+            // A expiração no service worker ainda descarta resultados não confirmados.
+        }
+    }
+    async getOperationStatus(operationId, signal) {
         let lastTransportError = null;
         for (let attempt = 0; attempt < OPERATION_STATUS_ATTEMPTS; attempt += 1) {
             signal?.throwIfAborted();
@@ -187,9 +208,9 @@ export class BrowserPortalExtensionClient {
                 }
                 break;
             }
-            const active = parseOperationStatus(response, operationId);
-            if (active !== null)
-                return active;
+            const status = parseOperationStatus(response, operationId);
+            if (status !== null)
+                return status;
             throw new Error(messageFromFailure(response) ?? 'Resposta de estado da extensão inválida.');
         }
         throw lastTransportError instanceof Error
@@ -271,7 +292,7 @@ function parseOperationStatus(value, operationId) {
         typeof value.active !== 'boolean') {
         return null;
     }
-    return value.active;
+    return { active: value.active, terminalEvent: parseTerminalEvent(value.terminalEvent, operationId) };
 }
 function isStartedResponse(value) {
     return isRecord(value) &&
