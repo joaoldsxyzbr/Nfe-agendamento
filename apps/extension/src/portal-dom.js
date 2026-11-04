@@ -59,6 +59,20 @@ export function isSafeDownloadControl(control) {
     return isDownloadLabel(label);
 }
 
+/**
+ * Retorna um único alvo seguro conhecido; não interpreta propostas neurais.
+ * Extrai a seleção utilizada pelo content script para permitir comparação
+ * independente e fiel com o modelo em modo de observação.
+ */
+export function selectDownloadControl(controls) {
+    const candidates = Array.from(controls ?? []).filter(isSafeDownloadControl);
+    const officialLinks = candidates.filter((control) =>
+        String(control.tagName ?? '').toUpperCase() === 'A');
+    if (officialLinks.length > 0)
+        return officialLinks.length === 1 ? officialLinks[0] : null;
+    return candidates.length === 1 ? candidates[0] : null;
+}
+
 export function isCaptchaResponseReady(value) {
     return typeof value === 'string' && value.trim().length > 0;
 }
