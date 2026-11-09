@@ -1,11 +1,11 @@
 // Somente metadados previamente permitidos. Nunca armazenar conteúdo do Portal ou dados fiscais.
-import { MODEL_VERSION } from './portal-model.js';
+// A chave de armazenamento é mantida por compatibilidade com registros locais existentes; o nome é histórico.
 export const DIAGNOSTICS_KEY = 'nfeIntelligenceDiagnosticsV1';
 export const MAX_DIAGNOSTICS = 100;
 export const DIAGNOSTICS_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
-const ALLOWED_CODES = new Set(['neural_candidate_unverified', 'neural_candidate_ambiguous', 'neural_candidate_rejected', 'portal_operation_failed', 'batch_completed', 'batch_retry_result', 'batch_preflight_failed', 'portal_state_reconciled']);
+const ALLOWED_CODES = new Set(['portal_operation_failed', 'batch_completed', 'batch_retry_result', 'batch_preflight_failed', 'portal_state_reconciled']);
 const ALLOWED_FAILURES = new Set(['portal_xml_invalid', 'portal_session_lost', 'portal_download_http_error', 'portal_download_not_found', 'portal_download_request_missing', 'portal_xml_capture_unavailable', 'portal_xml_too_large', 'portal_request_replay_invalid']);
-const ALLOWED_REASONS = new Set(['review_required', 'official_link', 'unsafe_candidate', 'ambiguous_candidates', 'extension_unavailable', 'unsupported_extension', 'handshake_failed', 'stale_operation']);
+const ALLOWED_REASONS = new Set(['extension_unavailable', 'unsupported_extension', 'handshake_failed', 'stale_operation']);
 const ALLOWED_STATES = new Set(['submitting', 'waiting_result', 'fetching_xml', 'failed', 'batch']);
 
 export function normalizeDiagnostic(input, now = Date.now()) {
@@ -13,10 +13,6 @@ export function normalizeDiagnostic(input, now = Date.now()) {
         return null;
     if (!ALLOWED_STATES.has(input.state))
         return null;
-    const score = Number.isInteger(input.score) && input.score >= 0 && input.score <= 100
-        ? input.score : null;
-    const inspected = Number.isInteger(input.inspected) && input.inspected >= 0 && input.inspected <= 80
-        ? input.inspected : null;
     const batch = input.code === 'batch_completed';
     const retry = input.code === 'batch_retry_result';
     const total = input.total;
@@ -36,10 +32,6 @@ export function normalizeDiagnostic(input, now = Date.now()) {
         at: new Date(now).toISOString(),
         code: input.code,
         state: input.state,
-        modelVersion: input.modelVersion === 'portal-download-shadow-0.1' ? input.modelVersion : MODEL_VERSION,
-        score,
-        inspected,
-        ambiguous: input.ambiguous === true,
         reason: ALLOWED_REASONS.has(input.reason) ? input.reason : null,
         failureCode: ALLOWED_FAILURES.has(input.failureCode) ? input.failureCode : null,
         total: batch ? total : null,

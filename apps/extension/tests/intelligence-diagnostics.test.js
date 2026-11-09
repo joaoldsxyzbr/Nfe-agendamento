@@ -20,38 +20,41 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const event = (extra = {}) => ({
-    code: 'neural_candidate_unverified',
-    state: 'submitting',
-    score: 91,
-    inspected: 4,
-    ambiguous: false,
+    code: 'portal_operation_failed',
+    state: 'failed',
+    failureCode: 'portal_xml_invalid',
     ...extra,
 });
 
-describe('diagnósticos locais da mini-IA', () => {
+describe('diagnósticos locais de operação', () => {
     it('descarta campos sensíveis, mesmo quando recebidos de uma página externa', () => {
         const record = normalizeDiagnostic(event({
             accessKey: '12345678901234567890123456789012345678901234',
             xml: '<nfeProc>sigilo</nfeProc>',
             url: 'https://portal/?chave=segredo',
             textContent: 'CNPJ real',
+            score: 91,
+            modelVersion: 'portal-download-trained-0.2',
         }), Date.UTC(2026, 9, 26));
         expect(JSON.stringify(record)).not.toMatch(/123456|nfeProc|segredo|CNPJ/);
-        expect(record).toMatchObject({ code: 'neural_candidate_unverified', score: 91, inspected: 4 });
+        expect(record).toMatchObject({ code: 'portal_operation_failed', state: 'failed', failureCode: 'portal_xml_invalid' });
+        expect(record).not.toHaveProperty('score');
+        expect(record).not.toHaveProperty('modelVersion');
     });
-    it('rejeita códigos e estados arbitrários', async () => {
+    it('rejeita códigos e estados arbitrários, incluindo legado neural', async () => {
         expect(normalizeDiagnostic(event({ code: 'injetado' }))).toBeNull();
         expect(normalizeDiagnostic(event({ state: 'chave-secreta' }))).toBeNull();
-        expect(normalizeDiagnostic(event({ score: '91' })).score).toBeNull();
+        expect(normalizeDiagnostic(event({ code: 'neural_candidate_unverified' }))).toBeNull();
+        expect(normalizeDiagnostic(event({ failureCode: 'score:91' })).failureCode).toBeNull();
         expect(await appendDiagnostic(event({ code: 'injetado' }))).toBe(false);
     });
     it('serializa eventos simultâneos e mantém no máximo 100 registros', async () => {
         const now = Date.UTC(2026, 9, 26);
         await Promise.all(Array.from({ length: MAX_DIAGNOSTICS + 5 }, (_, index) =>
-            appendDiagnostic(event({ score: index % 101 }), now + index)));
+            appendDiagnostic(event(), now + index)));
         const result = await readDiagnostics(now + 150);
         expect(result).toHaveLength(MAX_DIAGNOSTICS);
-        expect(result[0].score).toBe(5);
+        expect(result[0].at).toBe(new Date(now + 5).toISOString());
     });
     it('valida soma, limites e saneamento de relatórios agregados', async () => {
         const now = Date.UTC(2026, 9, 26);

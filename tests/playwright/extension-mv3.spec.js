@@ -32,7 +32,7 @@ test('extensão MV3 real: service worker, opções, diagnósticos privados e exc
             if (!request.url().startsWith('chrome-extension://')) externalRequests.push(request.url());
         });
         await options.goto('chrome-extension://' + extensionId + '/options.html');
-        await expect(options.getByRole('heading', { name: 'Diagnósticos da mini-IA (experimental)' })).toBeVisible();
+        await expect(options.getByRole('heading', { name: 'Diagnósticos de operação' })).toBeVisible();
         await expect(options.locator('#diagnostics-analyze')).toBeVisible();
         await expect(options.locator('#diagnostics-export')).toBeVisible();
         await expect(options.locator('#diagnostics-clear')).toBeVisible();
@@ -60,7 +60,7 @@ test('extensão MV3 real: service worker, opções, diagnósticos privados e exc
             options.waitForEvent('download'),
             options.locator('#diagnostics-export').click(),
         ]);
-        expect(download.suggestedFilename()).toBe('nfe-intelligence-diagnosticos.json');
+        expect(download.suggestedFilename()).toBe('nfe-diagnosticos.json');
         const downloadedPath = await download.path();
         expect(downloadedPath).not.toBeNull();
         const exported = await readFile(downloadedPath, 'utf8');

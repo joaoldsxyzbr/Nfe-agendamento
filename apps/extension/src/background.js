@@ -276,12 +276,6 @@ async function handlePortalMessage(envelope, sender) {
         throw new ExtensionFailure('portal_tab_mismatch', 'Esta aba não pertence à operação Portal ativa.');
     }
     const type = envelope.type;
-    if (type === 'intelligence_diagnostic') {
-        if (operation.state !== 'submitting')
-            return { recorded: false };
-        const saved = await appendDiagnostic(envelope.diagnostic).catch(() => false);
-        return { recorded: saved };
-    }
     if (type === 'ready') {
         let activeOperation = operation;
         if (operation.state === 'opening' || operation.state === 'loading_portal') {

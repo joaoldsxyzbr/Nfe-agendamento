@@ -40,18 +40,16 @@ describe('extension-only distribution boundaries', () => {
         ])
             expect(webJob).toContain(command);
     });
-    it('requires Mini-IA safety checks in the extension job before distribution', async () => {
+    it('requires extension checks in the extension job before distribution', async () => {
         const ci = await readFile(ciUrl, 'utf8');
         const extensionJob = ci.split(/\n(?=  [\w-]+:\n)/).find((part) => part.startsWith('  extension:\n'));
         expect(extensionJob).toBeDefined();
         for (const command of [
-            'node scripts/train-mini-ai.mjs --check',
-            'node scripts/evaluate-mini-ai-adversarial.mjs',
-            'node scripts/evaluate-mini-ai-utility.mjs',
-            'node --test scripts/tests/review-mini-ai-report.test.mjs',
             'npm run test:extension', 'npm run coverage:extension', 'npm run build:extension',
         ])
             expect(extensionJob).toContain(command);
+        expect(extensionJob).not.toContain('mini-ai');
+        expect(extensionJob).not.toContain('mini-IA');
     });
     it('retires unused pilot workflows while preserving the safe main release gate', async () => {
         for (const path of [

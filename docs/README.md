@@ -13,24 +13,19 @@ Leia nesta ordem:
 5. [Campos fiscais RTC/IBS/CBS](architecture/rtc-ibs-cbs.md)
 6. [Interface da consulta](ui/consultation-screen.md)
 7. [Plano da migração](plans/2026-10-22-nfe-agendamento-extensao-autonoma.md)
-8. [Mini-IA local e diagnósticos — P0 experimental](plans/2026-10-26-mini-ia-nfe-p0.md)
-9. [Treinamento neural reproduzível — P1](plans/2026-10-26-mini-ia-nfe-p1.md)
-10. [Decisões supervisionadas e testes adversariais — P2](plans/2026-10-26-mini-ia-nfe-p2.md)
-11. [Memória operacional e análise local — P3](plans/2026-10-26-mini-ia-nfe-p3.md)
-12. [Corpus adversarial e triagem privada — P4](plans/2026-10-26-mini-ia-nfe-p4.md)
-13. [P5 — Testes reais do pacote MV3 em Chromium e preparação da homologação](plans/2026-10-26-mini-ia-nfe-p5.md)
-14. [Roteiro manual P5 — Chrome e Edge](testing/mini-ai-p5-manual.md)
-15. [Endurecimento P0: segurança, seleção do Portal e integridade do XML](operations/p0-hardening-2026-11-04.md)
-16. [Recuperação de resultado perdido no MV3](operations/terminal-replay-2026-11-04.md)
-17. [Limite agregado de memória XML por lote](operations/batch-xml-memory-2026-11-04.md)
-18. [Medição independente da utilidade sintética da mini-IA](operations/mini-ai-utility-evaluation-2026-11-04.md)
-19. [Notas e limites da versão v0.3.2](releases/v0.3.2.md) e [registro de aceite físico](testing/acceptance-results/v0.3.2.md)
-20. [Correção do listener MV3 após invalidação do contexto](operations/mv3-message-listener-lifecycle-2026-11-04.md)
-21. [Hotfix v0.3.3 e registro de aceitação pendente](releases/v0.3.3.md)
+8. [Endurecimento P0: segurança, seleção do Portal e integridade do XML](operations/p0-hardening-2026-11-04.md)
+9. [Recuperação de resultado perdido no MV3](operations/terminal-replay-2026-11-04.md)
+10. [Limite agregado de memória XML por lote](operations/batch-xml-memory-2026-11-04.md)
+11. [Correção do listener MV3 após invalidação do contexto](operations/mv3-message-listener-lifecycle-2026-11-04.md)
+12. [Notas e limites da versão v0.3.2](releases/v0.3.2.md) e [registro de aceite físico](testing/acceptance-results/v0.3.2.md)
+13. [Hotfix v0.3.3 e registro de aceitação pendente](releases/v0.3.3.md)
+14. [Remoção da mini-IA (motor neural) — decisão de 09/11/2026](operations/mini-ia-removal-decision-2026-11-09.md)
 
 ## Histórico
 
 Documentos antigos de site, Worker, Windows Bridge, consultador SEFAZ, Vite, projetos e provas de conceito ficam preservados para rastreabilidade, mas **não definem o runtime desta branch**. São históricos: `architecture/frontend-boundaries.md`, `architecture/site-estatico-sem-vite.md`, `architecture/bridge-security.md`, `superpowers/`, relatórios de releases anteriores e documentos em `operations/` anteriores à mudança.
+
+A mini-IA experimental (P0–P5) foi **removida em 09/11/2026** (ver [decisão de remoção](operations/mini-ia-removal-decision-2026-11-09.md)). Os planos [P0](plans/2026-10-26-mini-ia-nfe-p0.md), [P1](plans/2026-10-26-mini-ia-nfe-p1.md), [P2](plans/2026-10-26-mini-ia-nfe-p2.md), [P3](plans/2026-10-26-mini-ia-nfe-p3.md), [P4](plans/2026-10-26-mini-ia-nfe-p4.md) e [P5](plans/2026-10-26-mini-ia-nfe-p5.md), o [roteiro manual P5](testing/mini-ai-p5-manual.md) e a [avaliação de utilidade](operations/mini-ai-utility-evaluation-2026-11-04.md) permanecem como registro histórico do experimento; nada deles define comportamento de produção.
 
 Os workflows exclusivos das branches antigas `nfe-agendamento` e `feat/nfe-mini-ia-*` foram aposentados em 04/11/2026: `.github/workflows/release-extension-pilot.yml` e `.github/workflows/mini-ai-ci.yml`. Suas notas, tags e evidências anteriores permanecem no histórico. As verificações vigentes estão em `.github/workflows/ci.yml`, e a publicação estável em `.github/workflows/release.yml`.
 

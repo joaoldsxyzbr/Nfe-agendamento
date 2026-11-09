@@ -82,13 +82,13 @@ async function exportDiagnostics() {
             schemaVersion: 2,
             insights: buildDiagnosticInsights(records),
             exportedAt: new Date().toISOString(),
-            source: 'NFe Intelligence - diagnóstico local',
+            source: 'NFe Agendamento - diagnóstico local',
             records,
         }, null, 2);
         const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'nfe-intelligence-diagnosticos.json';
+        link.download = 'nfe-diagnosticos.json';
         link.click();
         globalThis.setTimeout(() => URL.revokeObjectURL(url), 15000);
         if (diagnosticStatus) diagnosticStatus.textContent = records.length + ' registros exportados localmente.';
