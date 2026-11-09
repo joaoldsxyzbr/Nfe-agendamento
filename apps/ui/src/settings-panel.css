@@ -12,7 +12,7 @@
   height: 38px;
   min-height: 38px;
   padding: 0;
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-control);
   background: var(--surface-2);
   color: var(--text);
@@ -96,7 +96,7 @@ body.settings-open {
 }
 
 .settings-panel-header button:hover:not(:disabled) {
-  border-color: var(--line-soft);
+  border-color: var(--control-border);
   background: var(--surface-2);
 }
 

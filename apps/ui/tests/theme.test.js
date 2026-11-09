@@ -36,6 +36,13 @@ describe('site theme', () => {
             ]) {
                 expect(contrastRatio(themeColor(palette, foreground), themeColor(palette, background))).toBeGreaterThanOrEqual(4.5);
             }
+            // WCAG 1.4.11: bordas de controles interativos exigem mínimo de 3:1.
+            for (const [foreground, background] of [
+                ['control-border', 'control-bg'],
+                ['control-border', 'surface-2'],
+            ]) {
+                expect(contrastRatio(themeColor(palette, foreground), themeColor(palette, background))).toBeGreaterThanOrEqual(3);
+            }
         }
         expect(contrastRatio('#edf4f0', '#32776f')).toBeGreaterThanOrEqual(4.5);
     });
@@ -66,6 +73,12 @@ describe('site theme', () => {
         expect(batchStyles).toContain('max-height: 148px');
         expect(batchStyles).toContain('.batch-form-footer > div:first-child');
         expect(styles).toContain('padding: 18px;');
+        expect(main).toContain('id="batch-progress-bar"');
+        expect(main).toContain('role="progressbar"');
+        expect(batchStyles).toContain('.batch-progress-bar');
+        expect(batchStyles).toContain('.batch-progress-fill');
+        expect(batchStyles).toContain('@keyframes batch-status-spin');
+        expect(batchStyles).toContain('@media (prefers-reduced-motion: reduce)');
     });
     it('keeps one consultation card with a reset action for the unified flow', () => {
         expect(main).toContain('<section class="lookup-card"');

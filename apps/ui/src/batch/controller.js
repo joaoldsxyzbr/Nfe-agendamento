@@ -320,6 +320,12 @@ export function createBatchController(deps) {
     function renderState(label, changedItem, refreshAllRows = false) {
         const terminal = items.filter((item) => isTerminalStatus(item.status)).length;
         elements.progress.textContent = `${terminal} de ${items.length}`;
+        if (elements.progressBar) {
+            const percentage = items.length === 0 ? 0 : Math.round((terminal / items.length) * 1000) / 10;
+            elements.progressBar.style.setProperty('--batch-progress-value', `${percentage}%`);
+            elements.progressBar.setAttribute('aria-valuenow', String(terminal));
+            elements.progressBar.setAttribute('aria-valuemax', String(items.length));
+        }
         elements.routeText.textContent = running ? `${label} · Portal Nacional` : label;
         if (elements.toolbar)
             elements.toolbar.hidden = !hasRun;
