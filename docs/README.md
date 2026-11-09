@@ -27,6 +27,7 @@ Leia nesta ordem:
 19. [Notas e limites da versão v0.3.2](releases/v0.3.2.md) e [registro de aceite físico](testing/acceptance-results/v0.3.2.md)
 20. [Correção do listener MV3 após invalidação do contexto](operations/mv3-message-listener-lifecycle-2026-11-04.md)
 21. [Hotfix v0.3.3 e registro de aceitação pendente](releases/v0.3.3.md)
+22. [Congelamento da mini-IA na P5 — decisão de 09/11/2026](operations/mini-ia-freeze-decision-2026-11-09.md)
 
 ## Histórico
 

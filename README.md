@@ -30,6 +30,8 @@ Na P5, o GitHub CI passou a **carregar realmente o pacote Manifest V3 no Chromiu
 
 O CI também compara a mini-IA ao seletor determinístico **realmente usado pelo Portal** com exemplos sintéticos independentes. Esse comparativo mede apenas sugestões para revisão (sem cliques) e não demonstra ganhos em páginas reais. Veja [avaliação de utilidade e limites](docs/operations/mini-ai-utility-evaluation-2026-11-04.md).
 
+Em **09/11/2026** a mini-IA foi **congelada na P5** por decisão do responsável: não haverá novas fases (sem P6) nem aumento de autonomia, e a reabertura depende de evidência de benefício mensurável sobre o seletor determinístico. Veja [a decisão registrada](docs/operations/mini-ia-freeze-decision-2026-11-09.md).
+
 Nenhuma decisão neural substitui a validação fiscal, o hCaptcha manual, as permissões ou o fluxo operacional aprovado. O código da Mini-IA já está na `main`, mas permanece em observação; não há homologação física completa nem autorização para ações neurais autônomas. A publicação estável de `v0.3.0` não altera o limite de observação da Mini-IA. Veja [plano P0 da mini-IA](docs/plans/2026-10-26-mini-ia-nfe-p0.md).
 
 
