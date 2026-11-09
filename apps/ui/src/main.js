@@ -73,6 +73,9 @@ app.innerHTML = `
           <div class="batch-progress-copy" aria-live="polite">
             <strong id="batch-progress">0 de 0</strong>
             <span id="batch-route">Aguardando início</span>
+            <div class="batch-progress-bar" id="batch-progress-bar" role="progressbar" aria-label="Progresso do lote" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+              <div class="batch-progress-fill"></div>
+            </div>
           </div>
           <div class="batch-toolbar-actions">
             <button id="batch-cancel" class="secondary-button" type="button" hidden>${actionIconMarkup('cancel')}<span>Cancelar consulta</span></button>
@@ -113,6 +116,7 @@ const batchRunToolbar = requireElement('#batch-run-toolbar');
 const batchStart = requireElement('#batch-start');
 const batchReset = requireElement('#batch-reset');
 const batchProgress = requireElement('#batch-progress');
+const batchProgressBar = requireElement('#batch-progress-bar');
 const batchRouteText = requireElement('#batch-route');
 const batchCancel = requireElement('#batch-cancel');
 const batchDownloadAll = requireElement('#batch-download-all');
@@ -152,6 +156,7 @@ const batchController = createBatchController({
         downloadAllButton: batchDownloadAll,
         printButton: batchPrint,
         progress: batchProgress,
+        progressBar: batchProgressBar,
         routeText: batchRouteText,
         toolbar: batchRunToolbar,
         list: batchList,
