@@ -18,7 +18,8 @@
   --green: #276a59;
   --danger: #a73f50;
   --control-bg: #f1f3ee;
-  --control-border: #a3b8ad;
+  /* Borda de controles interativos: mínimo de 3:1 sobre --control-bg (WCAG 1.4.11). */
+  --control-border: #73867b;
   --on-accent: #edf4f0;
   --on-secondary: #203633;
   --source-bg: #d5e5dc;
