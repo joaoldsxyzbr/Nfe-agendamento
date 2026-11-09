@@ -57,7 +57,7 @@
         <img src="icon.png" alt="" aria-hidden="true" />
         <h1>NFe Agendamento</h1>
       </div>
-      <p>A extensão usa o Portal Nacional para consultar NF-e. Esta página mantém regras privadas de fornecedor e diagnósticos locais da mini-IA, sem enviar dados fiscais a servidores.</p>
+      <p>A extensão usa o Portal Nacional para consultar NF-e. Esta página mantém regras privadas de fornecedor e diagnósticos locais de operação, sem enviar dados fiscais a servidores.</p>
     </div>
 
     <section class="card" aria-labelledby="supplier-config-title">
@@ -75,9 +75,9 @@
       <p id="supplier-config-status" role="status" aria-live="polite">Nenhuma alteração nesta sessão.</p>
     </section>
 
-    <section class="card" aria-labelledby="intelligence-title">
-      <h2 id="intelligence-title">Diagnósticos da mini-IA (experimental)</h2>
-      <p>O classificador neural observa possíveis mudanças no Portal sem clicar por conta própria. Registra apenas códigos autorizados, estado, data, pontuação, categorias de erro e contagens agregadas de lotes. Não inclui chave NF-e, XML, documentos pessoais ou URL do Portal. Limite de 100 eventos, com retenção de até 14 dias.</p>
+    <section class="card" aria-labelledby="diagnostics-title">
+      <h2 id="diagnostics-title">Diagnósticos de operação</h2>
+      <p>Registros locais de falhas e resultados da operação: códigos autorizados, estado, data, categorias de erro e contagens agregadas de lotes. Não inclui chave NF-e, XML, documentos pessoais ou URL do Portal. Limite de 100 eventos, com retenção de até 14 dias.</p>
       <div class="actions">
         <button id="diagnostics-analyze" type="button">Analisar padrões locais</button>
         <button id="diagnostics-export" type="button">Exportar relatório JSON</button>

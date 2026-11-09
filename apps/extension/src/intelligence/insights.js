@@ -1,4 +1,4 @@
-// P3: heurísticas offline para priorizar diagnósticos. NÃO é inferência neural,
+// Heurísticas offline para priorizar diagnósticos. Não é inferência de qualquer natureza,
 // não identifica notas, não correlaciona pessoas e não executa recuperação.
 import { DIAGNOSTICS_RETENTION_MS, MAX_DIAGNOSTICS, normalizeDiagnostic } from './diagnostics.js';
 
